@@ -1,0 +1,19 @@
+# Ignore all .tgz files - output of 'npm pack
+*.tgz
+
+# Node.js dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE-specific files
+.vscode/
+.idea/
+.DS_Store
+*.swp
