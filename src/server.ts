@@ -1,12 +1,24 @@
 import express from "express";
-
+import { connectDb } from "./mongodb";
+import initRouter from "./routes/init-route";
 const app = express();
-const port = 3000;
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-  res.send("Hello, World!");
-});
+// Access variables using process.env
+const PORT = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+app.use("/init", initRouter);
+
+export default app;
+
+export async function startServer(port = PORT) {
+  await connectDb();
+  return app.listen(port, () => console.log(`Server is up at ${port}`));
+}
+
+if (require.main === module) {
+  (async () => {
+    await startServer(PORT);
+  })();
+}
