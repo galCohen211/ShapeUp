@@ -11,7 +11,6 @@ class UserController {
         return;
       }
     
-      console.log("Received code:", code);
     try {
 
       const oauth2Client = new google.auth.OAuth2(
