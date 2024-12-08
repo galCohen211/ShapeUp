@@ -21,12 +21,15 @@
     "express-session": "^1.18.1",
     "google-auth-library": "^9.15.0",
     "googleapis": "^144.0.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.3",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.1",
     "cross-env": "^7.0.3",
     "nodemon": "^3.1.7",

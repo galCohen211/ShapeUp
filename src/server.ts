@@ -2,18 +2,22 @@ import express from "express";
 import { connectDb } from "./mongodb";
 import initRouter from "./routes/init-route";
 import userRouter from "./routes/user-route";
+import cors from "cors";
+
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 // Access variables using process.env
 const PORT = process.env.PORT || 3000;
-
+app.use(cors());
 app.use("/init", initRouter);
 app.use("/users", userRouter);
 
 export default app;
+
 
 export async function startServer(port = PORT) {
   await connectDb();
