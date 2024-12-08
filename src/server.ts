@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 3000;
 
 app.use("/init", initRouter);
-app.use("/auth/google", userRouter);
+app.use("/users", userRouter);
 
 export default app;
 

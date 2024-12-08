@@ -3,6 +3,6 @@ import UserController from '../controllers/user-controller';
 
 const router = express.Router();
 
-router.post('/callback', UserController.loginGoogle);
+router.post('/google', UserController.loginGoogle); //get
 
 export default router;
