@@ -1,6 +1,7 @@
 import express from "express";
 import { connectDb } from "./mongodb";
 import initRouter from "./routes/init-route";
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -9,7 +10,6 @@ app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 3000;
 
 app.use("/init", initRouter);
-
 export default app;
 
 export async function startServer(port = PORT) {
