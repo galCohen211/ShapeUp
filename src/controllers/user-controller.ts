@@ -18,15 +18,16 @@ passport.use(new GoogleStrategy(
     profile: Express.User,
     done: VerifyCallback
   ) {
-    
     return done(null, profile);
   }
 ));
 
+//Responsible for retrieving the user's information from the session in each request
 passport.serializeUser(function (user: Express.User, done: (err: any, id?: unknown) => void): void {
   done(null, user);
 });
 
+//Responsible for retrieving the user's information from the session in each request
 passport.deserializeUser(function (user: Express.User, done: (err: any, user?: Express.User) => void): void {
   done(null, user);
 });
