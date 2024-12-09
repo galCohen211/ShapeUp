@@ -1,5 +1,6 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy, VerifyCallback } from 'passport-google-oauth2';
+import User from '../models/user-model';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
@@ -11,14 +12,35 @@ passport.use(new GoogleStrategy(
     callbackURL: "http://localhost:3000/users/auth/google/callback",
     passReqToCallback: true,
   },
-  function (
+  async function (
     request: any,
     accessToken: string,
     refreshToken: string,
-    profile: Express.User,
+    profile: any,
     done: VerifyCallback
   ) {
-    return done(null, profile);
+    try{
+      console.log('profile' + profile)
+      const existingUser = await User.findOne({ email: profile.email });
+      if(existingUser){
+        console.log('user already exists' + existingUser)
+        return done(null, existingUser);
+      }
+
+      const newUser = await new User({
+        email: profile.email,
+        username: profile.displayName,
+        firstName: profile.name.givenName,
+        lastName: profile.name.familyName,
+        address: ' ',
+        type: 'user',
+        favoriteGyms:[],
+      }).save();
+      console.log('new user created' + newUser)
+      return done(null, newUser);
+    }catch(err){
+      return done(err, null);
+    }
   }
 ));
 

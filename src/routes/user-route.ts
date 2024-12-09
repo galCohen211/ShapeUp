@@ -24,7 +24,7 @@ userRouter.get('/auth/google/callback',
 );
 
 userRouter.get('/auth/google/protected', isLoggedIn, (req: any, res) => {
-  res.send(`Hello ${req.user?.displayName}`);
+  res.send(`Hello ${req.user.username}`);
 });
 
 userRouter.get('/auth/google/logout', (req: any, res) => {
@@ -40,7 +40,7 @@ userRouter.get('/auth/google/logout', (req: any, res) => {
 });
 
 userRouter.get('/auth/google/failure', (req, res) => {
-  res.send('Failed to authenticate..');
+  res.send('Failed to authenticate');
 });
 
 export default userRouter;
