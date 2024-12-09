@@ -18,6 +18,7 @@ passport.use(new GoogleStrategy(
     profile: Express.User,
     done: VerifyCallback
   ) {
+    
     return done(null, profile);
   }
 ));
