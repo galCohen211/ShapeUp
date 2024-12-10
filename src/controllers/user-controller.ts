@@ -1,4 +1,5 @@
 import passport from "passport";
+import { Request } from "express";
 import {
   Strategy as GoogleStrategy,
   VerifyCallback,
@@ -18,7 +19,7 @@ passport.use(
       passReqToCallback: true,
     },
     async function (
-      request: any,
+      request: Request,
       accessToken: string,
       refreshToken: string,
       profile: any,
@@ -45,7 +46,7 @@ passport.use(
 //Responsible for retrieving the user's information from the session in each request
 passport.serializeUser(function (
   user: Express.User,
-  done: (err: any, id?: unknown) => void
+  done: (err: unknown , id?: unknown) => void
 ): void {
   done(null, user);
 });
@@ -53,7 +54,7 @@ passport.serializeUser(function (
 //Responsible for retrieving the user's information from the session in each request
 passport.deserializeUser(function (
   user: Express.User,
-  done: (err: any, user?: Express.User) => void
+  done: (err: unknown, user?: Express.User) => void
 ): void {
   done(null, user);
 });

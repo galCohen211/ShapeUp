@@ -31,7 +31,7 @@ userRouter.get("/auth/google/protected", isLoggedIn, (req: any, res) => {
 });
 
 userRouter.get("/auth/google/logout", (req: Request, res:Response) => { 
-  req.logout((err: any) => {
+  req.logout((err) => {
     if (err) {
       console.error(err);
       return res.sendStatus(500);
