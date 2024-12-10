@@ -1,13 +1,14 @@
 import { Router } from "express";
 import passport from "passport";
+import { Request, Response } from "express";
 
 const userRouter = Router();
 
-function isLoggedIn(req: any, res: any, next: any): void {
+function isLoggedIn(req: Request, res: Response, next: any): void { 
   req.user ? next() : res.sendStatus(401);
 }
 
-userRouter.get("/", (req, res) => {
+userRouter.get("/", (req:Request, res:Response) => { 
   res.send('<a href="/users/auth/google">Authenticate with Google</a>');
 });
 
@@ -25,11 +26,11 @@ userRouter.get(
   })
 );
 
-userRouter.get("/auth/google/protected", isLoggedIn, (req: any, res) => {
+userRouter.get("/auth/google/protected", isLoggedIn, (req: any, res) => { 
   res.send(`Hello ${req.user.user.username}`);
 });
 
-userRouter.get("/auth/google/logout", (req: any, res) => {
+userRouter.get("/auth/google/logout", (req: Request, res:Response) => { 
   req.logout((err: any) => {
     if (err) {
       console.error(err);
@@ -41,7 +42,7 @@ userRouter.get("/auth/google/logout", (req: any, res) => {
   });
 });
 
-userRouter.get("/auth/google/failure", (req, res) => {
+userRouter.get("/auth/google/failure", (req:Request, res:Response) => { 
   res.send("Failed to authenticate");
 });
 
