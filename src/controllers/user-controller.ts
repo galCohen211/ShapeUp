@@ -43,7 +43,7 @@ passport.use(
   )
 );
 
-//Responsible for retrieving the user's information from the session in each request
+// Responsible for retrieving the user's information from the session in each request
 passport.serializeUser(function (
   user: Express.User,
   done: (err: unknown , id?: unknown) => void
@@ -51,7 +51,7 @@ passport.serializeUser(function (
   done(null, user);
 });
 
-//Responsible for retrieving the user's information from the session in each request
+// Responsible for retrieving the user's information from the session in each request
 passport.deserializeUser(function (
   user: Express.User,
   done: (err: unknown, user?: Express.User) => void
