@@ -27,7 +27,6 @@ passport.use(
       try {
         const res = await registerUser(
           profile.email,
-          profile.displayName,
           profile.name.givenName,
           profile.name.familyName,
           " " // address

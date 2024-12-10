@@ -34,7 +34,6 @@ const loginUser = async (email: string, password: string) => {
 
 const registerUser = async (
   email: string,
-  username: string,
   firstName: string,
   lastName: string,
   address: string,
@@ -52,7 +51,6 @@ const registerUser = async (
     const newUser = await new User({
       email,
       password,
-      username,
       firstName,
       lastName,
       address,

@@ -9,7 +9,6 @@ enum IUserType {
 interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
-  username: string;
   password?: string;
   firstName: string;
   lastName: string;
@@ -21,7 +20,6 @@ interface IUser extends Document {
 
 const UserSchema: Schema<IUser> = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
-  username: { type: String, required: true, unique: true },
   password: { type: String, required: false },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },

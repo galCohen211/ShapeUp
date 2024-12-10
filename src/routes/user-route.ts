@@ -27,7 +27,7 @@ userRouter.get(
 );
 
 userRouter.get("/auth/google/protected", isLoggedIn, (req: any, res) => { 
-  res.send(`Hello ${req.user.user.username}`);
+  res.send(`Hello ${req.user.user.email}`);
 });
 
 userRouter.get("/auth/google/logout", (req: Request, res:Response) => { 
