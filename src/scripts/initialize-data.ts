@@ -7,7 +7,6 @@ async function createGymsAndUsers() {
     // Create Gym Owner (Gal Cohen)
     const gymOwner = new User({
       email: "galcohen@example.com",
-      username: "galcohen",
       password: "securepassword",
       firstName: "Gal",
       lastName: "Cohen",
@@ -20,7 +19,6 @@ async function createGymsAndUsers() {
     // Create 2 Users (Alis and Bob)
     const userAlis = new User({
       email: "alis@example.com",
-      username: "alis",
       password: "securepassword",
       firstName: "Alis",
       lastName: "Smith",
@@ -31,7 +29,6 @@ async function createGymsAndUsers() {
 
     const userBob = new User({
       email: "bob@example.com",
-      username: "bob",
       password: "securepassword",
       firstName: "Bob",
       lastName: "Johnson",
