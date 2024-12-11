@@ -120,6 +120,16 @@ class GymController {
         }
     }
 
+    static async getAllGyms(req: Request, res: Response): Promise<void> {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            res.status(400).json({ errors: errors.array() });
+            return;
+        }
+        const allGyms = await Gym.find();
+        res.status(200).json({ allGyms });
+    }
+
 }
 
 export default GymController;

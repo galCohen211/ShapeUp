@@ -35,4 +35,7 @@ router.put("/:gymId", upload.fields([{ name: "pictures", maxCount: 5 }]),
     ],
     GymController.updateGym
 );
+
+router.get("/", GymController.getAllGyms);
+
 export default router;
