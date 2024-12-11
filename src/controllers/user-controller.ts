@@ -200,4 +200,8 @@ export const login = async (req: Request, res: Response) => {
   }
 }
 
+export const testCookie = async (req: Request, res: Response) => {
+  return res.status(200).json({ message: "this is a cookie test" });
+}
+
 export default passport;

@@ -1,7 +1,9 @@
 import { Router } from "express";
 import passport from "passport";
 import { Request, Response } from "express";
-import { signup, login } from "../controllers/user-controller"
+import { signup, login, testCookie } from "../controllers/user-controller"
+import { IUserType } from "../models/user-model";
+import verifyToken from "../middleware/verifyToken";
 const userRouter = Router();
 
 function isLoggedIn(req: Request, res: Response, next: any): void {
@@ -52,6 +54,10 @@ userRouter.post("/signup", (req: Request, res: Response) => {
 
 userRouter.post("/login", (req: Request, res: Response) => {
   login(req, res);
+});
+
+userRouter.get("/testCookie", verifyToken([IUserType.USER]), (req: Request, res: Response) => {
+  testCookie(req, res);
 });
 
 export default userRouter;
