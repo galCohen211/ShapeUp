@@ -13,6 +13,8 @@ interface RegisterUserParams {
   lastName: string;
   password?: string;
   address?: string;
+  userType?: IUserType;
+  gymOwnerLicenseImage?: string;
 }
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
@@ -80,14 +82,27 @@ passport.deserializeUser(function (
 
 
 export const signup = async (req: Request, res: Response) => {
-  const { email, password, firstName, lastName, address } = req.body;
+  const { email, password, firstName, lastName, address, gymOwnerLicenseImage } = req.body;
 
   if (!email || !password || !firstName || !lastName || !address) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
+  let userType: IUserType = IUserType.USER; // default type is user
+  if (gymOwnerLicenseImage) {
+    userType = IUserType.GYM_OWNER;
+  }
+
   try {
-    const result = await registerGeneralUser({ email, firstName, lastName, password, address });
+    const result = await registerGeneralUser({
+      email,
+      firstName,
+      lastName,
+      password,
+      address,
+      userType,
+      gymOwnerLicenseImage
+    });
 
     if ("token" in result) {
       res.cookie("access_token", result.token, {
@@ -107,7 +122,7 @@ export const signup = async (req: Request, res: Response) => {
 };
 
 const registerGeneralUser = async (params: RegisterUserParams) => {
-  const { email, firstName, lastName, password, address } = params;
+  const { email, firstName, lastName, password, address, userType, gymOwnerLicenseImage } = params;
   const user = await User.findOne({ email });
   if (user) {
     return { message: "User already exists" };
@@ -127,8 +142,9 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
       firstName: firstName,
       lastName: lastName,
       address: address,
-      type: IUserType.USER,
+      type: userType,
       favoriteGyms: [],
+      gymOwnerLicenseImage: gymOwnerLicenseImage
     }).save();
 
     console.log("New user created: " + newUser);

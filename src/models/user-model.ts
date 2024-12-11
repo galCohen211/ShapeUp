@@ -15,7 +15,8 @@ interface IUser extends Document {
   address?: string;
   type: IUserType;
   favoriteGyms: Types.ObjectId[];
-  avatarUrl?: string;
+  avatarUrl?: string,
+  gymOwnerLicenseImage?: string;
 }
 
 const UserSchema: Schema<IUser> = new mongoose.Schema({
@@ -27,6 +28,7 @@ const UserSchema: Schema<IUser> = new mongoose.Schema({
   type: { type: String, required: true },
   favoriteGyms: [{ type: Schema.Types.ObjectId, ref: "Gym" }],
   avatarUrl: { type: String, required: false },
+  gymOwnerLicenseImage: { type: String, required: false }
 });
 
 const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
