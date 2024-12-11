@@ -5,7 +5,7 @@ import passport from "passport";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 
-import "../src/controllers/user-controller";
+import "./controllers/auth-controller";
 import initRouter from "./routes/init-route";
 import userRouter from "./routes/user-route";
 

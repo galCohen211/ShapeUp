@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import passport from "passport";
-import { signup, login, testCookie } from "../controllers/user-controller"
+import { signup, login, testCookie } from "../controllers/auth-controller"
 import { IUserType } from "../models/user-model";
 import verifyToken from "../middleware/verifyToken";
 const userRouter = Router();
