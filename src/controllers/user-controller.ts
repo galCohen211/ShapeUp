@@ -140,7 +140,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
   }
 }
 
-const generateJWT = (userId: Types.ObjectId, email: string, type: string) => {
+const generateJWT = (userId: Types.ObjectId, email: string, type: IUserType) => {
   if (!process.env.JWT_SECRET) {
     return { message: "Missing auth configuration" };
   }
