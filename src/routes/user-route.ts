@@ -1,6 +1,5 @@
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import passport from "passport";
-import { Request, Response } from "express";
 import { signup, login, testCookie } from "../controllers/user-controller"
 import { IUserType } from "../models/user-model";
 import verifyToken from "../middleware/verifyToken";
