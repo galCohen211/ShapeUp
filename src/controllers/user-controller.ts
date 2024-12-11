@@ -40,7 +40,8 @@ passport.use(
         const res = await registerGeneralUser({
           email: profile.email,
           firstName: profile.name.givenName,
-          lastName: profile.name.familyName
+          lastName: profile.name.familyName,
+          userType: IUserType.USER
         });
 
         if ("token" in res) {
@@ -130,7 +131,14 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
 
   try {
     let hashedPassword: string | null = null;
-    let address: string | null = null;
+
+    if (!address) {
+      let address: string | null = null;
+    }
+    if (!gymOwnerLicenseImage) {
+      let gymOwnerLicenseImage: string | null = null;
+    }
+
     if (password) {
       const salt = await bcrypt.genSalt(10);
       hashedPassword = await bcrypt.hash(password, salt);
