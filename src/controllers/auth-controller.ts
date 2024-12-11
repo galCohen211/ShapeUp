@@ -3,19 +3,11 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { Types } from "mongoose";
+import { validationResult } from "express-validator";
 import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oauth2";
 
 import User, { IUserType } from "../models/user-model";
-
-interface RegisterUserParams {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password?: string;
-  address?: string;
-  userType?: IUserType;
-  gymOwnerLicenseImage?: string;
-}
+import { RegisterUserParams } from "../types/auth.types";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
@@ -83,11 +75,14 @@ passport.deserializeUser(function (
 
 
 export const signup = async (req: Request, res: Response) => {
-  const { email, password, firstName, lastName, address, gymOwnerLicenseImage } = req.body;
 
-  if (!email || !password || !firstName || !lastName || !address) {
-    return res.status(400).json({ message: "All fields are required" });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
   }
+
+  const { email, password, firstName, lastName, address, gymOwnerLicenseImage } = req.body;
 
   let userType: IUserType = IUserType.USER; // default type is user
   if (gymOwnerLicenseImage) {
@@ -104,6 +99,10 @@ export const signup = async (req: Request, res: Response) => {
       userType,
       gymOwnerLicenseImage
     });
+
+    if (result.message) {
+      return res.status(400).json({ message: result.message });
+    }
 
     if ("token" in result) {
       res.cookie("access_token", result.token, {
@@ -182,11 +181,15 @@ const generateJWT = (userId: Types.ObjectId, email: string, type: IUserType) => 
 };
 
 export const login = async (req: Request, res: Response) => {
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
+
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
   try {
     const user = await User.findOne({ email });
     if (!user) {
@@ -207,7 +210,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign(
-      { _id: user._id },
+      { _id: user._id, type: user.type },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRATION });
 

@@ -1,12 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 import { IUserType } from "../models/user-model";
+import { TokenPayload } from "../types/auth.types";
 
-interface TokenPayload extends JwtPayload {
-    id: string;
-    type: IUserType;
-}
 
 const verifyToken = (allowedRoles: Array<IUserType>) => {
     return (req: Request, res: Response, next: NextFunction): void => {
@@ -27,9 +24,6 @@ const verifyToken = (allowedRoles: Array<IUserType>) => {
                 res.status(403).send("Forbidden. You don't have access to this resource");
                 return;
             }
-
-            req.query.userId = result.id; // we may use it in controllers
-            req.query.type = result.type;
             next();
         }
         catch (err) {

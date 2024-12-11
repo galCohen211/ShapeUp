@@ -7,9 +7,7 @@ import upload from "../multer";
 const router = express.Router();
 
 // Add a new gym
-router.post(
-    "/",
-    upload.array("pictures", 5),
+router.post("/", upload.array("pictures", 5),
     [
         body("name")
             .notEmpty().withMessage("Name is required."),
@@ -24,9 +22,7 @@ router.post(
     GymController.addGym
 );
 
-router.put(
-    "/:gymId",
-    upload.fields([{ name: "pictures", maxCount: 5 }]),
+router.put("/:gymId", upload.fields([{ name: "pictures", maxCount: 5 }]),
     [
         param("gymId")
             .notEmpty().withMessage("Gym ID is required.")
