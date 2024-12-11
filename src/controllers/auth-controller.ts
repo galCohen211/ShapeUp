@@ -190,7 +190,7 @@ export const login = async (req: Request, res: Response) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).send("Wrong email or password");
+      return res.status(401).send("Wrong email or password");
     }
 
     if (!user.password) {
@@ -199,7 +199,7 @@ export const login = async (req: Request, res: Response) => {
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).send("wrong email or password");
+      return res.status(401).send("Wrong email or password");
     }
 
     if (!process.env.JWT_SECRET) {
