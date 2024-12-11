@@ -3,7 +3,9 @@ import { connectDb } from "./mongodb";
 import cors from "cors";
 import passport from "passport";
 import session from "express-session";
-import "../src/controllers/user-controller";
+import cookieParser from "cookie-parser";
+
+import "./controllers/auth-controller";
 import initRouter from "./routes/init-route";
 import GymRouter from "./routes/gym-route"
 import userRouter from "./routes/user-route";
@@ -12,10 +14,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//Google OAuth
+// Google OAuth
 app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Use cookies
+app.use(cookieParser());
 
 // Access variables using process.env
 const PORT = process.env.PORT || 3000;
