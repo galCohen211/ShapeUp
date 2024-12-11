@@ -124,10 +124,13 @@ export const signup = async (req: Request, res: Response) => {
 const registerGeneralUser = async (params: RegisterUserParams) => {
   const { email, firstName, lastName, password, address, userType, gymOwnerLicenseImage } = params;
   const user = await User.findOne({ email });
+  
+  // "regular" user
   if (user && password) {
     return { message: "User already exists" };
   }
 
+  // SSO user
   if (user) {
     return generateJWT(user._id, user.email, user.type);
   }
