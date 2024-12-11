@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 
 import "./controllers/auth-controller";
 import initRouter from "./routes/init-route";
+import GymRouter from "./routes/gym-route"
 import userRouter from "./routes/user-route";
 
 const app = express();
@@ -25,6 +26,7 @@ app.use(cookieParser());
 const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use("/init", initRouter);
+app.use("/gyms", GymRouter);
 app.use("/users", userRouter);
 
 export default app;
