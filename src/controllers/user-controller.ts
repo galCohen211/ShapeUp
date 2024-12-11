@@ -5,7 +5,6 @@ import bcrypt from "bcryptjs";
 import { Types } from "mongoose";
 import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oauth2";
 
-// import { registerUser } from "../services/user-service"; // 
 import User, { IUserType } from "../models/user-model";
 
 interface RegisterUserParams {
@@ -159,5 +158,48 @@ const generateJWT = (userId: Types.ObjectId, email: string, type: string) => {
     token: token
   };
 };
+
+export const login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).send("Wrong email or password");
+    }
+
+    if (!user.password) {
+      return res.status(400).send("this is SSO user - no password");
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(400).send("wrong email or password");
+    }
+
+    if (!process.env.JWT_SECRET) {
+      return { message: "Missing auth configuration" };
+    }
+
+    const token = jwt.sign(
+      { _id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRATION });
+
+    return res.status(200).send({
+      _id: user._id,
+      email: user.email,
+      token: token
+    });
+
+  }
+  catch (error) {
+    console.error("Error during login:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
 
 export default passport;
