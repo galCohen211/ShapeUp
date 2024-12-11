@@ -5,6 +5,19 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+    "types": [
+      "jest",
+      "node"
+    ],
+  },
+  "include": [
+    "**/*.ts",
+    "tests/**/*.ts",
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+  ]
 }
