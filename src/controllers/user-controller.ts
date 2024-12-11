@@ -41,7 +41,6 @@ passport.use(
           lastName: profile.name.familyName
         });
 
-        // set cookie
         if ("token" in res) {
           request.res?.cookie("access_token", res.token, {
             httpOnly: true,
@@ -150,7 +149,6 @@ const generateJWT = (userId: Types.ObjectId, email: string, type: string) => {
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRATION }
   );
-  console.log(token); //
 
   return {
     _id: userId,
