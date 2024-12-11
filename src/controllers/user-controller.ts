@@ -8,6 +8,13 @@ import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oaut
 import { registerUser } from "../services/user-service"; // 
 import User, { IUserType } from "../models/user-model";
 
+interface RegisterUserParams {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password?: string;
+  address?: string;
+}
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
@@ -72,43 +79,52 @@ export const signup = async (req: Request, res: Response) => {
   }
 
   try {
-    const user = await User.findOne({ email });
-    if (user) {
-      return { message: "User already exists" };
+    const result = await registerGeneralUser({ email, firstName, lastName, password, address });
+
+    if ("token" in result) {
+      res.cookie("access_token", result.token, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+      });
+
+      return res.status(201).json({
+        message: "User registered successfully",
+        email: result.email
+      });
     }
-
-    // Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const newUser = await new User({
-      email,
-      password: hashedPassword, // if SSO is used, the value is null
-      firstName,
-      lastName,
-      address,
-      type: IUserType.USER, // change to role?
-      favoriteGyms: [],
-    }).save();
-
-    console.log("New user created. " + newUser);
-    const result = generateJWT(newUser._id, newUser.email, newUser.type);
-
-    // set the JWT as a cookie
-    res.cookie("access_token", result.token, {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
-
-    return res.status(201).json({
-      message: "User registered successfully",
-      user: newUser,
-    });
   } catch (error) {
     console.error("Error during signup:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+const registerGeneralUser = async (params: RegisterUserParams) => {
+  const { email, firstName, lastName, password, address } = params;
+  const user = await User.findOne({ email });
+  if (user) {
+    return { message: "User already exists" };
+  }
+
+  let hashedPassword: string | null = null;
+  if (password) {
+    const salt = await bcrypt.genSalt(10);
+    hashedPassword = await bcrypt.hash(password, salt);
+  }
+
+  const newUser = await new User({
+    email: email,
+    password: hashedPassword, // if SSO is used, the value is null
+    firstName: firstName,
+    lastName: lastName,
+    address: address,
+    type: IUserType.USER, // change to role?
+    favoriteGyms: [],
+  }).save();
+
+  console.log("New user created: " + newUser);
+  const result = generateJWT(newUser._id, newUser.email, newUser.type);
+  return result;
+}
 
 const generateJWT = (userId: Types.ObjectId, email: string, type: string) => {
   if (!process.env.JWT_SECRET) {
