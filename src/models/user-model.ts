@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
-enum IUserType {
+export enum IUserType {
   ADMIN = "admin",
   GYM_OWNER = "gym_owner",
   USER = "user",

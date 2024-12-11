@@ -1,10 +1,13 @@
 import passport from "passport";
-import { Request } from "express";
-import {
-  Strategy as GoogleStrategy,
-  VerifyCallback,
-} from "passport-google-oauth2";
-import { registerUser } from "../services/user-service";
+import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { Types } from "mongoose";
+import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oauth2";
+
+import { registerUser } from "../services/user-service"; // 
+import User, { IUserType } from "../models/user-model";
+
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
@@ -35,6 +38,7 @@ passport.use(
         if (res.error) {
           return done(res.error, null);
         }
+
         return done(null, { user: res.user });
       } catch (err) {
         return done(err, null);
@@ -46,7 +50,7 @@ passport.use(
 // Responsible for retrieving the user's information from the session in each request
 passport.serializeUser(function (
   user: Express.User,
-  done: (err: unknown , id?: unknown) => void
+  done: (err: unknown, id?: unknown) => void
 ): void {
   done(null, user);
 });
@@ -58,5 +62,70 @@ passport.deserializeUser(function (
 ): void {
   done(null, user);
 });
+
+
+export const signup = async (req: Request, res: Response) => {
+  const { email, password, firstName, lastName, address } = req.body;
+
+  if (!email || !password || !firstName || !lastName || !address) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (user) {
+      return { message: "User already exists" };
+    }
+
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = await new User({
+      email,
+      password: hashedPassword, // if SSO is used, the value is null
+      firstName,
+      lastName,
+      address,
+      type: IUserType.USER, // change to role?
+      favoriteGyms: [],
+    }).save();
+
+    console.log("New user created. " + newUser);
+    const result = generateJWT(newUser._id, newUser.email, newUser.type);
+
+    // set the JWT as a cookie
+    res.cookie("access_token", result.token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
+    return res.status(201).json({
+      message: "User registered successfully",
+      user: newUser,
+    });
+  } catch (error) {
+    console.error("Error during signup:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const generateJWT = (userId: Types.ObjectId, email: string, type: string) => {
+  if (!process.env.JWT_SECRET) {
+    return { message: "Missing auth configuration" };
+  }
+  const token = jwt.sign(
+    { id: userId.toString(), type: type },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRATION }
+  );
+  console.log(token); //
+
+  return {
+    _id: userId,
+    email: email,
+    token: token
+  };
+};
 
 export default passport;

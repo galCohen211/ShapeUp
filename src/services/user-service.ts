@@ -1,16 +1,25 @@
-import User from "../models/user-model";
-// import { Types } from "mongoose";
-// import jwt from "jsonwebtoken";
+import User, { IUserType } from "../models/user-model";
+import { Types } from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
-// const generateJWT = (userID: Types.ObjectId, UserEmail: string) => {
-//   const token = jwt.sign(
-//     { id: userID.toString(), email: UserEmail },
-//     process.env.JWT_SECRET || "cats",
-//     { expiresIn: "1h" }
-//   );
+const generateJWT = (userId: Types.ObjectId, email: string, type: string) => {
+  if (!process.env.JWT_SECRET) {
+    return { message: "Missing auth configuration" };
+  }
+  const token = jwt.sign(
+    { id: userId.toString(), type: type},
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRATION }
+  );
 
-//   return token;
-// };
+  return {
+    _id: userId,
+    email: email,
+    token: token
+  };
+};
+
 
 const loginUser = async (email: string, password: string) => {
   const existingUser = await User.findOne({ email });
@@ -40,34 +49,38 @@ const registerUser = async (
   password?: string
 ) => {
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return {
-        message: "User already exists",
-        user: existingUser,
-      };
+    const user = await User.findOne({ email });
+    if (user) {
+      return { message: "User already exists" };
+    }
+
+    let hashedPassword: string | null = null;
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      hashedPassword = await bcrypt.hash(password, salt);
     }
 
     const newUser = await new User({
       email,
-      password,
+      hashedPassword, // if SSO is used, the value is null
       firstName,
       lastName,
       address,
-      type: "user",
+      type: IUserType.USER, // change to role?
       favoriteGyms: [],
     }).save();
-    console.log("new user created" + newUser);
 
-    // const token = generateJWT(newUser._id, newUser.email);
+    console.log("New user created:" + newUser);
+    const token = generateJWT(newUser._id, newUser.email, newUser.type);
 
     return {
       message: "User created successfully",
       user: newUser,
-      //   token,
+      token: token
     };
   } catch (err) {
-    return { message: "Error accured", error: err };
+    return { message: "Failed to register user", error: err };
   }
 };
 
