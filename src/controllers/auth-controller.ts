@@ -36,10 +36,6 @@ passport.use(
           userType: IUserType.USER
         });
 
-        if (res.message) {
-          return done(res.message, null);
-        }
-
         if ("token" in res) {
           request.res?.cookie("access_token", res.token, {
             httpOnly: true,
@@ -128,10 +124,14 @@ export const signup = async (req: Request, res: Response) => {
 const registerGeneralUser = async (params: RegisterUserParams) => {
   const { email, firstName, lastName, password, address, userType, gymOwnerLicenseImage } = params;
   const user = await User.findOne({ email });
-  if (user) {
+  if (user && password) {
     return { message: "User already exists" };
   }
-  
+
+  if (user) {
+    return generateJWT(user._id, user.email, user.type);
+  }
+
   try {
     let hashedPassword: string | null = null;
 
