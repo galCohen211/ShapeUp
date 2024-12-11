@@ -127,7 +127,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
       firstName: firstName,
       lastName: lastName,
       address: address,
-      type: IUserType.USER, // change to role?
+      type: IUserType.USER,
       favoriteGyms: [],
     }).save();
 
