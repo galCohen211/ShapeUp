@@ -54,9 +54,9 @@ userRouter.post("/signup",
 [
   body("email").notEmpty().isEmail().withMessage("Valid email is required"),
   body("password").notEmpty().withMessage("Password is required"),
-  body("firstName").notEmpty().isString().withMessage("First name is required"),
-  body("lastName").notEmpty().isString().withMessage("Last name is required"),
-  body("address").notEmpty().isString().withMessage("Address is required"),
+  body("firstName").notEmpty().isString().withMessage("First name is required and must be a string"),
+  body("lastName").notEmpty().isString().withMessage("Last name is required and must be a string"),
+  body("address").notEmpty().isString().withMessage("Address is required and must be a string"),
 ],
 (req: Request, res: Response) => {
   signup(req, res);
