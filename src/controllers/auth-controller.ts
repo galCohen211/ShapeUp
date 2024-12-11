@@ -39,7 +39,7 @@ passport.use(
         if ("token" in res) {
           request.res?.cookie("access_token", res.token, {
             httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000, // 1 day
+            maxAge: 60 * 60 * 1000 // 1 hour
           });
         }
 
@@ -107,7 +107,7 @@ export const signup = async (req: Request, res: Response) => {
     if ("token" in result) {
       res.cookie("access_token", result.token, {
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        maxAge: 60 * 60 * 1000 // 1 hour
       });
 
       return res.status(201).json({
@@ -124,8 +124,15 @@ export const signup = async (req: Request, res: Response) => {
 const registerGeneralUser = async (params: RegisterUserParams) => {
   const { email, firstName, lastName, password, address, userType, gymOwnerLicenseImage } = params;
   const user = await User.findOne({ email });
-  if (user) {
+  
+  // "regular" user
+  if (user && password) {
     return { message: "User already exists" };
+  }
+
+  // SSO user
+  if (user) {
+    return generateJWT(user._id, user.email, user.type);
   }
 
   try {
