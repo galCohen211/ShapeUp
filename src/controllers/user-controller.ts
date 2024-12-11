@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import { Types } from "mongoose";
 import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oauth2";
 
-import { registerUser } from "../services/user-service"; // 
+// import { registerUser } from "../services/user-service"; // 
 import User, { IUserType } from "../models/user-model";
 
 interface RegisterUserParams {
@@ -36,17 +36,27 @@ passport.use(
       done: VerifyCallback
     ) {
       try {
-        const res = await registerUser(
-          profile.email,
-          profile.name.givenName,
-          profile.name.familyName,
-          " " // address
-        );
-        if (res.error) {
+        const res = await registerGeneralUser({
+          email: profile.email,
+          firstName: profile.name.givenName,
+          lastName: profile.name.familyName
+        });
+
+        // set cookie
+        if ("token" in res) {
+          request.res?.cookie("access_token", res.token, {
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
+          });
+        }
+
+        if ("error" in res && res.error) {
           return done(res.error, null);
         }
 
-        return done(null, { user: res.user });
+        if ("email" in res && res.email) {
+          return done(null, { email: res.email });
+        }
       } catch (err) {
         return done(err, null);
       }
@@ -105,25 +115,31 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
     return { message: "User already exists" };
   }
 
-  let hashedPassword: string | null = null;
-  if (password) {
-    const salt = await bcrypt.genSalt(10);
-    hashedPassword = await bcrypt.hash(password, salt);
+  try {
+    let hashedPassword: string | null = null;
+    let address: string | null = null;
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      hashedPassword = await bcrypt.hash(password, salt);
+    }
+
+    const newUser = await new User({
+      email: email,
+      password: hashedPassword, // if SSO is used, the value is null
+      firstName: firstName,
+      lastName: lastName,
+      address: address,
+      type: IUserType.USER, // change to role?
+      favoriteGyms: [],
+    }).save();
+
+    console.log("New user created: " + newUser);
+    const result = generateJWT(newUser._id, newUser.email, newUser.type);
+    return result;
   }
-
-  const newUser = await new User({
-    email: email,
-    password: hashedPassword, // if SSO is used, the value is null
-    firstName: firstName,
-    lastName: lastName,
-    address: address,
-    type: IUserType.USER, // change to role?
-    favoriteGyms: [],
-  }).save();
-
-  console.log("New user created: " + newUser);
-  const result = generateJWT(newUser._id, newUser.email, newUser.type);
-  return result;
+  catch (err) {
+    return { message: "Failed to register user", error: err };
+  }
 }
 
 const generateJWT = (userId: Types.ObjectId, email: string, type: string) => {

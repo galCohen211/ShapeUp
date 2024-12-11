@@ -12,7 +12,7 @@ interface IUser extends Document {
   password?: string;
   firstName: string;
   lastName: string;
-  address: string;
+  address?: string;
   type: IUserType;
   favoriteGyms: Types.ObjectId[];
   avatarUrl?: string;
@@ -23,7 +23,7 @@ const UserSchema: Schema<IUser> = new mongoose.Schema({
   password: { type: String, required: false },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  address: { type: String, required: true },
+  address: { type: String, required: false },
   type: { type: String, required: true },
   favoriteGyms: [{ type: Schema.Types.ObjectId, ref: "Gym" }],
   avatarUrl: { type: String, required: false },
