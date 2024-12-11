@@ -13,11 +13,11 @@
   },
   "include": [
     "**/*.ts",
-    "tests/**/*.ts"
+    "tests/**/*.ts",
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "**/*.test.ts"
   ]
 }

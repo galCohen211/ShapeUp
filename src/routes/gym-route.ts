@@ -35,8 +35,8 @@ router.put(
         body("location").optional(),
         body("description").optional(),
         body("amountOfReviews").optional().isInt({ min: 0 }).withMessage("Reviews must be a non-negative integer."),
-        body("pictures").optional().isString().withMessage("Retained images must be a comma-separated string."),
+        body("pictures").optional().isString().withMessage("At least one picture is required"),
     ],
-    GymController.editGym
+    GymController.updateGym
 );
 export default router;

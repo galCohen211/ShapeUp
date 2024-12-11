@@ -2,25 +2,35 @@ import request from "supertest";
 import app from "../../server";
 import Gym from "../../models/gym-model";
 import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
 
 jest.mock("../../models/gym-model");
 
 describe("GymController Endpoints", () => {
+    const uploadsDir = path.join(__dirname, "../../uploads");
+    const testImages: string[] = [];
+
     afterAll(async () => {
         await mongoose.disconnect();
+        testImages.forEach((file) => {
+            const filePath = path.join(uploadsDir, file);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        });
     });
 
     describe("POST /gyms", () => {
         it("should add a new gym successfully", async () => {
             const ownerId = new mongoose.Types.ObjectId();
 
-            // Mock the Gym model's save method
             (Gym.prototype.save as jest.Mock).mockResolvedValue({
                 _id: new mongoose.Types.ObjectId(),
                 name: "Test Gym",
                 location: "Test Location",
                 description: "Test Description",
-                pictures: ["http://localhost/uploads/image1.jpg"],
+                pictures: ["http://localhost/uploads/test-image1.jpg"],
                 amountOfReviews: 0,
                 owner: ownerId,
             });
@@ -31,10 +41,12 @@ describe("GymController Endpoints", () => {
                 .field("location", "Test Location")
                 .field("description", "Test Description")
                 .query({ owner: ownerId.toString() })
-                .attach("pictures", Buffer.from("image content"), "image1.jpg");
+                .attach("pictures", Buffer.from("image content"), "test-image1.jpg");
 
             expect(response.status).toBe(201);
             expect(response.body.message).toBe("Gym added successfully!");
+
+            testImages.push("test-image1.jpg");
         });
 
         it("should return 400 if required fields are missing", async () => {
@@ -52,7 +64,7 @@ describe("GymController Endpoints", () => {
                 name: "Old Gym",
                 location: "Old Location",
                 description: "Old Description",
-                pictures: ["http://localhost/uploads/image1.jpg"],
+                pictures: ["http://localhost/uploads/test-image2.jpg"],
             };
 
             (Gym.findById as jest.Mock).mockResolvedValue(existingGym);
@@ -68,11 +80,14 @@ describe("GymController Endpoints", () => {
                 .field("name", "Updated Gym")
                 .field("location", "Updated Location")
                 .field("description", "Updated Description")
-                .field("pictures", "http://localhost/uploads/image1.jpg");
+                .field("pictures", "http://localhost/uploads/test-image2.jpg");
 
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("Gym updated successfully");
             expect(response.body.gym).toHaveProperty("name", "Updated Gym");
+
+            // Add the test image to the cleanup list
+            testImages.push("test-image2.jpg");
         });
 
         it("should return 404 if gym is not found", async () => {

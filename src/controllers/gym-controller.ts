@@ -20,10 +20,6 @@ class GymController {
             const { name, location, description } = req.body;
             const owner = req.query.owner as string;
 
-            if (!name || !location || !description || !owner) {
-                res.status(400).json({ message: "Missing required fields." });
-                return;
-            }
             if (!req.files || !(req.files as Express.Multer.File[]).length) {
                 res.status(400).json({ message: "Please upload at least one picture." });
                 return;
@@ -49,15 +45,14 @@ class GymController {
                 gym: newGym,
             });
         } catch (error) {
-            console.error("Error adding gym:", error);
             res.status(500).json({ message: "An error occurred while adding the gym." });
         }
     }
 
     // Edit gym details
-    static async editGym(req: Request, res: Response): Promise<void> {
+    static async updateGym(req: Request, res: Response): Promise<void> {
         try {
-            // Validate request inputs
+
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 res.status(400).json({ errors: errors.array() });
@@ -66,7 +61,6 @@ class GymController {
 
             const { gymId } = req.params;
 
-            // Find the existing gym
             const existingGym = await Gym.findById(gymId);
             if (!existingGym) {
                 res.status(404).json({ message: "Gym not found" });
@@ -76,11 +70,9 @@ class GymController {
             const { name, location, description, amountOfReviews } = req.body;
 
             // Handle image deletion logic
-            let updatedPictures = [...existingGym.pictures]; // Start with existing pictures
+            let updatedPictures = [...existingGym.pictures];
 
-            const pictures = req.body.pictures
-                ? req.body.pictures.split(",")
-                : [];
+            const pictures = req.body.pictures ? req.body.pictures.split(",") : [];
             const imagesToDelete = existingGym.pictures.filter(
                 (image) => !pictures.includes(image)
             );
@@ -100,9 +92,9 @@ class GymController {
             // Handle new image uploads
             const files = req.files as { [fieldname: string]: Express.Multer.File[] };
             if (files && files["pictures"]) {
-                const newPictures = files["pictures"].map((file) => 
-                `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
-            );
+                const newPictures = files["pictures"].map((file) =>
+                    `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+                );
                 updatedPictures = pictures.concat(newPictures);
             } else {
                 updatedPictures = pictures;
