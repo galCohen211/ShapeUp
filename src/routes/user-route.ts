@@ -6,6 +6,7 @@ import { signup, login, getFromCookie } from "../controllers/auth-controller"
 import { IUserType } from "../models/user-model";
 import verifyToken from "../middleware/verifyToken";
 import upload from "../multer";
+import UserController from "../controllers/user-controller";
 
 const userRouter = Router();
 
@@ -71,5 +72,19 @@ userRouter.post("/login",
   (req: Request, res: Response) => {
     login(req, res);
   });
+
+  userRouter.put("/update-user/:userId", upload.fields([{ name: "avatar", maxCount: 1 }]), verifyToken([IUserType.GYM_OWNER, IUserType.USER]),
+  [
+    param("userId")
+    .notEmpty().withMessage("User ID is required.")
+    .isMongoId().withMessage("User ID must be a valid MongoDB ObjectId."),
+    body("password").optional(),
+    body("firstName").optional().isString(),
+    body("lastName").optional().isString(),
+    body("address").optional().isString(),
+  ],
+  UserController.updateUser
+);
+
 
 export default userRouter;
