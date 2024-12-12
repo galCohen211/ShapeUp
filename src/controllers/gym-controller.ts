@@ -5,6 +5,8 @@ import mongoose from "mongoose";
 import path from "path";
 import fs from "fs";
 
+import { getFromCookie } from "./auth-controller";
+
 class GymController {
 
     // Add a new gym
@@ -120,16 +122,39 @@ class GymController {
         }
     }
 
-    static async getAllGyms(req: Request, res: Response): Promise<void> {
+    static async getGyms(req: Request, res: Response): Promise<void> {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             res.status(400).json({ errors: errors.array() });
             return;
         }
-        const allGyms = await Gym.find();
-        res.status(200).json({ allGyms });
+
+        let gyms;
+        if (req.query.owner) {
+            const owner = req.query.owner as string;
+
+            if (!mongoose.Types.ObjectId.isValid(owner)) {
+                res.status(400).json({ error: "Invalid owner ID format" });
+                return;
+            }
+            gyms = await Gym.find({ owner });
+        }
+        else {
+            gyms = await Gym.find();
+        }
+        res.status(200).json({ gyms });
     }
 
+    static async getMyGyms(req: Request, res: Response): Promise<void> {
+        const myUserId = await getFromCookie(req, res, "id");
+        let gyms;
+        if (!mongoose.Types.ObjectId.isValid(myUserId)) {
+            res.status(400).json({ error: "Invalid user ID format" });
+            return;
+        }
+        gyms = await Gym.find({ owner: myUserId });
+        res.status(200).json({ gyms });
+    }
 }
 
 export default GymController;

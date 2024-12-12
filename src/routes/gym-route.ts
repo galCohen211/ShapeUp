@@ -1,7 +1,9 @@
 import express from "express";
 import { body, query, param } from "express-validator";
-import GymController from "../controllers/gym-controller";
 import upload from "../multer";
+import GymController from "../controllers/gym-controller";
+import verifyToken from "../middleware/verifyToken";
+import { IUserType } from "../models/user-model";
 
 
 const router = express.Router();
@@ -36,6 +38,13 @@ router.put("/:gymId", upload.fields([{ name: "pictures", maxCount: 5 }]),
     GymController.updateGym
 );
 
-router.get("/", GymController.getAllGyms);
+router.get("/",
+    [
+        query("owner").isMongoId().withMessage("Owner ID must be a valid MongoDB ObjectId")
+            .optional()
+    ], GymController.getGyms);
+
+router.get("/myGyms", verifyToken([IUserType.GYM_OWNER]), GymController.getMyGyms);
+
 
 export default router;
