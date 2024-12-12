@@ -122,6 +122,7 @@ class GymController {
         }
     }
 
+    // get all gyms or get gyms by owner
     static async getGyms(req: Request, res: Response): Promise<void> {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
