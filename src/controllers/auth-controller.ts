@@ -124,7 +124,7 @@ export const signup = async (req: Request, res: Response) => {
 const registerGeneralUser = async (params: RegisterUserParams) => {
   const { email, firstName, lastName, password, address, userType, gymOwnerLicenseImage } = params;
   const user = await User.findOne({ email });
-  
+
   // "regular" user
   if (user && password) {
     return { message: "User already exists" };
@@ -234,8 +234,32 @@ export const login = async (req: Request, res: Response) => {
   }
 }
 
-export const testCookie = async (req: Request, res: Response) => {
-  return res.status(200).json({ message: "this is a cookie test" });
+export const getFromCookie = async (req: Request, res: Response, property: string) => {
+  const accessToken = req.cookies.access_token;
+
+  if (!accessToken) {
+    res.status(400).json({ message: "Access token not found" });
+    return;
+  }
+
+  try {
+    if (!process.env.JWT_SECRET) {
+      return { message: "Missing auth configuration" };
+    }
+
+    // get decoded cookie
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET) as { [key: string]: any };
+
+    // get the desired property from the decoded cookie
+    if (decoded && decoded[property]) {
+      return decoded[property];
+    } else {
+      res.status(400).json({ message: `'${property}' not found in token` });
+    }
+
+  } catch (error) {
+    res.status(400).json({ message: "Invalid token", error: error });
+  }
 }
 
 export default passport;

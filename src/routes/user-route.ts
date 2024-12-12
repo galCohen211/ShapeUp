@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import passport from "passport";
 import { body, query, param } from "express-validator";
 
-import { signup, login, testCookie } from "../controllers/auth-controller"
+import { signup, login, getFromCookie } from "../controllers/auth-controller"
 import { IUserType } from "../models/user-model";
 import verifyToken from "../middleware/verifyToken";
 
@@ -50,29 +50,25 @@ userRouter.get("/auth/google/failure", (req: Request, res: Response) => {
   res.send("Failed to authenticate");
 });
 
-userRouter.post("/signup", 
-[
-  body("email").notEmpty().isEmail().withMessage("Valid email is required"),
-  body("password").notEmpty().withMessage("Password is required"),
-  body("firstName").notEmpty().isString().withMessage("First name is required and must be a string"),
-  body("lastName").notEmpty().isString().withMessage("Last name is required and must be a string"),
-  body("address").notEmpty().isString().withMessage("Address is required and must be a string"),
-],
-(req: Request, res: Response) => {
-  signup(req, res);
-});
+userRouter.post("/signup",
+  [
+    body("email").notEmpty().isEmail().withMessage("Valid email is required"),
+    body("password").notEmpty().withMessage("Password is required"),
+    body("firstName").notEmpty().isString().withMessage("First name is required and must be a string"),
+    body("lastName").notEmpty().isString().withMessage("Last name is required and must be a string"),
+    body("address").notEmpty().isString().withMessage("Address is required and must be a string"),
+  ],
+  (req: Request, res: Response) => {
+    signup(req, res);
+  });
 
 userRouter.post("/login",
-[
-  body("email").notEmpty().isEmail().withMessage("Valid email is required"),
-  body("password").notEmpty().withMessage("Password is required"),
-],
- (req: Request, res: Response) => {
-  login(req, res);
-});
-
-userRouter.get("/testCookie", verifyToken([IUserType.USER]), (req: Request, res: Response) => {
-  testCookie(req, res);
-});
+  [
+    body("email").notEmpty().isEmail().withMessage("Valid email is required"),
+    body("password").notEmpty().withMessage("Password is required"),
+  ],
+  (req: Request, res: Response) => {
+    login(req, res);
+  });
 
 export default userRouter;
