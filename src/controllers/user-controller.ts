@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
 
 
