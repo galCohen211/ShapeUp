@@ -89,6 +89,15 @@ export const signup = async (req: Request, res: Response) => {
     userType = IUserType.GYM_OWNER;
   }
 
+  const avatar = req.files && "avatar" in req.files
+    ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
+
+  if (!avatar) {
+    return res.status(400).send("Please upload an avatar");
+  }
+
+  const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
+
   try {
     const result = await registerGeneralUser({
       email,
@@ -97,6 +106,7 @@ export const signup = async (req: Request, res: Response) => {
       password,
       address,
       userType,
+      avatarUrl,
       gymOwnerLicenseImage
     });
 
@@ -122,7 +132,7 @@ export const signup = async (req: Request, res: Response) => {
 };
 
 const registerGeneralUser = async (params: RegisterUserParams) => {
-  const { email, firstName, lastName, password, address, userType, gymOwnerLicenseImage } = params;
+  const { email, firstName, lastName, password, address, userType, gymOwnerLicenseImage, avatarUrl } = params;
   const user = await User.findOne({ email });
 
   // "regular" user
@@ -144,6 +154,9 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
     if (!gymOwnerLicenseImage) {
       let gymOwnerLicenseImage: string | null = null;
     }
+    if (!avatarUrl) {
+      let avatarUrl: string | null = null;
+    }
 
     if (password) {
       const salt = await bcrypt.genSalt(10);
@@ -158,6 +171,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
       address: address,
       type: userType,
       favoriteGyms: [],
+      avatarUrl: avatarUrl,
       gymOwnerLicenseImage: gymOwnerLicenseImage
     }).save();
 
