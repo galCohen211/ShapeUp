@@ -130,31 +130,40 @@ class GymController {
             return;
         }
 
-        let gyms;
-        if (req.query.owner) {
-            const owner = req.query.owner as string;
+        try {
+            let gyms;
+            if (req.query.owner) {
+                const owner = req.query.owner as string;
 
-            if (!mongoose.Types.ObjectId.isValid(owner)) {
-                res.status(400).json({ error: "Invalid owner ID format" });
-                return;
+                if (!mongoose.Types.ObjectId.isValid(owner)) {
+                    res.status(400).json({ error: "Invalid owner ID format" });
+                    return;
+                }
+                gyms = await Gym.find({ owner });
             }
-            gyms = await Gym.find({ owner });
+            else {
+                gyms = await Gym.find();
+            }
+            res.status(200).json({ gyms });
+        } catch (error) {
+            res.status(500).json({ message: "An error occurred while adding the gym." });
         }
-        else {
-            gyms = await Gym.find();
-        }
-        res.status(200).json({ gyms });
     }
 
     static async getMyGyms(req: Request, res: Response): Promise<void> {
-        const myUserId = await getFromCookie(req, res, "id");
-        let gyms;
-        if (!mongoose.Types.ObjectId.isValid(myUserId)) {
-            res.status(400).json({ error: "Invalid user ID format" });
-            return;
+        try {
+            const myUserId = await getFromCookie(req, res, "id");
+            let gyms;
+            if (!mongoose.Types.ObjectId.isValid(myUserId)) {
+                res.status(400).json({ error: "Invalid user ID format" });
+                return;
+            }
+            gyms = await Gym.find({ owner: myUserId });
+            res.status(200).json({ gyms });
         }
-        gyms = await Gym.find({ owner: myUserId });
-        res.status(200).json({ gyms });
+        catch (error) {
+            res.status(500).json({ message: "An error occurred while adding the gym." });
+        }
     }
 }
 
