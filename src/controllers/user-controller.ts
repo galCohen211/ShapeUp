@@ -19,8 +19,7 @@ class UserController {
         }
 
         const avatar = req.files && "avatar" in req.files
-            ? (req.files["avatar"] as Express.Multer.File[])[0]
-            : null;
+            ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
 
         try {
             const user = await User.findById(userId);

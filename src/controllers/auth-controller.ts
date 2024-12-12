@@ -90,8 +90,7 @@ export const signup = async (req: Request, res: Response) => {
   }
 
   const avatar = req.files && "avatar" in req.files
-    ? (req.files["avatar"] as Express.Multer.File[])[0]
-    : null;
+    ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
 
   if (!avatar) {
     return res.status(400).send("Please upload an avatar");
@@ -154,6 +153,9 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
     }
     if (!gymOwnerLicenseImage) {
       let gymOwnerLicenseImage: string | null = null;
+    }
+    if (!avatarUrl) {
+      let avatarUrl: string | null = null;
     }
 
     if (password) {
