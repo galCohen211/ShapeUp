@@ -5,6 +5,7 @@ import { body, query, param } from "express-validator";
 import { signup, login, getFromCookie } from "../controllers/auth-controller"
 import { IUserType } from "../models/user-model";
 import verifyToken from "../middleware/verifyToken";
+import upload from "../multer";
 
 const userRouter = Router();
 
@@ -50,7 +51,7 @@ userRouter.get("/auth/google/failure", (req: Request, res: Response) => {
   res.send("Failed to authenticate");
 });
 
-userRouter.post("/signup",
+userRouter.post("/signup", upload.fields([{ name: "avatar", maxCount: 1 }]),
   [
     body("email").notEmpty().isEmail().withMessage("Valid email is required"),
     body("password").notEmpty().withMessage("Password is required"),

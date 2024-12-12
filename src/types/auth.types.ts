@@ -9,6 +9,7 @@ export interface RegisterUserParams {
     password?: string;
     address?: string;
     userType?: IUserType;
+    avatarUrl?: string;
     gymOwnerLicenseImage?: string;
 }
 
