@@ -10,7 +10,7 @@ import initRouter from "./routes/init-route";
 import GymRouter from "./routes/gym-route"
 import userRouter from "./routes/user-route";
 
-const app = express();
+const app: any = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
