@@ -13,9 +13,13 @@ describe("GymController Endpoints", () => {
 
     afterAll(async () => {
         await mongoose.disconnect();
-        testImages.forEach((file) => {
-            const filePath = path.join(uploadsDir, file);
-            if (fs.existsSync(filePath)) {
+        testImages.forEach((testImage) => {
+            const filePattern = new RegExp(`${testImage.replace(/\.[^/.]+$/, "")}-.*\\.(png|jpg|jpeg)$`);
+            const files = fs.readdirSync(uploadsDir);
+            const matchedFile = files.find((file) => filePattern.test(file));
+
+            if (matchedFile) {
+                const filePath = path.join(uploadsDir, matchedFile);
                 fs.unlinkSync(filePath);
             }
         });
