@@ -10,6 +10,16 @@ import UserController from "../controllers/user-controller";
 
 const userRouter = Router();
 
+// Get gym owner by id
+userRouter.get(
+  "/gymOwner/:userId",UserController.getByIdGymOwner
+);
+
+// Get user by id
+userRouter.get(
+  "/user/:userId",UserController.getByIdUser
+);
+
 function isLoggedIn(req: Request, res: Response, next: any): void {
   req.user ? next() : res.sendStatus(401);
 }

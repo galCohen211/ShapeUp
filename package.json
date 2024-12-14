@@ -7,7 +7,9 @@
     "start:dev": "cross-env NODE_ENV=development nodemon --exec ts-node src/server.ts",
     "start:prod": "cross-env NODE_ENV=production node dist/server.js",
     "build": "tsc",
-    "test": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform='^.+\\.(ts|tsx)$'=babel-jest"
+    "test:win": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform=\"^.+\\.(ts|tsx)$\":babel-jest",
+    "test:mac": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform='^.+\\.(ts|tsx)$'=babel-jest"
+
   },
   "author": "Gal & Or & Yoni & Oriya",
   "license": "ISC",
