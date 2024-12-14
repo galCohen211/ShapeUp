@@ -1,89 +1,136 @@
 import request from "supertest";
+import app from "../../server";
+import User from "../../models/user-model"; // Update this import based on your project structure
 import mongoose from "mongoose";
-import { startServer }  from "../../server";
-import User from "../../models/user-model";
-import { Express } from "express";
 
-let server: Express;
+jest.mock("../../models/user-model");
 
-beforeAll(async () => {
-    server = await startServer();
-    await User.deleteMany({});
+describe("UserController Endpoints", () => {
+  const userId = new mongoose.Types.ObjectId().toString();
 
-  await User.create({
-    _id: "674f67127726eba2d7318eb8",
-    email: "gal1@gmail.com",
-    password: "123456",
-    firstName: "Gal",
-    lastName: "Cohen",
-    address: "Tel Aviv",
-    type: "user",
-    favoriteGyms: [],
-    avatarUrl: "img.jpg",
-  });
-  await User.create({
-    _id: "674f67127726eba2d7318eb4",
-    email: "ron1111@gmail.com",
-    password: "123456",
-    firstName: "ron",
-    lastName: "Cohen",
-    address: "Tel Aviv",
-    type: "gym_owner",
-    favoriteGyms: [],
-    avatarUrl: "img.jpg",
-    gymOwnerLicenseImage: "owner.jpg",
-  });
+  describe("GET /users/gymOwner/:userId", () => {
+    it("should return 200 and the user data for a gym owner", async () => {
+      const mockGymOwner = {
+        _id: userId,
+        email: "gymowner@example.com",
+        password: "123456",
+        firstName: "Gym",
+        lastName: "Owner",
+        address: "Somewhere",
+        type: "gym_owner",
+        favoriteGyms: [],
+        avatarUrl: "gym-owner.jpg",
+      };
 
-});
+      (User.findById as jest.Mock).mockResolvedValue(mockGymOwner);
 
-afterAll(async () => {
-  await mongoose.connection.close();
-});
+      const response = await request(app).get(`/users/gymOwner/${userId}`);
 
-const user = {
-    email: "gal1111@gmail.com",
-    password: "123456",
-    firstName: "Gal",
-    lastName: "Cohen",
-    address: "Tel Aviv",
-    type: "user",
-    favoriteGyms: [],
-    avatarUrl: "img.jpg",
-}
-
-const gymOwner = {
-    email: "ron1111@gmail.com",
-    password: "123456",
-    firstName: "ron",
-    lastName: "Cohen",
-    address: "Tel Aviv",
-    type: "gym_owner",
-    favoriteGyms: [],
-    avatarUrl: "img.jpg",
-    gymOwnerLicenseImage: "owner.jpg",
-}
-
-
-describe("All user test", () => {
-
-    test("Should get user by id", async () => {
-        const res = await request(server)
-            .get("/users/user/674f67127726eba2d7318eb8")
-            .expect(200);
-        expect(res.body.type).toBe("user");
-        expect(res.body.email).toBe("gal1@gmail.com");
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("email", "gymowner@example.com");
+      expect(response.body.type).toBe("gym_owner");
     });
 
-    test("Should get gym owner by id", async () => {
-        const res = await request(server)
-            .get("/users/gymOwner/674f67127726eba2d7318eb4")
-            .expect(200);
-        expect(res.body.type).toBe("gym_owner");
-        expect(res.body.email).toBe("ron1111@gmail.com");
+    it("should return 404 if user is not found", async () => {
+      (User.findById as jest.Mock).mockResolvedValue(null);
+
+      const response = await request(app).get(`/users/gymOwner/${userId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe("User not found");
     });
-   
-})
- 
 
+    it("should return 403 if the user is not a gym owner", async () => {
+      const mockUser = {
+        _id: userId,
+        email: "user@example.com",
+        password: "123456",
+        firstName: "Regular",
+        lastName: "User",
+        address: "Somewhere",
+        type: "user",
+        favoriteGyms: [],
+        avatarUrl: "user.jpg",
+      };
 
+      (User.findById as jest.Mock).mockResolvedValue(mockUser);
 
+      const response = await request(app).get(`/users/gymOwner/${userId}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body.message).toBe("Unauthorized: Not a GYM_OWNER");
+    });
+
+    it("should return 500 if there is a server error", async () => {
+      (User.findById as jest.Mock).mockRejectedValue(new Error("Server error"));
+
+      const response = await request(app).get(`/users/gymOwner/${userId}`);
+
+      expect(response.status).toBe(500);
+      expect(response.body.message).toBe("Server error");
+    });
+  });
+
+  describe("GET /users/user/:userId", () => {
+    it("should return 200 and the user data for a regular user", async () => {
+      const mockUser = {
+        _id: userId,
+        email: "user@example.com",
+        password: "123456",
+        firstName: "Regular",
+        lastName: "User",
+        address: "Somewhere",
+        type: "user",
+        favoriteGyms: [],
+        avatarUrl: "user.jpg",
+      };
+
+      (User.findById as jest.Mock).mockResolvedValue(mockUser);
+
+      const response = await request(app).get(`/users/user/${userId}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("email", "user@example.com");
+      expect(response.body.type).toBe("user");
+    });
+
+    it("should return 404 if user is not found", async () => {
+      (User.findById as jest.Mock).mockResolvedValue(null);
+
+      const response = await request(app).get(`/users/user/${userId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe("User not found");
+    });
+
+    it("should return 403 if the user is not a regular user", async () => {
+      const mockGymOwner = {
+        _id: userId,
+        email: "gymowner@example.com",
+        password: "123456",
+        firstName: "Gym",
+        lastName: "Owner",
+        address: "Somewhere",
+        type: "gym_owner",
+        favoriteGyms: [],
+        avatarUrl: "gym-owner.jpg",
+      };
+
+      (User.findById as jest.Mock).mockResolvedValue(mockGymOwner);
+
+      const response = await request(app).get(`/users/user/${userId}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body.message).toBe("Unauthorized: Not a USER");
+    });
+
+    it("should return 500 if there is a server error", async () => {
+      (User.findById as jest.Mock).mockRejectedValue(new Error("Server error"));
+
+      const response = await request(app).get(`/users/user/${userId}`);
+
+      expect(response.status).toBe(500);
+      expect(response.body.message).toBe("Server error");
+    });
+  });
+});

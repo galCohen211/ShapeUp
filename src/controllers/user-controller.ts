@@ -6,115 +6,117 @@ import { validationResult } from "express-validator";
 import User, { IUserType } from "../models/user-model";
 
 class UserController {
-    static async updateUser(req: Request, res: Response): Promise<void> {
-        const { password, firstName, lastName, address } = req.body;
-        const { userId } = req.params;
+  static async updateUser(req: Request, res: Response): Promise<void> {
+    const { password, firstName, lastName, address } = req.body;
+    const { userId } = req.params;
 
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            res.status(400).json({ errors: errors.array() });
-            return;
-        }
-
-        const avatar = req.files && "avatar" in req.files
-            ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
-
-        try {
-            const user = await User.findById(userId);
-
-            if (!user) {
-                res.status(404).json({ message: "User not found" });
-                return;
-            }
-
-            // Handle avatar replacement
-            let avatarUrl = user.avatarUrl;
-            if (avatar) {
-                UserController.deleteOldAvatar(user.avatarUrl); 
-                avatarUrl = `/uploads/${avatar.filename}`;
-            }
-
-            // Update user fields
-            if (firstName) user.firstName = firstName;
-            if (lastName) user.lastName = lastName;
-            if (address) user.address = address;
-            if (avatarUrl) user.avatarUrl = avatarUrl;
-
-            if (password) {
-                const salt = await bcrypt.genSalt(10);
-                user.password = await bcrypt.hash(password, salt);
-            }
-
-            await user.save();
-
-            res.status(200).json({ message: "User details updated successfully", user });
-        } catch (error) {
-            console.error("Error updating user:", error);
-            res.status(500).json({ message: "Internal server error" });
-        }
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+      return;
     }
 
-    static deleteOldAvatar(avatarUrl?: string): void {
-        if (!avatarUrl) return;
+    const avatar =
+      req.files && "avatar" in req.files
+        ? (req.files["avatar"] as Express.Multer.File[])[0]
+        : null;
 
-        // Construct the full path to the avatar file on the server
-        const oldAvatarPath = path.resolve(
-            __dirname,  
-            "../..",  
-            "src",  
-            "uploads",  
-            path.basename(avatarUrl)  
-        );
-        if (fs.existsSync(oldAvatarPath)) {
-            fs.unlinkSync(oldAvatarPath);
-        }
+    try {
+      const user = await User.findById(userId);
+
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+
+      // Handle avatar replacement
+      let avatarUrl = user.avatarUrl;
+      if (avatar) {
+        UserController.deleteOldAvatar(user.avatarUrl);
+        avatarUrl = `/uploads/${avatar.filename}`;
+      }
+
+      // Update user fields
+      if (firstName) user.firstName = firstName;
+      if (lastName) user.lastName = lastName;
+      if (address) user.address = address;
+      if (avatarUrl) user.avatarUrl = avatarUrl;
+
+      if (password) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+      }
+
+      await user.save();
+
+      res
+        .status(200)
+        .json({ message: "User details updated successfully", user });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
+  }
 
-    static async getByIdGymOwner(req: Request, res: Response): Promise<void> {
-        const { userId } = req.params;
+  static deleteOldAvatar(avatarUrl?: string): void {
+    if (!avatarUrl) return;
 
-        try {
-            const user = await User.findById(userId);
-
-            if (!user) {
-                res.status(404).json({ message: "User not found" });
-                return;
-            }
-
-            if (user.type !== "gym_owner") {
-                res.status(403).json({ message: "Unauthorized: Not a GYM_OWNER" });
-                return;
-            }
-
-            res.status(200).json(user);
-        } catch (error) {
-            console.error("Error fetching gym owner by ID:", error);
-            res.status(500).json({ message: "Server error" });
-        }
+    // Construct the full path to the avatar file on the server
+    const oldAvatarPath = path.resolve(
+      __dirname,
+      "../..",
+      "src",
+      "uploads",
+      path.basename(avatarUrl)
+    );
+    if (fs.existsSync(oldAvatarPath)) {
+      fs.unlinkSync(oldAvatarPath);
     }
+  }
 
-    static async getByIdUser(req: Request, res: Response): Promise<void> {
-        const { userId } = req.params;
+  static async getByIdGymOwner(req: Request, res: Response): Promise<void> {
+    const { userId } = req.params;
 
-        try {
-            const user = await User.findById(userId);
+    try {
+      const user = await User.findById(userId);
 
-            if (!user) {
-                res.status(404).json({ message: "User not found" });
-                return;
-            }
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
 
-            if (user.type !== "user") {
-                res.status(403).json({ message: "Unauthorized: Not a USER" });
-                return;
-            }
+      if (user.type !== "gym_owner") {
+        res.status(403).json({ message: "Unauthorized: Not a GYM_OWNER" });
+        return;
+      }
 
-            res.status(200).json(user);
-        } catch (error) {
-            console.error("Error fetching user by ID:", error);
-            res.status(500).json({ message: "Server error" });
-        }
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
     }
+  }
+
+  static async getByIdUser(req: Request, res: Response): Promise<void> {
+    const { userId } = req.params;
+
+    try {
+      const user = await User.findById(userId);
+
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+
+      if (user.type !== "user") {
+        res.status(403).json({ message: "Unauthorized: Not a USER" });
+        return;
+      }
+
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  }
 }
 
 export default UserController;
