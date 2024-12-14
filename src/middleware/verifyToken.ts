@@ -6,6 +6,7 @@ import { TokenPayload } from "../types/auth.types";
 
 
 const verifyToken = (allowedRoles: Array<IUserType>) => {
+    console.log("HI");
     return (req: Request, res: Response, next: NextFunction): void => {
         const token = req.cookies.access_token;
         if (!token) {
