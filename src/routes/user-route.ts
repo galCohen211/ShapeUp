@@ -12,12 +12,12 @@ const userRouter = Router();
 
 // Get gym owner by id
 userRouter.get(
-  "/gymOwner/:userId",UserController.getByIdGymOwner
+  "/gymOwner/:userId", UserController.getByIdGymOwner
 );
 
 // Get user by id
 userRouter.get(
-  "/user/:userId",UserController.getByIdUser
+  "/user/:userId", UserController.getByIdUser
 );
 
 function isLoggedIn(req: Request, res: Response, next: any): void {
@@ -71,16 +71,16 @@ userRouter.post("/login",
     login(req, res);
   });
 
-userRouter.post("/logout", 
+userRouter.post("/logout",
   (req: Request, res: Response) => {
     logout(req, res);
   });
 
-  userRouter.put("/updateUser/:userId", upload.fields([{ name: "avatar", maxCount: 1 }]), verifyToken([IUserType.GYM_OWNER, IUserType.USER]),
+userRouter.put("/updateUser/:userId", upload.fields([{ name: "avatar", maxCount: 1 }]), verifyToken([IUserType.GYM_OWNER, IUserType.USER]),
   [
     param("userId")
-    .notEmpty().withMessage("User ID is required.")
-    .isMongoId().withMessage("User ID must be a valid MongoDB ObjectId."),
+      .notEmpty().withMessage("User ID is required.")
+      .isMongoId().withMessage("User ID must be a valid MongoDB ObjectId."),
     body("password").optional(),
     body("firstName").optional().isString(),
     body("lastName").optional().isString(),
