@@ -4,7 +4,8 @@ import cors from "cors";
 import passport from "passport";
 import session from "express-session";
 import cookieParser from "cookie-parser";
-
+import { Server as SocketIOServer } from 'socket.io';
+import { initChat } from "./chat/chat-server";
 import "./controllers/auth-controller";
 import initRouter from "./routes/init-route";
 import GymRouter from "./routes/gym-route"
@@ -24,6 +25,8 @@ app.use(cookieParser());
 
 // Access variables using process.env
 const PORT = process.env.PORT || 3000;
+const socketIOServer = new SocketIOServer({ path: '/users-chat', cors: {origin: '*'} });
+initChat(socketIOServer)
 app.use(cors());
 app.use("/init", initRouter);
 app.use("/gyms", GymRouter);

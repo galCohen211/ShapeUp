@@ -3,6 +3,7 @@ import path from "path";
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
+import {getMessagesBetweenTwoUsers} from "../chat/chat-logic";
 
 
 import User from "../models/user-model";
@@ -70,6 +71,14 @@ class UserController {
         if (fs.existsSync(oldAvatarPath)) {
             fs.unlinkSync(oldAvatarPath);
         }
+    }
+
+    static async GetUserChats(req: Request, res: Response): Promise<void> {
+        const {userId1, userId2} = req.query;
+    
+        const chat = await getMessagesBetweenTwoUsers([userId1 as string, userId2 as string]);
+    
+        res.status(200).send(chat);
     }
 }
 
