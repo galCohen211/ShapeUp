@@ -71,6 +71,7 @@ describe("All user test", () => {
             .get("/users/user/674f67127726eba2d7318eb8")
             .expect(200);
         expect(res.body.type).toBe("user");
+        expect(res.body.email).toBe("gal1@gmail.com");
     });
 
     test("Should get gym owner by id", async () => {
@@ -78,6 +79,7 @@ describe("All user test", () => {
             .get("/users/gymOwner/674f67127726eba2d7318eb4")
             .expect(200);
         expect(res.body.type).toBe("gym_owner");
+        expect(res.body.email).toBe("ron1111@gmail.com");
     });
    
 })
