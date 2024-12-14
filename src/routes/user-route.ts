@@ -10,14 +10,9 @@ import UserController from "../controllers/user-controller";
 
 const userRouter = Router();
 
-// Get gym owner by id
 userRouter.get(
-  "/gymOwner/:userId",UserController.getByIdGymOwner
-);
-
-// Get user by id
-userRouter.get(
-  "/user/:userId",UserController.getByIdUser
+  "/user/:userId",UserController.getByIdUser,
+  [body("type").notEmpty().isString().withMessage("Type is required and must be a string")]
 );
 
 function isLoggedIn(req: Request, res: Response, next: any): void {

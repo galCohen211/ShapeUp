@@ -74,28 +74,6 @@ class UserController {
     }
   }
 
-  static async getByIdGymOwner(req: Request, res: Response): Promise<void> {
-    const { userId } = req.params;
-
-    try {
-      const user = await User.findById(userId);
-
-      if (!user) {
-        res.status(404).json({ message: "User not found" });
-        return;
-      }
-
-      if (user.type !== "gym_owner") {
-        res.status(403).json({ message: "Unauthorized: Not a GYM_OWNER" });
-        return;
-      }
-
-      res.status(200).json(user);
-    } catch (error) {
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-
   static async getByIdUser(req: Request, res: Response): Promise<void> {
     const { userId } = req.params;
 
@@ -107,10 +85,10 @@ class UserController {
         return;
       }
 
-      if (user.type !== "user") {
-        res.status(403).json({ message: "Unauthorized: Not a USER" });
+      if (user.type !== "user" && user.type !== "gym_owner") { 
+        res.status(403).json({ message: "Unauthorized: Not a USER or GYM-OWNER" });
         return;
-      }
+    }
 
       res.status(200).json(user);
     } catch (error) {
