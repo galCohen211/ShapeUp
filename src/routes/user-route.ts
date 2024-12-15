@@ -2,13 +2,22 @@ import { Request, Response, Router } from "express";
 import passport from "passport";
 import { body, query, param } from "express-validator";
 
-import { signup, login, getFromCookie } from "../controllers/auth-controller"
+import { signup, login, getFromCookie, logout } from "../controllers/auth-controller"
 import { IUserType } from "../models/user-model";
 import verifyToken from "../middleware/verifyToken";
 import upload from "../multer";
 import UserController from "../controllers/user-controller";
 
 const userRouter = Router();
+
+userRouter.get(
+  "/user/:userId", UserController.getUserById,
+  [param("userId")
+    .notEmpty()
+    .withMessage("User ID is required.")
+    .isMongoId()
+    .withMessage("User ID must be a valid MongoDB ObjectId."),]
+);
 
 function isLoggedIn(req: Request, res: Response, next: any): void {
   req.user ? next() : res.sendStatus(401);
@@ -36,18 +45,6 @@ userRouter.get("/auth/google/protected", isLoggedIn, (req: any, res) => {
   res.send(`Hello ${req.user.email}`);
 });
 
-userRouter.get("/auth/google/logout", (req: Request, res: Response) => {
-  req.logout((err) => {
-    if (err) {
-      console.error(err);
-      return res.sendStatus(500);
-    }
-    req.session.destroy(() => {
-      res.send("Goodbye!");
-    });
-  });
-});
-
 userRouter.get("/auth/google/failure", (req: Request, res: Response) => {
   res.send("Failed to authenticate");
 });
@@ -73,11 +70,16 @@ userRouter.post("/login",
     login(req, res);
   });
 
-  userRouter.put("/updateUser/:userId", upload.fields([{ name: "avatar", maxCount: 1 }]), verifyToken([IUserType.GYM_OWNER, IUserType.USER]),
+userRouter.post("/logout",
+  (req: Request, res: Response) => {
+    logout(req, res);
+  });
+
+userRouter.put("/updateUser/:userId", upload.fields([{ name: "avatar", maxCount: 1 }]), verifyToken([IUserType.GYM_OWNER, IUserType.USER]),
   [
     param("userId")
-    .notEmpty().withMessage("User ID is required.")
-    .isMongoId().withMessage("User ID must be a valid MongoDB ObjectId."),
+      .notEmpty().withMessage("User ID is required.")
+      .isMongoId().withMessage("User ID must be a valid MongoDB ObjectId."),
     body("password").optional(),
     body("firstName").optional().isString(),
     body("lastName").optional().isString(),
@@ -85,6 +87,7 @@ userRouter.post("/login",
   ],
   UserController.updateUser
 );
+
 
 
 export default userRouter;

@@ -276,4 +276,16 @@ export const getFromCookie = async (req: Request, res: Response, property: strin
   }
 }
 
+// Logout 
+export const logout = (req: Request, res: Response) => {
+  try {
+    res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
+    return res.status(200).send({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 export default passport;
