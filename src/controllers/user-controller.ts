@@ -85,10 +85,10 @@ class UserController {
         return;
       }
 
-      if (user.type !== IUserType.USER && user.type !== IUserType.GYM_OWNER) { 
+      if (user.type !== IUserType.USER && user.type !== IUserType.GYM_OWNER) {
         res.status(403).json({ message: "Unauthorized: Not a USER or GYM-OWNER" });
         return;
-    }
+      }
 
       res.status(200).json(user);
     } catch (error) {

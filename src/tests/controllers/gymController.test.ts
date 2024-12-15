@@ -125,7 +125,7 @@ describe("GymController Endpoints", () => {
 jest.mock('../../middleware/verifyToken.ts', () => ({
   __esModule: true,
   default: jest.fn(() => (req: any, res: any, next: any) => {
-    req.user = { id: "mocked-user-id", type: "gym_owner" }; 
+    req.user = { id: "mocked-user-id", type: "gym_owner" };
     next();
   }),
 }));
@@ -178,7 +178,7 @@ describe("DELETE /gyms/:gymId", () => {
       _id: gymId,
       owner: gymOwnerId,
     };
-    const loggedInUserId = new mongoose.Types.ObjectId(); 
+    const loggedInUserId = new mongoose.Types.ObjectId();
 
     (Gym.findById as jest.Mock).mockResolvedValue(existingGym);
 

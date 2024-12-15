@@ -11,7 +11,7 @@ import UserController from "../controllers/user-controller";
 const userRouter = Router();
 
 userRouter.get(
-  "/user/:userId",UserController.getUserById,
+  "/user/:userId", UserController.getUserById,
   [param("userId")
     .notEmpty()
     .withMessage("User ID is required.")
