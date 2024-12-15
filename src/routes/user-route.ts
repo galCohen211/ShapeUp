@@ -12,7 +12,11 @@ const userRouter = Router();
 
 userRouter.get(
   "/user/:userId",UserController.getUserById,
-  [body("type").notEmpty().isString().withMessage("Type is required and must be a string")]
+  [param("userId")
+    .notEmpty()
+    .withMessage("User ID is required.")
+    .isMongoId()
+    .withMessage("User ID must be a valid MongoDB ObjectId."),]
 );
 
 function isLoggedIn(req: Request, res: Response, next: any): void {
