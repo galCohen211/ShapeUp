@@ -1,4 +1,4 @@
-import Gym, { IGym } from "../models/gym-model";
+import Gym from "../models/gym-model";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import mongoose from "mongoose";
@@ -191,8 +191,8 @@ class GymController {
                 return;
             }
 
-            await Gym.findByIdAndDelete(gymId);
             if (gym.pictures) {
+                await Gym.findByIdAndDelete(gymId);
                 gym.pictures.forEach((image) => {
                     const imagePath = path.join(
                         __dirname,

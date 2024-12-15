@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../../server";
-import User from "../../models/user-model"; // Update this import based on your project structure
+import User from "../../models/user-model"; 
 import mongoose from "mongoose";
 
 jest.mock("../../models/user-model");

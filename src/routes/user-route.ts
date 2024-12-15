@@ -11,7 +11,7 @@ import UserController from "../controllers/user-controller";
 const userRouter = Router();
 
 userRouter.get(
-  "/user/:userId",UserController.getByIdUser,
+  "/user/:userId",UserController.getUserById,
   [body("type").notEmpty().isString().withMessage("Type is required and must be a string")]
 );
 

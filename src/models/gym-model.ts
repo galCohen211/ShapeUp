@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
-export interface IGym extends Document {
+interface IGym extends Document {
   _id: Types.ObjectId;
   name: string;
   pictures: string[];

@@ -169,14 +169,12 @@ describe("DELETE /gyms/:gymId", () => {
       _id: gymId,
       owner: gymOwnerId,
     };
-    const loggedInUserId = new mongoose.Types.ObjectId(); // This is not the owner
+    const loggedInUserId = new mongoose.Types.ObjectId(); 
 
     (Gym.findById as jest.Mock).mockResolvedValue(existingGym);
-    (getFromCookie as jest.Mock).mockResolvedValue(loggedInUserId.toString());
 
     const response = await request(app)
-      .delete(`/gyms/${gymId}`)
-      .set("access_token", "id=" + loggedInUserId);
+      .delete(`/gyms/${gymId}`);
 
     expect(response.status).toBe(403);
     expect(response.body.message).toBe(

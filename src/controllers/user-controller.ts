@@ -74,7 +74,7 @@ class UserController {
     }
   }
 
-  static async getByIdUser(req: Request, res: Response): Promise<void> {
+  static async getUserById(req: Request, res: Response): Promise<void> {
     const { userId } = req.params;
 
     try {
@@ -85,7 +85,7 @@ class UserController {
         return;
       }
 
-      if (user.type !== "user" && user.type !== "gym_owner") { 
+      if (user.type !== IUserType.USER && user.type !== IUserType.GYM_OWNER) { 
         res.status(403).json({ message: "Unauthorized: Not a USER or GYM-OWNER" });
         return;
     }
