@@ -65,6 +65,6 @@ router.get(
     GymController.getMyGyms
 );
 
-router.delete("/:gymId", GymController.deleteGym);
+router.delete("/:gymId",verifyToken([IUserType.GYM_OWNER]), GymController.deleteGym);
 
 export default router;

@@ -121,6 +121,15 @@ describe("GymController Endpoints", () => {
   });
 });
 
+// This mock replaces the original `verifyToken` function
+jest.mock('../../middleware/verifyToken.ts', () => ({
+  __esModule: true,
+  default: jest.fn(() => (req: any, res: any, next: any) => {
+    req.user = { id: "mocked-user-id", type: "gym_owner" }; 
+    next();
+  }),
+}));
+
 describe("DELETE /gyms/:gymId", () => {
   it("should delete gym successfully", async () => {
     const gymId = new mongoose.Types.ObjectId().toString();
