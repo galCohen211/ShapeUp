@@ -78,6 +78,7 @@ export const signup = async (req: Request, res: Response) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log("1")
     res.status(400).json({ errors: errors.array() });
     return;
   }
@@ -93,7 +94,8 @@ export const signup = async (req: Request, res: Response) => {
     ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
 
   if (!avatar) {
-    return res.status(400).send("Please upload an avatar");
+    console.log("2")
+    return res.status(400).json({error: "Please upload an avatar"});
   }
 
   const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
@@ -111,6 +113,7 @@ export const signup = async (req: Request, res: Response) => {
     });
 
     if (result.message) {
+      console.log("3")
       return res.status(400).json({ message: result.message });
     }
 

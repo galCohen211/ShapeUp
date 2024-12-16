@@ -2,6 +2,8 @@ import request from "supertest";
 import app from "../../server";
 import User from "../../models/user-model";
 import mongoose from "mongoose";
+import path from "path";
+
 
 jest.mock("../../models/user-model");
 
@@ -94,4 +96,32 @@ describe("UserController Endpoints", () => {
       expect(response.body.message).toBe("Unauthorized: Not a USER or GYM-OWNER");
     });
   });
+  describe("POST /signup", () => {
+    it("should return 201 user created successfully", async () => {
+
+      (User.prototype.save as jest.Mock).mockResolvedValue({
+        _id: new mongoose.Types.ObjectId(),
+        email: "johndoe123@gmail.com",
+        password: "12345",
+        firstName: "John",
+        lastName: "Doe",
+        address: "ono",
+        avatar: ["http://localhost/uploads/test-image1.jpg"]
+      });
+
+      const response = await request(app)
+        .post("/users/signup")
+        .field("email", "johndoe123@gmail.com")
+        .field("password", "12345")
+        .field("firstName", "John")
+        .field("lastName", "Doe")
+        .field("address", "ono")
+        .attach("avatar", Buffer.from("image content"), "test-image1.jpg");
+
+      expect(response.status).toBe(201);
+      expect(response.body.message).toBe("User registered successfully");
+      expect(response.body.email).toBe("johndoe123@gmail.com");
+    });
+  });
+
 });
