@@ -1,6 +1,9 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
+
 import app from "../../server";
 import User from "../../models/user-model";
 
@@ -8,6 +11,26 @@ jest.mock("../../models/user-model");
 
 describe("UserController Endpoints", () => {
   const userId = new mongoose.Types.ObjectId().toString();
+
+  // images cleanup
+  const uploadsDir = path.join(__dirname, "../../uploads");
+  const testImages: string[] = [];
+
+  afterAll(async () => {
+    await mongoose.disconnect();
+    testImages.forEach((testImage) => {
+      const filePattern = new RegExp(
+        `${testImage.replace(/\.[^/.]+$/, "")}-.*\\.(png|jpg|jpeg)$`
+      );
+      const files = fs.readdirSync(uploadsDir);
+      const matchedFile = files.find((file) => filePattern.test(file));
+
+      if (matchedFile) {
+        const filePath = path.join(uploadsDir, matchedFile);
+        fs.unlinkSync(filePath);
+      }
+    });
+  });
 
   describe("GET /users/user/:userId", () => {
     it("should return 200 and the user data for a gym owner", async () => {
@@ -121,6 +144,8 @@ describe("UserController Endpoints", () => {
       expect(response.status).toBe(201);
       expect(response.body.message).toBe("User registered successfully");
       expect(response.body.email).toBe("johndoe123@gmail.com");
+
+      testImages.push("test-image1.jpg");
     });
   });
 
