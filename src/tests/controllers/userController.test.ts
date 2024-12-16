@@ -124,4 +124,32 @@ describe("UserController Endpoints", () => {
     });
   });
 
-});
+  describe("POST /login", () => {
+    it("should login an existing user with correct credentials", async () => {
+      const mockUser = {
+        _id: new mongoose.Types.ObjectId(),
+        email: "test@example.com",
+        password: "$2a$10$KIXK1m.kjG1Y7P6b1Fl5kuN4xLrQk5O44v8xR7dsb/EKkN4NCAXSi", // bcrypt hash for "password123"
+        firstName: "Test",
+        lastName: "User",
+        address: "123 Test Street",
+        type: "USER",
+        avatarUrl: "http://example.com/avatar.jpg",
+      };
+      User.findOne = jest.fn().mockResolvedValue(mockUser);
+      const bcrypt = require("bcryptjs");
+      bcrypt.compare = jest.fn().mockResolvedValue(true); // Password match
+
+      const response = await request(app)
+        .post("/users/login")
+        .send({
+          email: "test@example.com",
+          password: "password123",
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.token).toBeDefined();
+      expect(response.body.email).toBe("test@example.com");
+    });
+
+  });
