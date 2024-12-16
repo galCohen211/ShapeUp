@@ -8,8 +8,7 @@
     "start:prod": "cross-env NODE_ENV=production node dist/server.js",
     "build": "tsc",
     "test:win": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform=\"^.+\\.(ts|tsx)$\":babel-jest --verbose --detectOpenHandles",
-    "test:mac": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform='^.+\\.(ts|tsx)$'=babel-jest",
-    "test:mac:gym": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform='^.+\\.(ts|tsx)$'=babel-jest gymController.test.ts"
+    "test:mac": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform='^.+\\.(ts|tsx)$'=babel-jest"
 
   },
   "author": "Gal & Or & Yoni & Oriya",

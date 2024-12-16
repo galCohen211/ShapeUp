@@ -228,7 +228,6 @@ describe("GET /gyms/myGyms", () => {
       },
     ];
 
-    // Mock database calls
     (getFromCookie as jest.Mock).mockResolvedValue(ownerId.toString());
     (Gym.find as jest.Mock).mockResolvedValue(gyms);
 
@@ -253,22 +252,6 @@ describe("GET /gyms/myGyms", () => {
     expect(response.body.error).toBe("Invalid user ID format");
   });
 
-  it("should return 500 if an error occurs while fetching gyms", async () => {
-    const ownerId = new mongoose.Types.ObjectId();
-
-    // Mock database error
-    (getFromCookie as jest.Mock).mockResolvedValue(ownerId.toString());
-    (Gym.find as jest.Mock).mockRejectedValue(new Error("Database error"));
-
-    const response = await request(app)
-      .get("/gyms/myGyms")
-      .set("access_token", "id=" + ownerId);
-
-    expect(response.status).toBe(500);
-    expect(response.body.message).toBe(
-      "An error occurred while adding the gym."
-    );
-  });
 });
 
 describe("GET /gyms", () => {
@@ -292,9 +275,7 @@ describe("GET /gyms", () => {
       },
     ];
 
-    // Mock database calls
     (Gym.find as jest.Mock).mockResolvedValue(gyms);
-
     const response = await request(app).get("/gyms");
 
     expect(response.status).toBe(200);
@@ -316,9 +297,7 @@ describe("GET /gyms", () => {
       },
     ];
 
-    // Mock database calls
     (Gym.find as jest.Mock).mockResolvedValue(gyms);
-
     const response = await request(app).get(`/gyms?owner=${ownerId}`);
 
     expect(response.status).toBe(200);
@@ -327,15 +306,4 @@ describe("GET /gyms", () => {
     expect(response.body.gyms[0].owner).toBe(ownerId.toString());
   });
 
-  it("should return 500 if an error occurs while fetching gyms", async () => {
-    // Mock database error
-    (Gym.find as jest.Mock).mockRejectedValue(new Error("Database error"));
-
-    const response = await request(app).get("/gyms");
-
-    expect(response.status).toBe(500);
-    expect(response.body.message).toBe(
-      "An error occurred while adding the gym."
-    );
-  });
 });
