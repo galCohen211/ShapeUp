@@ -1,9 +1,8 @@
 import request from "supertest";
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 import app from "../../server";
 import User from "../../models/user-model";
-import mongoose from "mongoose";
-import path from "path";
-
 
 jest.mock("../../models/user-model");
 
@@ -96,6 +95,7 @@ describe("UserController Endpoints", () => {
       expect(response.body.message).toBe("Unauthorized: Not a USER or GYM-OWNER");
     });
   });
+
   describe("POST /signup", () => {
     it("should return 201 user created successfully", async () => {
 
@@ -105,7 +105,7 @@ describe("UserController Endpoints", () => {
         password: "12345",
         firstName: "John",
         lastName: "Doe",
-        address: "ono",
+        address: "First street",
         avatar: ["http://localhost/uploads/test-image1.jpg"]
       });
 
@@ -115,7 +115,7 @@ describe("UserController Endpoints", () => {
         .field("password", "12345")
         .field("firstName", "John")
         .field("lastName", "Doe")
-        .field("address", "ono")
+        .field("address", "First street")
         .attach("avatar", Buffer.from("image content"), "test-image1.jpg");
 
       expect(response.status).toBe(201);
@@ -125,31 +125,74 @@ describe("UserController Endpoints", () => {
   });
 
   describe("POST /login", () => {
-    it("should login an existing user with correct credentials", async () => {
-      const mockUser = {
-        _id: new mongoose.Types.ObjectId(),
-        email: "test@example.com",
-        password: "$2a$10$KIXK1m.kjG1Y7P6b1Fl5kuN4xLrQk5O44v8xR7dsb/EKkN4NCAXSi", // bcrypt hash for "password123"
-        firstName: "Test",
-        lastName: "User",
-        address: "123 Test Street",
-        type: "USER",
-        avatarUrl: "http://example.com/avatar.jpg",
-      };
+
+    const mockUser = {
+      _id: new mongoose.Types.ObjectId(),
+      email: "johndoe123@gmail.com",
+      password: "$2b$12$kiwSU0JHcdsDVJLOxDD2AekohHwS5RVU8E5wZerlnFE7/Jibvr10W", // bcrypt for 12345
+      firstName: "John",
+      lastName: "Doe",
+      address: "First Street",
+      type: "USER",
+      avatarUrl: "http://example.com/avatar.jpg",
+    };
+
+    it("should login an existing user with correct credentials and return 200", async () => {
       User.findOne = jest.fn().mockResolvedValue(mockUser);
-      const bcrypt = require("bcryptjs");
-      bcrypt.compare = jest.fn().mockResolvedValue(true); // Password match
+      bcrypt.compare = jest.fn().mockResolvedValue(true); // check if password match
+
+      const response = await request(app)
+        .post("/users/login")
+        .send({
+          email: "johndoe123@gmail.com",
+          password: "12345",
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.token).toBeDefined();
+      expect(response.body.email).toBe("johndoe123@gmail.com");
+    });
+
+    it("should return 401 for incorrect password", async () => {
+      User.findOne = jest.fn().mockResolvedValue(mockUser);
+      bcrypt.compare = jest.fn().mockResolvedValue(false); // Password mismatch
 
       const response = await request(app)
         .post("/users/login")
         .send({
           email: "test@example.com",
-          password: "password123",
+          password: "wrongpassword",
         });
 
-      expect(response.status).toBe(200);
-      expect(response.body.token).toBeDefined();
-      expect(response.body.email).toBe("test@example.com");
+      expect(response.status).toBe(401);
+      expect(response.text).toBe("Wrong email or password");
     });
 
+    it("should return 401 if user does not exist", async () => {
+      User.findOne = jest.fn().mockResolvedValue(null);
+
+      const response = await request(app)
+        .post("/users/login")
+        .send({
+          email: "idontexist@gmail.com",
+          password: "12345",
+        });
+
+      expect(response.status).toBe(401);
+      expect(response.text).toBe("Wrong email or password");
+    });
+
+    it("should return 400 if required fields are missing", async () => {
+      const response = await request(app)
+        .post("/users/login")
+        .send({
+          email: "",
+          password: "",
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
   });
+
+});
