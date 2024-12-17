@@ -203,16 +203,16 @@ export const logout = async (req: Request, res: Response) => {
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
-    const user = await User.findOne({ id: decoded.id });
+    const user = await User.findOne({ _id: decoded.id });
     if (!user) {
       return res.status(400).json({ message: "Invalid refresh token" });
     }
 
     // If refreshTokens list doesn't include 'refreshToken', we clear the list (maybe a breach)
     if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
-      user.refreshTokens = [""];
+      user.refreshTokens = [];
       await user.save();
-      res.status(400).json({ message: "Invalid refresh token" });
+      return res.status(400).json({ message: "Invalid refresh token" });
     }
 
     // remove 'refreshToken' from refreshTokens list 
@@ -230,7 +230,7 @@ export const logout = async (req: Request, res: Response) => {
 export const refresh = async (req: Request, res: Response) => {
   const refreshToken = req.body.refreshToken;
   if (!refreshToken) {
-    res.status(400).json({ message: "Access token not found" });
+    res.status(400).json({ message: "Refresh token not found" });
     return;
   }
 
@@ -240,15 +240,15 @@ export const refresh = async (req: Request, res: Response) => {
 
   const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
   try {
-    const user = await User.findOne({ id: decoded.id });
+    const user = await User.findOne({ _id: decoded.id });
     if (!user) {
-      return res.status(400).json({ message: "invalid token" });
+      return res.status(400).json({ message: "Invalid token" });
     }
 
     if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
       user.refreshTokens = [""];
       await user.save();
-      res.status(400).json({ message: "invalid token" });
+      res.status(400).json({ message: "Invalid token" });
       return;
     }
 
@@ -267,12 +267,20 @@ export const refresh = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Missing auth configuration (no refresh token)" });
     }
     const newAccessToken = result.accessToken;
+
+    res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
+    res.cookie("access_token", newAccessToken, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 1000 // 1 hour
+    });
+
     const newRefreshToken = result.refreshToken;
     user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
     user.refreshTokens.push(newRefreshToken)
     await user.save();
 
     return res.status(200).send({
+      message: "New tokens generated",
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     });
