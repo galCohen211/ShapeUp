@@ -8,11 +8,9 @@ import fs from "fs";
 import { getFromCookie } from "./auth-controller";
 
 class GymController {
-
     // Add a new gym
     static async addGym(req: Request, res: Response): Promise<void> {
         try {
-
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 res.status(400).json({ errors: errors.array() });
@@ -23,12 +21,16 @@ class GymController {
             const owner = req.query.owner as string;
 
             if (!req.files || !(req.files as Express.Multer.File[]).length) {
-                res.status(400).json({ message: "Please upload at least one picture." });
+                res
+                    .status(400)
+                    .json({ message: "Please upload at least one picture." });
                 return;
             }
 
-            const pictures = (req.files as Express.Multer.File[]).map((file) =>
-                `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`);
+            const pictures = (req.files as Express.Multer.File[]).map(
+                (file) =>
+                    `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
+            );
             const amountOfReviews = 0;
 
             const newGym = new Gym({
@@ -47,14 +49,15 @@ class GymController {
                 gym: newGym,
             });
         } catch (error) {
-            res.status(500).json({ message: "An error occurred while adding the gym." });
+            res
+                .status(500)
+                .json({ message: "An error occurred while adding the gym." });
         }
     }
 
     // Edit gym details
     static async updateGym(req: Request, res: Response): Promise<void> {
         try {
-
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 res.status(400).json({ errors: errors.array() });
@@ -94,8 +97,9 @@ class GymController {
             // Handle new image uploads
             const files = req.files as { [fieldname: string]: Express.Multer.File[] };
             if (files && files["pictures"]) {
-                const newPictures = files["pictures"].map((file) =>
-                    `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+                const newPictures = files["pictures"].map(
+                    (file) =>
+                        `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
                 );
                 updatedPictures = pictures.concat(newPictures);
             } else {
@@ -115,10 +119,14 @@ class GymController {
                 new: true,
             });
 
-            res.status(200).json({ message: "Gym updated successfully", gym: updatedGym });
+            res
+                .status(200)
+                .json({ message: "Gym updated successfully", gym: updatedGym });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: "An error occurred while updating the gym" });
+            res
+                .status(500)
+                .json({ message: "An error occurred while updating the gym" });
         }
     }
 
@@ -140,13 +148,14 @@ class GymController {
                     return;
                 }
                 gyms = await Gym.find({ owner });
-            }
-            else {
+            } else {
                 gyms = await Gym.find();
             }
             res.status(200).json({ gyms });
         } catch (error) {
-            res.status(500).json({ message: "An error occurred while adding the gym." });
+            res
+                .status(500)
+                .json({ message: "An error occurred while adding the gym." });
         }
     }
 
@@ -160,9 +169,46 @@ class GymController {
             }
             gyms = await Gym.find({ owner: myUserId });
             res.status(200).json({ gyms });
+        } catch (error) {
+            res
+                .status(500)
+                .json({ message: "An error occurred while adding the gym." });
         }
-        catch (error) {
-            res.status(500).json({ message: "An error occurred while adding the gym." });
+    }
+
+    static async deleteGym(req: Request, res: Response): Promise<void> {
+        try {
+            const { gymId } = req.params;
+            const gym = await Gym.findById(gymId);
+            if (!gym) {
+                res.status(404).json({ message: "Gym not found" });
+                return;
+            }
+            if (gym.owner.toString() !== (await getFromCookie(req, res, "id"))) {
+                res.status(403).json({
+                    message: "Forbidden. You don't have access to this resource",
+                });
+                return;
+            }
+
+            if (gym.pictures) {
+                await Gym.findByIdAndDelete(gymId);
+                gym.pictures.forEach((image) => {
+                    const imagePath = path.join(
+                        __dirname,
+                        "../uploads",
+                        path.basename(image)
+                    );
+                    if (fs.existsSync(imagePath)) {
+                        fs.unlinkSync(imagePath);
+                    }
+                });
+            }
+            res.status(200).json({ message: "Gym deleted successfully" });
+        } catch (error) {
+            res
+                .status(500)
+                .json({ message: "An error occurred while deleting the gym." });
         }
     }
 }

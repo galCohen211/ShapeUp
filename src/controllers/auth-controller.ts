@@ -93,7 +93,7 @@ export const signup = async (req: Request, res: Response) => {
     ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
 
   if (!avatar) {
-    return res.status(400).send("Please upload an avatar");
+    return res.status(400).json({ error: "Please upload an avatar" });
   }
 
   const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
@@ -175,7 +175,6 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
       gymOwnerLicenseImage: gymOwnerLicenseImage
     }).save();
 
-    console.log("New user created: " + newUser);
     const result = generateJWT(newUser._id, newUser.email, newUser.type);
     return result;
   }
@@ -275,5 +274,17 @@ export const getFromCookie = async (req: Request, res: Response, property: strin
     res.status(400).json({ message: "Invalid token", error: error });
   }
 }
+
+// Logout 
+export const logout = (req: Request, res: Response) => {
+  try {
+    res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
+    return res.status(200).send({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 export default passport;
