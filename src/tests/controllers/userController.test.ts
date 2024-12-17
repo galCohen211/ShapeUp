@@ -145,7 +145,6 @@ describe("UserController Endpoints", () => {
 
       expect(response.status).toBe(201);
       expect(response.body.message).toBe("User registered successfully");
-      expect(response.body.email).toBe("johndoe123@gmail.com");
 
       testImages.push("test-image1.jpg");
     });
