@@ -36,8 +36,8 @@ passport.use(
           userType: IUserType.USER
         });
 
-        if ("token" in res) {
-          request.res?.cookie("access_token", res.token, {
+        if ("accessToken" in res) {
+          request.res?.cookie("access_token", res.accessToken, {
             httpOnly: true,
             maxAge: 60 * 60 * 1000 // 1 hour
           });
@@ -114,8 +114,10 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(400).json({ message: result.message });
     }
 
-    if ("token" in result) {
-      res.cookie("access_token", result.token, {
+
+
+    if ("accessToken" in result) {
+      res.cookie("access_token", result.accessToken, {
         httpOnly: true,
         maxAge: 60 * 60 * 1000 // 1 hour
       });
@@ -140,7 +142,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
     return { message: "User already exists" };
   }
 
-  // SSO user
+  // SSO user - don't register, just create token
   if (user) {
     return generateJWT(user._id, user.email, user.type);
   }
@@ -177,6 +179,12 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
 
     console.log("New user created: " + newUser);
     const result = generateJWT(newUser._id, newUser.email, newUser.type);
+
+    if (result.refreshToken) {
+      newUser.refreshTokens?.push(result.refreshToken)
+    }
+    await newUser.save(); // save the refreshToken
+
     return result;
   }
   catch (err) {
@@ -188,16 +196,23 @@ const generateJWT = (userId: Types.ObjectId, email: string, type: IUserType) => 
   if (!process.env.JWT_SECRET) {
     return { message: "Missing auth configuration" };
   }
-  const token = jwt.sign(
+  const accessToken = jwt.sign(
     { id: userId.toString(), type: type },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRATION }
   );
 
+  const refreshToken = jwt.sign(
+    { id: userId.toString(), type: type },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
+  );
+
   return {
     _id: userId,
     email: email,
-    token: token
+    accessToken: accessToken,
+    refreshToken: refreshToken
   };
 };
 
@@ -230,15 +245,27 @@ export const login = async (req: Request, res: Response) => {
       return { message: "Missing auth configuration" };
     }
 
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { _id: user._id, type: user.type },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRATION });
 
+    const refreshToken = jwt.sign(
+      { id: user._id.toString(), type: user.type },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
+    );
+
+    if (refreshToken) {
+      user.refreshTokens?.push(refreshToken)
+    }
+    await user.save(); // save the refreshToken
+
     return res.status(200).send({
       _id: user._id,
       email: user.email,
-      token: token
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     });
 
   }
