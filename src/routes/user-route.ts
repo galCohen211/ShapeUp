@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import passport from "passport";
 import { body, query, param } from "express-validator";
 
-import { signup, login, getFromCookie, logout } from "../controllers/auth-controller"
+import { signup, login, getFromCookie, logout, refresh } from "../controllers/auth-controller"
 import { IUserType } from "../models/user-model";
 import verifyToken from "../middleware/verifyToken";
 import upload from "../multer";
@@ -73,6 +73,11 @@ userRouter.post("/login",
 userRouter.post("/logout",
   (req: Request, res: Response) => {
     logout(req, res);
+  });
+
+  userRouter.post("/refresh",
+  (req: Request, res: Response) => {
+    refresh(req, res);
   });
 
 userRouter.put("/updateUser/:userId", upload.fields([{ name: "avatar", maxCount: 1 }]), verifyToken([IUserType.GYM_OWNER, IUserType.USER]),

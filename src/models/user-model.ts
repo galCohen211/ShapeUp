@@ -17,7 +17,7 @@ interface IUser extends Document {
   favoriteGyms: Types.ObjectId[];
   avatarUrl?: string,
   gymOwnerLicenseImage?: string,
-  refreshTokens?: [string] ;
+  refreshTokens?: string[];
 }
 
 const UserSchema: Schema<IUser> = new mongoose.Schema({

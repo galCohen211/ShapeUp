@@ -7,8 +7,10 @@ import { validationResult } from "express-validator";
 import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oauth2";
 
 import User, { IUserType } from "../models/user-model";
-import { RegisterUserParams } from "../types/auth.types";
+import { RegisterUserParams, TokenPayload } from "../types/auth.types";
 
+
+// Gooogle SSO
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
 const SERVER_URL = process.env.SERVER_URL as string;
@@ -114,8 +116,6 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(400).json({ message: result.message });
     }
 
-
-
     if ("accessToken" in result) {
       res.cookie("access_token", result.accessToken, {
         httpOnly: true,
@@ -209,7 +209,7 @@ const generateJWT = (userId: Types.ObjectId, email: string, type: IUserType) => 
 
   return {
     _id: userId,
-    email: email,
+    email: email, // redundant
     accessToken: accessToken,
     refreshToken: refreshToken
   };
@@ -244,16 +244,17 @@ export const login = async (req: Request, res: Response) => {
       return { message: "Missing auth configuration" };
     }
 
-    const accessToken = jwt.sign(
-      { _id: user._id, type: user.type },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRATION });
+    const result = generateJWT(user._id, "email", user.type);
 
-    const refreshToken = jwt.sign(
-      { id: user._id.toString(), type: user.type },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
-    );
+    const accessToken = result.accessToken;
+    const refreshToken = result.refreshToken;
+
+    if (accessToken) {
+      res.cookie("access_token", accessToken, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 1000 // 1 hour
+      })
+    }
 
     if (refreshToken) {
       user.refreshTokens?.push(refreshToken)
@@ -303,8 +304,35 @@ export const getFromCookie = async (req: Request, res: Response, property: strin
 }
 
 // Logout 
-export const logout = (req: Request, res: Response) => {
+export const logout = async (req: Request, res: Response) => {
   try {
+    const refreshToken = req.body.refreshToken;
+
+    if (!refreshToken) {
+      res.status(400).json({ message: "Access token not found" });
+      return;
+    }
+
+    if (!process.env.JWT_SECRET) {
+      return { message: "Missing auth configuration" };
+    }
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
+
+    const user = await User.findOne({ id: decoded.id });
+
+    if (!user) {
+      return res.status(400).json({ message: "invalid token" });
+    }
+
+    if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
+      user.refreshTokens = [""];
+      await user.save();
+      res.status(400).json({ message: "invalid token" });
+    }
+
+    user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
+    await user.save();
+
     res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
     return res.status(200).send({ message: "Logged out successfully" });
   } catch (error) {
@@ -313,5 +341,63 @@ export const logout = (req: Request, res: Response) => {
   }
 };
 
+export const refresh = async (req: Request, res: Response) => {
+  const refreshToken = req.body.refreshToken;
 
+  if (!refreshToken) {
+    res.status(400).json({ message: "Access token not found" });
+    return;
+  }
+
+  if (!process.env.JWT_SECRET) {
+    return { message: "Missing auth configuration" };
+  }
+
+  const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
+
+  try {
+    const user = await User.findOne({ id: decoded.id });
+
+
+    if (!user) {
+      return res.status(400).json({ message: "invalid token" });
+    }
+
+    if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
+      user.refreshTokens = [""];
+      await user.save();
+      res.status(400).json({ message: "invalid token" });
+      return;
+    }
+
+    const result = generateJWT(user._id, "email", user.type);
+    if (!result) {
+      user.refreshTokens = [""];
+      await user.save();
+      return res.status(400).json({ message: "Missing auth configuration" });
+    }
+
+    if (!result.accessToken) {
+      return res.status(400).json({ message: "Missing auth configuration (no access token)" });
+    }
+
+    if (!result.refreshToken) {
+      return res.status(400).json({ message: "Missing auth configuration (no refresh token)" });
+    }
+    const newAccessToken = result.accessToken;
+    const newRefreshToken = result.refreshToken;
+    user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
+    user.refreshTokens.push(newRefreshToken)
+    await user.save();
+
+    return res.status(200).send({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+
+
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
+  }
+}
 export default passport;

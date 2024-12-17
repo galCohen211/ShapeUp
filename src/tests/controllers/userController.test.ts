@@ -129,7 +129,9 @@ describe("UserController Endpoints", () => {
         firstName: "John",
         lastName: "Doe",
         address: "First street",
-        avatar: ["http://localhost/uploads/test-image1.jpg"]
+        avatar: ["http://localhost/uploads/test-image1.jpg"],
+        refreshTokens: [],
+        save: jest.fn().mockResolvedValue(true),
       });
 
       const response = await request(app)
@@ -160,6 +162,8 @@ describe("UserController Endpoints", () => {
       address: "First Street",
       type: "USER",
       avatarUrl: "http://example.com/avatar.jpg",
+      refreshTokens: [],
+      save: jest.fn().mockResolvedValue(true),
     };
 
     it("should login an existing user with correct credentials and return 200", async () => {
@@ -174,7 +178,8 @@ describe("UserController Endpoints", () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.token).toBeDefined();
+      expect(response.body.accessToken).toBeDefined();
+      expect(response.body.refreshToken).toBeDefined();
       expect(response.body.email).toBe("johndoe123@gmail.com");
     });
 
