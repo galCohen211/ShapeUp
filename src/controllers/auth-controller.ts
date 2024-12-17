@@ -93,7 +93,7 @@ export const signup = async (req: Request, res: Response) => {
     ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
 
   if (!avatar) {
-    return res.status(400).send("Please upload an avatar");
+    return res.status(400).json({ error: "Please upload an avatar" });
   }
 
   const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
@@ -175,7 +175,6 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
       gymOwnerLicenseImage: gymOwnerLicenseImage
     }).save();
 
-    console.log("New user created: " + newUser);
     const result = generateJWT(newUser._id, newUser.email, newUser.type);
     return result;
   }

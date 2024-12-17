@@ -205,3 +205,105 @@ describe("DELETE /gyms/:gymId", () => {
     );
   });
 });
+
+describe("GET /gyms/myGyms", () => {
+  it("should return the gyms owned by the logged-in user", async () => {
+    const ownerId = new mongoose.Types.ObjectId();
+    const gyms = [
+      {
+        _id: new mongoose.Types.ObjectId(),
+        name: "Gym 1",
+        location: "Location 1",
+        description: "Description 1",
+        pictures: ["http://localhost/uploads/gym1.jpg"],
+        owner: ownerId,
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
+        name: "Gym 2",
+        location: "Location 2",
+        description: "Description 2",
+        pictures: ["http://localhost/uploads/gym2.jpg"],
+        owner: ownerId,
+      },
+    ];
+
+    (getFromCookie as jest.Mock).mockResolvedValue(ownerId.toString());
+    (Gym.find as jest.Mock).mockResolvedValue(gyms);
+
+    const response = await request(app)
+      .get("/gyms/myGyms")
+      .set("access_token", "id=" + ownerId);
+
+    expect(response.status).toBe(200);
+    expect(response.body.gyms).toHaveLength(gyms.length);
+    expect(response.body.gyms[0]).toHaveProperty("name", "Gym 1");
+    expect(response.body.gyms[1]).toHaveProperty("name", "Gym 2");
+  });
+
+  it("should return 400 for an invalid user ID format", async () => {
+    (getFromCookie as jest.Mock).mockResolvedValue("invalid-user-id");
+
+    const response = await request(app)
+      .get("/gyms/myGyms")
+      .set("access_token", "id=invalid-user-id");
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe("Invalid user ID format");
+  });
+
+});
+
+describe("GET /gyms", () => {
+  it("should return all gyms if no owner query parameter is provided", async () => {
+    const gyms = [
+      {
+        _id: new mongoose.Types.ObjectId(),
+        name: "Gym 1",
+        location: "Location 1",
+        description: "Description 1",
+        pictures: ["http://localhost/uploads/gym1.jpg"],
+        owner: new mongoose.Types.ObjectId(),
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
+        name: "Gym 2",
+        location: "Location 2",
+        description: "Description 2",
+        pictures: ["http://localhost/uploads/gym2.jpg"],
+        owner: new mongoose.Types.ObjectId(),
+      },
+    ];
+
+    (Gym.find as jest.Mock).mockResolvedValue(gyms);
+    const response = await request(app).get("/gyms");
+
+    expect(response.status).toBe(200);
+    expect(response.body.gyms).toHaveLength(gyms.length);
+    expect(response.body.gyms[0]).toHaveProperty("name", "Gym 1");
+    expect(response.body.gyms[1]).toHaveProperty("name", "Gym 2");
+  });
+
+  it("should return gyms owned by a specific owner when a valid owner ID is provided", async () => {
+    const ownerId = new mongoose.Types.ObjectId();
+    const gyms = [
+      {
+        _id: new mongoose.Types.ObjectId(),
+        name: "Gym 1",
+        location: "Location 1",
+        description: "Description 1",
+        pictures: ["http://localhost/uploads/gym1.jpg"],
+        owner: ownerId,
+      },
+    ];
+
+    (Gym.find as jest.Mock).mockResolvedValue(gyms);
+    const response = await request(app).get(`/gyms?owner=${ownerId}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.gyms).toHaveLength(gyms.length);
+    expect(response.body.gyms[0]).toHaveProperty("name", "Gym 1");
+    expect(response.body.gyms[0].owner).toBe(ownerId.toString());
+  });
+
+});
