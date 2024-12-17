@@ -49,8 +49,8 @@ passport.use(
           return done(res.error, null);
         }
 
-        if ("email" in res && res.email) {
-          return done(null, { email: res.email });
+        if ("_id" in res && res._id) {
+          return done(null, { id: res._id });
         }
       } catch (err) {
         return done(err, null);
@@ -91,13 +91,10 @@ export const signup = async (req: Request, res: Response) => {
     userType = IUserType.GYM_OWNER;
   }
 
-  const avatar = req.files && "avatar" in req.files
-    ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
-
+  const avatar = req.files && "avatar" in req.files ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
   if (!avatar) {
     return res.status(400).json({ error: "Please upload an avatar" });
   }
-
   const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
 
   try {
@@ -124,7 +121,7 @@ export const signup = async (req: Request, res: Response) => {
 
       return res.status(201).json({
         message: "User registered successfully",
-        email: result.email
+        userId: result._id
       });
     }
   } catch (error) {
@@ -132,6 +129,158 @@ export const signup = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const login = async (req: Request, res: Response) => {
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
+
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).send("Wrong email or password");
+    }
+
+    // This is SSO user - no password in user object
+    if (!user.password) {
+      return res.status(400).send("Wrong email or password");
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).send("Wrong email or password");
+    }
+
+    if (!process.env.JWT_SECRET) {
+      return { message: "Missing auth configuration" };
+    }
+
+    const result = generateJWT(user._id, user.type);
+    const accessToken = result.accessToken;
+    const refreshToken = result.refreshToken;
+
+    if (accessToken) {
+      res.cookie("access_token", accessToken, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 1000 // 1 hour
+      })
+    }
+
+    if (refreshToken) {
+      user.refreshTokens?.push(refreshToken)
+    }
+    await user.save(); // save the refresh token in user object
+
+    return res.status(200).send({
+      _id: user._id,
+      email: user.email,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    });
+
+  }
+  catch (error) {
+    console.error("Error during login:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.body.refreshToken;
+    if (!refreshToken) {
+      res.status(400).json({ message: "Refresh token not found" });
+      return;
+    }
+
+    if (!process.env.JWT_SECRET) {
+      return { message: "Missing auth configuration" };
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
+    const user = await User.findOne({ id: decoded.id });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid refresh token" });
+    }
+
+    // If refreshTokens list doesn't include 'refreshToken', we clear the list (maybe a breach)
+    if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
+      user.refreshTokens = [""];
+      await user.save();
+      res.status(400).json({ message: "Invalid refresh token" });
+    }
+
+    // remove 'refreshToken' from refreshTokens list 
+    user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
+    await user.save();
+
+    res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
+    return res.status(200).send({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const refresh = async (req: Request, res: Response) => {
+  const refreshToken = req.body.refreshToken;
+  if (!refreshToken) {
+    res.status(400).json({ message: "Access token not found" });
+    return;
+  }
+
+  if (!process.env.JWT_SECRET) {
+    return { message: "Missing auth configuration" };
+  }
+
+  const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
+  try {
+    const user = await User.findOne({ id: decoded.id });
+    if (!user) {
+      return res.status(400).json({ message: "invalid token" });
+    }
+
+    if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
+      user.refreshTokens = [""];
+      await user.save();
+      res.status(400).json({ message: "invalid token" });
+      return;
+    }
+
+    const result = generateJWT(user._id, user.type);
+    if (!result) {
+      user.refreshTokens = [""];
+      await user.save();
+      return res.status(400).json({ message: "Missing auth configuration" });
+    }
+
+    if (!result.accessToken) {
+      return res.status(400).json({ message: "Missing auth configuration (no access token)" });
+    }
+
+    if (!result.refreshToken) {
+      return res.status(400).json({ message: "Missing auth configuration (no refresh token)" });
+    }
+    const newAccessToken = result.accessToken;
+    const newRefreshToken = result.refreshToken;
+    user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
+    user.refreshTokens.push(newRefreshToken)
+    await user.save();
+
+    return res.status(200).send({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
+  }
+}
 
 const registerGeneralUser = async (params: RegisterUserParams) => {
   const { email, firstName, lastName, password, address, userType, gymOwnerLicenseImage, avatarUrl } = params;
@@ -144,7 +293,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
 
   // SSO user - don't register, just create token
   if (user) {
-    return generateJWT(user._id, user.email, user.type);
+    return generateJWT(user._id, user.type);
   }
 
   try {
@@ -177,8 +326,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
       gymOwnerLicenseImage: gymOwnerLicenseImage
     }).save();
 
-    const result = generateJWT(newUser._id, newUser.email, newUser.type);
-
+    const result = generateJWT(newUser._id, newUser.type);
     if (result.refreshToken) {
       newUser.refreshTokens?.push(result.refreshToken)
     }
@@ -191,10 +339,11 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
   }
 }
 
-const generateJWT = (userId: Types.ObjectId, email: string, type: IUserType) => {
+const generateJWT = (userId: Types.ObjectId, type: IUserType) => {
   if (!process.env.JWT_SECRET) {
     return { message: "Missing auth configuration" };
   }
+
   const accessToken = jwt.sign(
     { id: userId.toString(), type: type },
     process.env.JWT_SECRET,
@@ -209,71 +358,10 @@ const generateJWT = (userId: Types.ObjectId, email: string, type: IUserType) => 
 
   return {
     _id: userId,
-    email: email, // redundant
     accessToken: accessToken,
     refreshToken: refreshToken
   };
 };
-
-export const login = async (req: Request, res: Response) => {
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ errors: errors.array() });
-    return;
-  }
-
-  const { email, password } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).send("Wrong email or password");
-    }
-
-    if (!user.password) {
-      return res.status(400).send("this is SSO user - no password");
-    }
-
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      return res.status(401).send("Wrong email or password");
-    }
-
-    if (!process.env.JWT_SECRET) {
-      return { message: "Missing auth configuration" };
-    }
-
-    const result = generateJWT(user._id, "email", user.type);
-
-    const accessToken = result.accessToken;
-    const refreshToken = result.refreshToken;
-
-    if (accessToken) {
-      res.cookie("access_token", accessToken, {
-        httpOnly: true,
-        maxAge: 60 * 60 * 1000 // 1 hour
-      })
-    }
-
-    if (refreshToken) {
-      user.refreshTokens?.push(refreshToken)
-    }
-    await user.save(); // save the refreshToken
-
-    return res.status(200).send({
-      _id: user._id,
-      email: user.email,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-    });
-
-  }
-  catch (error) {
-    console.error("Error during login:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-}
 
 export const getFromCookie = async (req: Request, res: Response, property: string) => {
   const accessToken = req.cookies.access_token;
@@ -300,104 +388,6 @@ export const getFromCookie = async (req: Request, res: Response, property: strin
 
   } catch (error) {
     res.status(400).json({ message: "Invalid token", error: error });
-  }
-}
-
-// Logout 
-export const logout = async (req: Request, res: Response) => {
-  try {
-    const refreshToken = req.body.refreshToken;
-
-    if (!refreshToken) {
-      res.status(400).json({ message: "Access token not found" });
-      return;
-    }
-
-    if (!process.env.JWT_SECRET) {
-      return { message: "Missing auth configuration" };
-    }
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
-
-    const user = await User.findOne({ id: decoded.id });
-
-    if (!user) {
-      return res.status(400).json({ message: "invalid token" });
-    }
-
-    if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
-      user.refreshTokens = [""];
-      await user.save();
-      res.status(400).json({ message: "invalid token" });
-    }
-
-    user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
-    await user.save();
-
-    res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
-    return res.status(200).send({ message: "Logged out successfully" });
-  } catch (error) {
-    console.error("Error during logout:", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
-export const refresh = async (req: Request, res: Response) => {
-  const refreshToken = req.body.refreshToken;
-
-  if (!refreshToken) {
-    res.status(400).json({ message: "Access token not found" });
-    return;
-  }
-
-  if (!process.env.JWT_SECRET) {
-    return { message: "Missing auth configuration" };
-  }
-
-  const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
-
-  try {
-    const user = await User.findOne({ id: decoded.id });
-
-
-    if (!user) {
-      return res.status(400).json({ message: "invalid token" });
-    }
-
-    if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
-      user.refreshTokens = [""];
-      await user.save();
-      res.status(400).json({ message: "invalid token" });
-      return;
-    }
-
-    const result = generateJWT(user._id, "email", user.type);
-    if (!result) {
-      user.refreshTokens = [""];
-      await user.save();
-      return res.status(400).json({ message: "Missing auth configuration" });
-    }
-
-    if (!result.accessToken) {
-      return res.status(400).json({ message: "Missing auth configuration (no access token)" });
-    }
-
-    if (!result.refreshToken) {
-      return res.status(400).json({ message: "Missing auth configuration (no refresh token)" });
-    }
-    const newAccessToken = result.accessToken;
-    const newRefreshToken = result.refreshToken;
-    user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
-    user.refreshTokens.push(newRefreshToken)
-    await user.save();
-
-    return res.status(200).send({
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-    });
-
-
-  } catch (err) {
-    return res.status(500).json({ message: "Server error" });
   }
 }
 export default passport;
