@@ -2,37 +2,28 @@ import { Request, Response, Router } from "express";
 import passport from "passport";
 import { body, query, param } from "express-validator";
 
-import { signup, login, getFromCookie, logout } from "../controllers/auth-controller"
 import { IUserType } from "../models/user-model";
 import verifyToken from "../middleware/verifyToken";
 import upload from "../multer";
+import { signup, login, logout, refresh } from "../controllers/auth-controller"
 import UserController from "../controllers/user-controller";
 
-const userRouter = Router();
-
-userRouter.get(
-  "/user/:userId", UserController.getUserById,
-  [param("userId")
-    .notEmpty()
-    .withMessage("User ID is required.")
-    .isMongoId()
-    .withMessage("User ID must be a valid MongoDB ObjectId."),]
-);
+const router = Router();
 
 function isLoggedIn(req: Request, res: Response, next: any): void {
   req.user ? next() : res.sendStatus(401);
 }
 
-userRouter.get("/", (req: Request, res: Response) => {
+router.get("/", (req: Request, res: Response) => {
   res.send('<a href="/users/auth/google">Authenticate with Google</a>');
 });
 
-userRouter.get(
+router.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["email", "profile"] })
 );
 
-userRouter.get(
+router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
     // session: false,
@@ -41,15 +32,16 @@ userRouter.get(
   })
 );
 
-userRouter.get("/auth/google/protected", isLoggedIn, (req: any, res) => {
-  res.send(`Hello ${req.user.email}`);
+router.get("/auth/google/protected", isLoggedIn, (req: any, res) => {
+  res.send(`Hello ${req.user.id}`);
 });
 
-userRouter.get("/auth/google/failure", (req: Request, res: Response) => {
+router.get("/auth/google/failure", (req: Request, res: Response) => {
   res.send("Failed to authenticate");
 });
 
-userRouter.post("/signup", upload.fields([{ name: "avatar", maxCount: 1 }]),
+router.post("/signup",
+  upload.fields([{ name: "avatar", maxCount: 1 }]),
   [
     body("email").notEmpty().isEmail().withMessage("Valid email is required"),
     body("password").notEmpty().withMessage("Password is required"),
@@ -61,7 +53,7 @@ userRouter.post("/signup", upload.fields([{ name: "avatar", maxCount: 1 }]),
     signup(req, res);
   });
 
-userRouter.post("/login",
+router.post("/login",
   [
     body("email").notEmpty().isEmail().withMessage("Valid email is required"),
     body("password").notEmpty().withMessage("Password is required"),
@@ -70,12 +62,28 @@ userRouter.post("/login",
     login(req, res);
   });
 
-userRouter.post("/logout",
+router.post("/logout",
   (req: Request, res: Response) => {
     logout(req, res);
   });
 
-userRouter.put("/updateUser/:userId", upload.fields([{ name: "avatar", maxCount: 1 }]), verifyToken([IUserType.GYM_OWNER, IUserType.USER]),
+router.post("/refresh",
+  (req: Request, res: Response) => {
+    refresh(req, res);
+  });
+
+
+router.get("/user/:userId", UserController.getUserById,
+  [param("userId")
+    .notEmpty()
+    .withMessage("User ID is required.")
+    .isMongoId()
+    .withMessage("User ID must be a valid MongoDB ObjectId."),]
+);
+
+router.put("/updateUser/:userId",
+  upload.fields([{ name: "avatar", maxCount: 1 }]),
+  verifyToken([IUserType.GYM_OWNER, IUserType.USER]),
   [
     param("userId")
       .notEmpty().withMessage("User ID is required.")
@@ -88,6 +96,4 @@ userRouter.put("/updateUser/:userId", upload.fields([{ name: "avatar", maxCount:
   UserController.updateUser
 );
 
-
-
-export default userRouter;
+export default router;
