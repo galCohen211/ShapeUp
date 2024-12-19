@@ -27,14 +27,14 @@ describe("UserController Endpoints", () => {
 
   afterAll(async () => {
     await mongoose.disconnect();
-  
+
     for (const testImage of testImages) {
       const filePattern = new RegExp(
         `${testImage.replace(/\.[^/.]+$/, "")}-.*\\.(png|jpg|jpeg)$`
       );
       const files = fs.readdirSync(uploadsDir);
       const matchedFiles = files.filter((file) => filePattern.test(file));
-  
+
       if (matchedFiles.length > 0) {
         for (const file of matchedFiles) {
           const filePath = path.join(uploadsDir, file);
@@ -43,10 +43,10 @@ describe("UserController Endpoints", () => {
           } catch (err) {
           }
         }
-      } 
+      }
     }
   });
-  
+
   describe("GET /users/user/:userId", () => {
     it("should return 200 and the user data for a gym owner", async () => {
       const mockGymOwner = {
