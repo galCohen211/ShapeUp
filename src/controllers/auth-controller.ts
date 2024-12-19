@@ -192,13 +192,12 @@ export const login = async (req: Request, res: Response) => {
 export const logout = async (req: Request, res: Response) => {
   try {
 
-    const data = await get_decoded_data(req, res);
+    const refreshToken = req.body.refreshToken;
+    const decoded = await get_decoded(req, res, refreshToken);
 
-    if (!data || !data.decoded) {
-      return res.status(400).json({ message: "Invalid data" });
+    if (!decoded || 'error' in decoded) {
+      return res.status(400).json({ error: "Invalid decoded" });
     }
-    const decoded = data.decoded;
-    const refreshToken = data.refreshToken;
 
     const user = await User.findOne({ _id: decoded.id });
     if (!user) {
@@ -225,13 +224,12 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 export const refresh = async (req: Request, res: Response) => {
-  const data = await get_decoded_data(req, res);
+  const refreshToken = req.body.refreshToken;
+  const decoded = await get_decoded(req, res, refreshToken);
 
-  if (!data || !data.decoded) {
-    return res.status(400).json({ message: "Invalid data" });
+  if (!decoded || 'error' in decoded) {
+    return res.status(400).json({ error: "Invalid decoded" });
   }
-  const decoded = data.decoded;
-  const refreshToken = data.refreshToken;
 
   try {
     const user = await User.findOne({ _id: decoded.id });
@@ -393,20 +391,19 @@ export const getFromCookie = async (req: Request, res: Response, property: strin
   }
 }
 
-const get_decoded_data = async (req: Request, res: Response) => {
+const get_decoded = async (req: Request, res: Response, refreshToken: string) => {
 
-  const refreshToken = req.body.refreshToken;
   if (!refreshToken) {
     res.status(400).json({ message: "Refresh token not found" });
     return;
   }
 
   if (!process.env.JWT_SECRET) {
-    return { message: "Missing auth configuration" };
+    return { error: "Missing auth configuration" };
   }
 
   const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
-  return { decoded, refreshToken };
+  return decoded;
 }
 
 export default passport;
