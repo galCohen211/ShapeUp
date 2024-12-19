@@ -177,7 +177,6 @@ export const login = async (req: Request, res: Response) => {
     await user.save(); // save the refresh token in user object
 
     return res.status(200).send({
-      _id: user._id,
       email: user.email,
       accessToken: accessToken,
       refreshToken: refreshToken,
@@ -192,17 +191,15 @@ export const login = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   try {
-    const refreshToken = req.body.refreshToken;
-    if (!refreshToken) {
-      res.status(400).json({ message: "Refresh token not found" });
-      return;
-    }
 
-    if (!process.env.JWT_SECRET) {
-      return { message: "Missing auth configuration" };
-    }
+    const data = await get_decoded_data(req, res);
 
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
+    if (!data || !data.decoded) {
+      return res.status(400).json({ message: "Invalid data" });
+    }
+    const decoded = data.decoded;
+    const refreshToken = data.refreshToken;
+
     const user = await User.findOne({ _id: decoded.id });
     if (!user) {
       return res.status(400).json({ message: "Invalid refresh token" });
@@ -228,17 +225,14 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 export const refresh = async (req: Request, res: Response) => {
-  const refreshToken = req.body.refreshToken;
-  if (!refreshToken) {
-    res.status(400).json({ message: "Refresh token not found" });
-    return;
-  }
+  const data = await get_decoded_data(req, res);
 
-  if (!process.env.JWT_SECRET) {
-    return { message: "Missing auth configuration" };
+  if (!data || !data.decoded) {
+    return res.status(400).json({ message: "Invalid data" });
   }
+  const decoded = data.decoded;
+  const refreshToken = data.refreshToken;
 
-  const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
   try {
     const user = await User.findOne({ _id: decoded.id });
     if (!user) {
@@ -246,7 +240,7 @@ export const refresh = async (req: Request, res: Response) => {
     }
 
     if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
-      user.refreshTokens = [""];
+      user.refreshTokens = [];
       await user.save();
       res.status(400).json({ message: "Invalid token" });
       return;
@@ -269,7 +263,7 @@ export const refresh = async (req: Request, res: Response) => {
     const newAccessToken = result.accessToken;
 
     res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
-    res.cookie("access_token", newAccessToken, {
+    res.cookie("access_token", newAccessToken, { // create a cookie with the new access token
       httpOnly: true,
       maxAge: 60 * 60 * 1000 // 1 hour
     });
@@ -398,4 +392,21 @@ export const getFromCookie = async (req: Request, res: Response, property: strin
     res.status(400).json({ message: "Invalid token", error: error });
   }
 }
+
+const get_decoded_data = async (req: Request, res: Response) => {
+
+  const refreshToken = req.body.refreshToken;
+  if (!refreshToken) {
+    res.status(400).json({ message: "Refresh token not found" });
+    return;
+  }
+
+  if (!process.env.JWT_SECRET) {
+    return { message: "Missing auth configuration" };
+  }
+
+  const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
+  return { decoded, refreshToken };
+}
+
 export default passport;
