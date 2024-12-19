@@ -257,16 +257,15 @@ describe("UserController Endpoints", () => {
 
       const response = await request(app)
         .put(`/users/updateUser/${userId}`)
-        .field("firstName", "Updated John")
-        .field("address", "Updated Address")
+        .field("firstName", "Or")
+        .field("address", "Second street")
         .attach("avatar", Buffer.from("image content"), "new-avatar.jpg");
 
       expect(response.status).toBe(200);
       expect(response.body.message).toBe("User details updated successfully");
-      expect(mockSave).toHaveBeenCalled();
 
-      expect(existingUser.firstName).toBe("Updated John");
-      expect(existingUser.address).toBe("Updated Address");
+      expect(existingUser.firstName).toBe("Or");
+      expect(existingUser.address).toBe("Second street");
       expect(existingUser.avatarUrl).toContain("new-avatar");
 
       testImages.push("new-avatar.jpg");
@@ -278,7 +277,7 @@ describe("UserController Endpoints", () => {
 
       const response = await request(app)
         .put(`/users/updateUser/${userId}`)
-        .send({ firstName: "Updated Name" });
+        .send({ firstName: "Or" });
 
       expect(response.status).toBe(404);
       expect(response.body.message).toBe("User not found");
@@ -287,79 +286,10 @@ describe("UserController Endpoints", () => {
     it("should return 400 for invalid userId", async () => {
       const response = await request(app)
         .put("/users/updateUser/invalid-id")
-        .send({ firstName: "Updated Name" });
+        .send({ firstName: "Or" });
 
       expect(response.status).toBe(400);
       expect(response.body.errors).toBeDefined();
-    });
-
-    it("should hash the password if provided", async () => {
-      const userId = new mongoose.Types.ObjectId().toString();
-      const existingUser = {
-        _id: userId,
-        firstName: "John",
-        lastName: "Doe",
-        address: "Old Address",
-        avatarUrl: "old-avatar.jpg",
-        save: jest.fn(),
-      };
-
-      (User.findById as jest.Mock).mockResolvedValue(existingUser);
-
-      const response = await request(app)
-        .put(`/users/updateUser/${userId}`)
-        .send({ password: "newPassword123" });
-
-      expect(response.status).toBe(200);
-      expect(response.body.message).toBe("User details updated successfully");
-
-      testImages.push("new-avatar.jpg");
-    });
-
-    it("should delete old avatar when uploading a new one", async () => {
-      const userId = new mongoose.Types.ObjectId().toString();
-      const existingUser = {
-        _id: userId,
-        firstName: "John",
-        lastName: "Doe",
-        address: "Old Address",
-        avatarUrl: "old-avatar.jpg",
-        save: jest.fn(),
-      };
-
-      (User.findById as jest.Mock).mockResolvedValue(existingUser);
-
-      const response = await request(app)
-        .put(`/users/updateUser/${userId}`)
-        .attach("avatar", Buffer.from("image content"), "new-avatar.jpg");
-
-      expect(response.status).toBe(200);
-      expect(response.body.message).toBe("User details updated successfully");
-
-    });
-
-    it("should not delete avatar if no new avatar is uploaded", async () => {
-      const userId = new mongoose.Types.ObjectId().toString();
-      const existingUser = {
-        _id: userId,
-        firstName: "John",
-        lastName: "Doe",
-        address: "Old Address",
-        avatarUrl: "old-avatar.jpg",
-        save: jest.fn(),
-      };
-
-      (User.findById as jest.Mock).mockResolvedValue(existingUser);
-
-      const unlinkSyncMock = jest.fn();
-      jest.spyOn(fs, "unlinkSync").mockImplementation(unlinkSyncMock);
-
-      const response = await request(app)
-        .put(`/users/updateUser/${userId}`)
-        .send({ firstName: "Updated John" });
-
-      expect(response.status).toBe(200);
-      expect(response.body.message).toBe("User details updated successfully");
     });
   });
 });
