@@ -196,7 +196,7 @@ export const logout = async (req: Request, res: Response) => {
     const decoded = await get_decoded(req, res, refreshToken);
 
     if (!decoded || 'error' in decoded) {
-      return res.status(400).json({ message: "Invalid data" });
+      return res.status(400).json({ error: "Invalid decoded" });
     }
 
     const user = await User.findOne({ _id: decoded.id });
@@ -228,7 +228,7 @@ export const refresh = async (req: Request, res: Response) => {
   const decoded = await get_decoded(req, res, refreshToken);
 
   if (!decoded || 'error' in decoded) {
-    return res.status(400).json({ message: "Invalid data" });
+    return res.status(400).json({ error: "Invalid decoded" });
   }
 
   try {
