@@ -153,7 +153,7 @@ describe("Auth Endpoints", () => {
       return { message: "Missing auth configuration" };
     }
 
-    const token = jwt.sign(
+    const myRefreshToken = jwt.sign(
       { id: "123", type: "user" },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRATION }
@@ -168,7 +168,7 @@ describe("Auth Endpoints", () => {
       address: "First Street",
       type: "USER",
       avatarUrl: "http://example.com/avatar.jpg",
-      refreshTokens: [token],
+      refreshTokens: [myRefreshToken],
       save: jest.fn().mockResolvedValue(true),
     };
 
@@ -181,7 +181,7 @@ describe("Auth Endpoints", () => {
       const response = await request(app)
         .post("/users/logout")
         .send({
-          refreshToken: token
+          refreshToken: myRefreshToken
         });
 
       expect(response.status).toBe(200);
@@ -252,7 +252,7 @@ describe("Auth Endpoints", () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.message).toBe("Tokens refreshed successfully");
+      expect(response.body.message).toBe("New tokens generated");
       expect(response.body.accessToken).toBeDefined();
       expect(response.body.refreshToken).toBeDefined();
     });
