@@ -195,7 +195,7 @@ export const logout = async (req: Request, res: Response) => {
     const refreshToken = req.body.refreshToken;
     const decoded = await get_decoded(req, res, refreshToken);
 
-    if (!decoded || 'message' in decoded) {
+    if (!decoded || 'error' in decoded) {
       return res.status(400).json({ message: "Invalid data" });
     }
 
@@ -227,7 +227,7 @@ export const refresh = async (req: Request, res: Response) => {
   const refreshToken = req.body.refreshToken;
   const decoded = await get_decoded(req, res, refreshToken);
 
-  if (!decoded || 'message' in decoded) {
+  if (!decoded || 'error' in decoded) {
     return res.status(400).json({ message: "Invalid data" });
   }
 
@@ -399,7 +399,7 @@ const get_decoded = async (req: Request, res: Response, refreshToken: string) =>
   }
 
   if (!process.env.JWT_SECRET) {
-    return { message: "Missing auth configuration" };
+    return { error: "Missing auth configuration" };
   }
 
   const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;
