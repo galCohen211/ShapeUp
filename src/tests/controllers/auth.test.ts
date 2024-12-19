@@ -214,4 +214,49 @@ describe("Auth Endpoints", () => {
     });
   });
 
+  describe("POST /refresh", () => {
+
+    if (!process.env.JWT_SECRET) {
+      return { message: "Missing auth configuration" };
+    }
+
+    const myRefreshToken = jwt.sign(
+      { id: "123", type: "user" },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRATION }
+    );
+
+    const mockUser = {
+      _id: new mongoose.Types.ObjectId(),
+      email: "johndoe123@gmail.com",
+      password: "$2b$12$kiwSU0JHcdsDVJLOxDD2AekohHwS5RVU8E5wZerlnFE7/Jibvr10W", // bcrypt for 12345
+      firstName: "John",
+      lastName: "Doe",
+      address: "First Street",
+      type: "USER",
+      avatarUrl: "http://example.com/avatar.jpg",
+      refreshTokens: [myRefreshToken],
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    beforeEach(() => {
+      User.findOne = jest.fn().mockResolvedValue(mockUser);
+    });
+
+    it("should return 200 with new access and refresh tokens", async () => {
+
+      const response = await request(app)
+        .post("/users/refresh")
+        .send({
+          refreshToken: myRefreshToken,
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe("Tokens refreshed successfully");
+      expect(response.body.accessToken).toBeDefined();
+      expect(response.body.refreshToken).toBeDefined();
+    });
+
+  });
+
 });
