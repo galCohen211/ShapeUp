@@ -96,4 +96,23 @@ router.put("/updateUser/:userId",
   UserController.updateUser
 );
 
+router.post(
+  "/:userId/favoriteGym",
+  verifyToken([IUserType.USER]),
+  [
+    param("userId")
+      .notEmpty()
+      .withMessage("User ID is required.")
+      .isMongoId()
+      .withMessage("User ID must be a valid MongoDB ObjectId."),
+    body("gymId")
+      .notEmpty()
+      .withMessage("Gym ID is required.")
+      .isMongoId()
+      .withMessage("Gym ID must be a valid MongoDB ObjectId."),
+  ],
+  UserController.addFavoriteGym
+);
+
+
 export default router;

@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
 import User, { IUserType } from "../models/user-model";
+import Gym from "../models/gym-model";
 
 class UserController {
   static async updateUser(req: Request, res: Response): Promise<void> {
@@ -90,6 +91,38 @@ class UserController {
       res.status(200).json(user);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
+    }
+  }
+
+  static async addFavoriteGym(req: Request, res: Response): Promise<void> {
+    const { userId } = req.params;
+    const { gymId } = req.body;
+
+    try {
+      const gym = await Gym.findById(gymId);
+      if (!gym) {
+        res.status(404).json({ message: "Gym not found" });
+        return;
+      }
+      const user = await User.findById(userId);
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+      if (user.favoriteGyms.includes(gymId)) {
+        res.status(400).json({ message: "Gym already in favorites" });
+        return;
+      }
+      user.favoriteGyms.push(gymId);
+      await user.save();
+
+      res.status(200).json({
+        message: "Gym added to favorites successfully",
+        favoriteGyms: user.favoriteGyms,
+      });
+    } catch (error) {
+      console.error("Error adding favorite gym:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
