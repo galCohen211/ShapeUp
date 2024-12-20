@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
 import {getMessagesBetweenTwoUsers} from "../chat/chat-logic";
 import User, { IUserType } from "../models/user-model";
+import { ObjectId } from "mongoose";
 
 
 class UserController {
@@ -99,8 +100,7 @@ class UserController {
   }
     static async GetUserChats(req: Request, res: Response): Promise<void> {
         const {userId1, userId2} = req.query;
-    
-        const chat = await getMessagesBetweenTwoUsers([userId1 as string, userId2 as string]);
+        const chat = await getMessagesBetweenTwoUsers([(userId1 as unknown) as ObjectId, (userId2 as unknown) as ObjectId]);
     
         res.status(200).send(chat);
     }

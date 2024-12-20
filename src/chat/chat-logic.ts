@@ -1,27 +1,28 @@
+import { ObjectId } from "mongoose";
 import { IChat, IMessage, chatModel } from "../models/chat-model";
 
-export async function createChatBetweenUsers(userId1: string, userId2: string) {
+export async function createChatBetweenUsers(userIds: ObjectId[]) {
   const existingChat = await chatModel.findOne({
-    usersIds: { $all: [userId1, userId2] },
+    usersIds: { $all: [userIds[0], userIds[1]] },
   });
 
   if (existingChat == null) {
     const usersChat: IChat = {
-      usersIds: [userId1, userId2],
+      usersIds: userIds,
       messages: []
     };
 
     await chatModel.create(usersChat);
 
-    console.log('Chat was created for user ids: ' + userId1 + "&" + userId2);
+    console.log('Chat was created for user ids: ' + userIds[0] + "&" + userIds[1]);
   } else {
-    console.log('Chat was already exists for user ids: ' + userId1 + "&" + userId2);
+    console.log('Chat was already exists for user ids: ' + userIds[0] + "&" + userIds[1]);
   }
 }
 
 export async function AddMessageToChat(
-  userId1: string,
-  userId2: string,
+  userId1: ObjectId,
+  userId2: ObjectId,
   newMessage: IMessage
 ) {
   const filter = { usersIds: { $all: [userId1, userId2] } };
@@ -41,12 +42,10 @@ export async function AddMessageToChat(
   };
 
   await chatModel.findOneAndUpdate(filter, update, options);
-
-  console.log('New message was added to the chat');      
 }
 
 export async function getMessagesBetweenTwoUsers(
-  usersIds: string[]
+  usersIds: ObjectId[]
 ) {
   const filter = { usersIds: { $all: usersIds } };
 

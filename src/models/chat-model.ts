@@ -1,14 +1,15 @@
-import {model, Schema} from "mongoose";
+import {model, ObjectId, Schema} from "mongoose";
 
 export interface IMessage {
-  creator: string;
+  creator: ObjectId;
   text: string;
-  timestamp: Date
+  timestamp: Date;
 }
 
 export const messageSchema = new Schema<IMessage>({
   creator: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: "User",
     required: true
   },
   text: {
@@ -23,13 +24,14 @@ export const messageSchema = new Schema<IMessage>({
 
 
 export interface IChat {
-  usersIds: string[];
+  usersIds: ObjectId[];
   messages: IMessage[];
 }
 
 const chatSchema = new Schema<IChat>({
   usersIds: {
-    type: [String],
+    type: [Schema.Types.ObjectId],
+    ref: "User",
     required: true
   },
   messages: [messageSchema]
