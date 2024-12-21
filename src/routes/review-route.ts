@@ -7,10 +7,10 @@ import { IUserType } from "../models/user-model";
 const router = express.Router();
 
 // Add a new review
-router.post("/",verifyToken([IUserType.USER]), reviewController.addReview);
+router.post("/", verifyToken([IUserType.USER]), reviewController.addReview);
 
 // Update a review
-router.put("/:reviewId",verifyToken([IUserType.USER]), reviewController.updateReview);
+router.put("/:reviewId", verifyToken([IUserType.USER]), reviewController.updateReview);
 
 // Get all reviews
 router.get("/", reviewController.getAllReviews);

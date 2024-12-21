@@ -6,7 +6,7 @@ import User from "../models/user-model";
 
 class reviewController {
     static async addReview(req: Request, res: Response): Promise<void> {
-        try{
+        try {
             const { rating, content, gym } = req.body;
             const commenterUserId = await getFromCookie(req, res, "id") as string;
 
@@ -16,8 +16,8 @@ class reviewController {
             }
 
             if (!rating || rating < 1 || rating > 5) {
-                 res.status(400).json({ error: "Rating must be between 1 and 5." });
-                 return;
+                res.status(400).json({ error: "Rating must be between 1 and 5." });
+                return;
             }
 
             if (!content || content.trim().length === 0) {
@@ -41,7 +41,7 @@ class reviewController {
                 res.status(404).json({ message: "User not found" });
                 return;
             }
-        
+
             const review = new Review({
                 rating,
                 content,
@@ -50,18 +50,18 @@ class reviewController {
             });
             await review.save();
 
-            res.status(201).json({message: "Review added successfully.",review});
+            res.status(201).json({ message: "Review added successfully.", review });
             return;
-        }catch(error){
+        } catch (error) {
             res.status(500).json({ error: "An error occurred while adding the review." });
             return;
         }
     }
 
     static async updateReview(req: Request, res: Response): Promise<void> {
-        try{
-            const {reviewId} = req.params;
-            const { rating, content } = req.body; 
+        try {
+            const { reviewId } = req.params;
+            const { rating, content } = req.body;
             const commenterUserId = await getFromCookie(req, res, "id") as string;
 
             if (!commenterUserId) {
@@ -72,19 +72,19 @@ class reviewController {
             if (!rating || rating < 1 || rating > 5) {
                 res.status(400).json({ error: "Rating must be between 1 and 5." });
                 return;
-           }
+            }
 
-           if (!content || content.trim().length === 0) {
-               res.status(400).json({ error: "Content cannot be empty." });
-               return;
-           }
+            if (!content || content.trim().length === 0) {
+                res.status(400).json({ error: "Content cannot be empty." });
+                return;
+            }
             const review = await Review.findByIdAndUpdate(reviewId, { rating, content }, { new: true });
-            
+
 
             res.status(200).json({ message: "Review updated successfully.", review });
             return;
 
-        }catch(err){
+        } catch (err) {
             res.status(500).json({ error: "An error occurred while updating the review.", err });
             return;
         }
@@ -92,11 +92,11 @@ class reviewController {
     }
 
     static async getAllReviews(req: Request, res: Response): Promise<void> {
-        try{
+        try {
             const reviews = await Review.find();
             res.status(200).json({ reviews });
             return;
-        }catch(err){
+        } catch (err) {
             res.status(500).json({ error: "An error occurred while fetching reviews.", err });
             return;
         }
