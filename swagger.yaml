@@ -11,6 +11,10 @@ servers:
 tags:
   - name: "users"
     description: "Endpoints related to user data management"
+  - name: "gyms"
+    description: "Endpoints related to gym data management"
+  - name: "reviews"
+    description: "Endpoints related to reviews"
 
 paths:
   /users/user/{userId}:
@@ -72,4 +76,85 @@ paths:
           description: User not found
         "500":
           description: Internal server error
-
+  /users/signup:
+    post:
+      tags:
+        - users
+      summary: Sign up a new user
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                address:
+                  type: string
+                avatar:
+                  type: string
+                  format: binary
+              required:
+                - email
+                - password
+                - firstName
+                - lastName
+                - address
+      responses:
+        "201":
+          description: User signed up successfully
+        "400":
+          description: Validation errors
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Log in a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        "200":
+          description: User logged in successfully
+        "400":
+          description: Validation errors
+  /users/logout:
+    post:
+      tags:
+        - users
+      summary: Log out the current user
+      responses:
+        "200":
+          description: User logged out successfully
+        "400":
+          description: Validation errors
+  /users/refresh:
+    post:
+      tags:
+        - users
+      summary: Refresh the authentication token
+      responses:
+        "200":
+          description: Token refreshed successfully
+        "400":
+          description: Validation errors
