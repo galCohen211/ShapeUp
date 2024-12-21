@@ -58,6 +58,39 @@ class reviewController {
         }
     }
 
+    static async updateReview(req: Request, res: Response): Promise<void> {
+        try{
+            const {reviewId} = req.params;
+            const { rating, content } = req.body; 
+            const commenterUserId = await getFromCookie(req, res, "id") as string;
+
+            if (!commenterUserId) {
+                res.status(401).json({ error: "Unauthorized: User ID is missing." });
+                return;
+            }
+
+            if (!rating || rating < 1 || rating > 5) {
+                res.status(400).json({ error: "Rating must be between 1 and 5." });
+                return;
+           }
+
+           if (!content || content.trim().length === 0) {
+               res.status(400).json({ error: "Content cannot be empty." });
+               return;
+           }
+            const review = await Review.findByIdAndUpdate(reviewId, { rating, content }, { new: true });
+            
+
+            res.status(200).json({ message: "Review updated successfully.", review });
+            return;
+
+        }catch(err){
+            res.status(500).json({ error: "An error occurred while updating the review.", err });
+            return;
+        }
+
+    }
+
 }
 
 export default reviewController;

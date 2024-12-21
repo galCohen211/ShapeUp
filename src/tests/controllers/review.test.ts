@@ -5,7 +5,6 @@ import Gym from '../../models/gym-model';
 import User from '../../models/user-model';
 import jwt from 'jsonwebtoken';
 
-// Mock dependencies
 jest.mock('../../models/review-model');
 jest.mock('../../models/gym-model');
 jest.mock('../../models/user-model');
@@ -105,3 +104,76 @@ describe('POST /reviews', () => {
     expect(response.body.error).toBe('An error occurred while adding the review.');
   });
 });
+
+jest.mock('../../models/review-model');
+jest.mock('../../models/user-model');
+
+describe('PUT /reviews/:reviewId', () => {
+  const mockUserToken = jwt.sign({ id: 'mockUserId', type: 'user' }, process.env.JWT_SECRET || 'testsecret');
+  const mockAdminToken = jwt.sign({ id: 'mockAdminId', type: 'ADMIN' }, process.env.JWT_SECRET || 'testsecret');
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should update a review successfully with valid inputs and token', async () => {
+    (Review.findByIdAndUpdate as jest.Mock).mockResolvedValue({
+      id: 'mockReviewId',
+      rating: 4,
+      content: 'Updated review content',
+      user: 'mockUserId',
+      gym: 'mockGymId',
+    });
+    (User.findById as jest.Mock).mockResolvedValue({ id: 'mockUserId', name: 'Mock User' });
+
+    const response = await request(app)
+      .put('/reviews/mockReviewId')
+      .set('Cookie', [`access_token=${mockUserToken}`])
+      .send({ rating: 4, content: 'Updated review content' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Review updated successfully.');
+    expect(Review.findByIdAndUpdate).toHaveBeenCalledWith('mockReviewId', { rating: 4, content: 'Updated review content' }, { new: true });
+  });
+
+  it('should return 401 if no token is provided', async () => {
+    const response = await request(app)
+      .put('/reviews/mockReviewId')
+      .send({ rating: 4, content: 'Updated review content' });
+
+    expect(response.status).toBe(401);
+  });
+
+  it('should return 400 if rating is invalid (out of range)', async () => {
+    const response = await request(app)
+      .put('/reviews/mockReviewId')
+      .set('Cookie', [`access_token=${mockUserToken}`])
+      .send({ rating: 6, content: 'Updated review content' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Rating must be between 1 and 5.');
+  });
+
+  it('should return 400 if content is empty or only whitespace', async () => {
+    const response = await request(app)
+      .put('/reviews/mockReviewId')
+      .set('Cookie', [`access_token=${mockUserToken}`])
+      .send({ rating: 4, content: '' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Content cannot be empty.');
+  });
+
+  it('should return 500 for unexpected errors', async () => {
+    (Review.findByIdAndUpdate as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+    const response = await request(app)
+      .put('/reviews/mockReviewId')
+      .set('Cookie', [`access_token=${mockUserToken}`])
+      .send({ rating: 4, content: 'Updated review content' });
+
+    expect(response.status).toBe(500);
+    expect(response.body.error).toBe('An error occurred while updating the review.');
+  });
+});
+
