@@ -91,6 +91,17 @@ class reviewController {
 
     }
 
+    static async getAllReviews(req: Request, res: Response): Promise<void> {
+        try{
+            const reviews = await Review.find();
+            res.status(200).json({ reviews });
+            return;
+        }catch(err){
+            res.status(500).json({ error: "An error occurred while fetching reviews.", err });
+            return;
+        }
+    }
+
 }
 
 export default reviewController;

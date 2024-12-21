@@ -13,7 +13,7 @@ router.post("/",verifyToken([IUserType.USER]), reviewController.addReview);
 router.put("/:reviewId",verifyToken([IUserType.USER]), reviewController.updateReview);
 
 // Get all reviews
-// router.get("/", reviewController.getAllReviews);
+router.get("/", reviewController.getAllReviews);
 
 
 
