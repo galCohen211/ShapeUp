@@ -55,7 +55,7 @@ class GymController {
         }
     }
 
-    // Edit gym details
+    // Update gym details
     static async updateGym(req: Request, res: Response): Promise<void> {
         try {
             const errors = validationResult(req);

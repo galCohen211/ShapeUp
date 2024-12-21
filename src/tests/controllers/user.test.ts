@@ -127,7 +127,7 @@ describe("UserController Endpoints", () => {
             const response = await request(app).get(`/users/user/${userId}`);
 
             expect(response.status).toBe(403);
-            expect(response.body.message).toBe("Unauthorized: Not a USER or GYM-OWNER");
+            expect(response.body.message).toBe("Forbidden: Not a USER or GYM-OWNER");
         });
     });
 
