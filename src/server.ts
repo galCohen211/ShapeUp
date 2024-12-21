@@ -4,6 +4,8 @@ import cors from "cors";
 import passport from "passport";
 import session from "express-session";
 import cookieParser from "cookie-parser";
+import swaggerUi from 'swagger-ui-express';
+import yaml from 'yamljs';
 
 import "./controllers/auth-controller";
 import initRouter from "./routes/init-route";
@@ -12,8 +14,12 @@ import userRouter from "./routes/user-route";
 import reviewRouter from "./routes/review-route";
 
 const app: any = express();
+const swaggerDocument = yaml.load('./swagger.yaml');
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Google OAuth
 app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
