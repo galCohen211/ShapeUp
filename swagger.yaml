@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: a API
+  description: Documentation of a's APIs
+  version: "1.0.0"
+
+servers:
+  - url: http://localhost:3000
+    description: Local server
+
+tags:
+  - name: "users"
+    description: "Endpoints related to user data management"
+
+paths:
+  /users/user/{userId}:
+    get:
+      tags:
+        - users
+      summary: Get user details by ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the user to retrieve
+      responses:
+        "200":
+          description: User details retrieved successfully
+        "404":
+          description: User not found
+        "403":
+          description: Unauthorized access
+  /users/updateUser/{userId}:
+    put:
+      tags:
+        - users
+      summary: Update user details
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the user to update
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                address:
+                  type: string
+                avatar:
+                  type: string
+      responses:
+        "200":
+          description: User updated successfully
+        "400":
+          description: Validation errors
+        "404":
+          description: User not found
+        "500":
+          description: Internal server error
+
