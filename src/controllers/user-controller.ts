@@ -3,7 +3,10 @@ import path from "path";
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
+import {getMessagesBetweenTwoUsers} from "../chat/chat-logic";
 import User, { IUserType } from "../models/user-model";
+import { ObjectId } from "mongoose";
+
 
 class UserController {
   static async updateUserById(req: Request, res: Response): Promise<void> {
@@ -90,6 +93,12 @@ class UserController {
       res.status(500).json({ message: "Server error" });
     }
   }
+    static async GetUserChats(req: Request, res: Response): Promise<void> {
+        const {userId1, userId2} = req.query;
+        const chat = await getMessagesBetweenTwoUsers([(userId1 as unknown) as ObjectId, (userId2 as unknown) as ObjectId]);
+    
+        res.status(200).send(chat);
+    }
 }
 
 export default UserController;

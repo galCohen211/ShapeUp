@@ -6,7 +6,10 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import swaggerUi from 'swagger-ui-express';
 import yaml from 'yamljs';
+import { Server } from 'socket.io';
+import * as http from "http";
 
+import { initChat } from "./chat/chat-server";
 import "./controllers/auth-controller";
 import initRouter from "./routes/init-route";
 import GymRouter from "./routes/gym-route"
@@ -31,6 +34,20 @@ app.use(cookieParser());
 
 // Access variables using process.env
 const PORT = process.env.PORT || 3000;
+
+const server = http.createServer();
+const socketIOServer = new Server(server, {
+  path: "/users-chat",
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+initChat(socketIOServer)
+server.listen(process.env.HTTP_SERVER_PORT, () => {
+  console.log("Socket.IO server running on http://localhost:" + process.env.HTTP_SERVER_PORT);
+});
+
 app.use(cors());
 app.use("/init", initRouter);
 app.use("/gyms", GymRouter);
