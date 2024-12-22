@@ -58,7 +58,7 @@ class reviewController {
         }
     }
 
-    static async updateReview(req: Request, res: Response): Promise<void> {
+    static async updateReviewById(req: Request, res: Response): Promise<void> {
         try {
             const { reviewId } = req.params;
             const { rating, content } = req.body;
