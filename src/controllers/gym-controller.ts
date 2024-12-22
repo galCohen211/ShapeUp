@@ -56,7 +56,7 @@ class GymController {
     }
 
     // Update gym details
-    static async updateGym(req: Request, res: Response): Promise<void> {
+    static async updateGymById(req: Request, res: Response): Promise<void> {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -176,7 +176,7 @@ class GymController {
         }
     }
 
-    static async deleteGym(req: Request, res: Response): Promise<void> {
+    static async deleteGymById(req: Request, res: Response): Promise<void> {
         try {
             const { gymId } = req.params;
             const gym = await Gym.findById(gymId);

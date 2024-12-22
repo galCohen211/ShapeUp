@@ -16,5 +16,4 @@ router.put("/:reviewId", verifyToken([IUserType.USER]), reviewController.updateR
 router.get("/", reviewController.getAllReviews);
 
 
-
 export default router;

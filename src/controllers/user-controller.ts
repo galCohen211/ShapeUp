@@ -6,7 +6,7 @@ import { validationResult } from "express-validator";
 import User, { IUserType } from "../models/user-model";
 
 class UserController {
-  static async updateUser(req: Request, res: Response): Promise<void> {
+  static async updateUserById(req: Request, res: Response): Promise<void> {
     const { password, firstName, lastName, address } = req.body;
     const { userId } = req.params;
 

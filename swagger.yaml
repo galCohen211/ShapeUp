@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: a API
-  description: Documentation of a's APIs
+  title: ShapeUp API
+  description: Documentation of ShapeUp's APIs
   version: "1.0.0"
 
 servers:
@@ -37,7 +37,7 @@ paths:
           description: User not found
         "403":
           description: Unauthorized access
-  /users/updateUser/{userId}:
+  /users/updateUserById/{userId}:
     put:
       tags:
         - users

@@ -246,7 +246,7 @@ export const refresh = async (req: Request, res: Response) => {
 
     const result = generateJWT(user._id, user.type);
     if (!result) {
-      user.refreshTokens = [""];
+      user.refreshTokens = [];
       await user.save();
       return res.status(400).json({ message: "Missing auth configuration" });
     }
