@@ -206,9 +206,7 @@ class GymController {
             }
             res.status(200).json({ message: "Gym deleted successfully" });
         } catch (error) {
-            res
-                .status(500)
-                .json({ message: "An error occurred while deleting the gym." });
+            res.status(500).json({ message: "An error occurred while deleting the gym." });
         }
     }
 }
