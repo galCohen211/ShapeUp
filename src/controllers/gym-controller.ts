@@ -21,9 +21,7 @@ class GymController {
             const owner = req.query.owner as string;
 
             if (!req.files || !(req.files as Express.Multer.File[]).length) {
-                res
-                    .status(400)
-                    .json({ message: "Please upload at least one picture." });
+                res.status(400).json({ message: "Please upload at least one picture." });
                 return;
             }
 
@@ -49,9 +47,7 @@ class GymController {
                 gym: newGym,
             });
         } catch (error) {
-            res
-                .status(500)
-                .json({ message: "An error occurred while adding the gym." });
+            res.status(500).json({ message: "An error occurred while adding the gym." });
         }
     }
 
@@ -119,14 +115,10 @@ class GymController {
                 new: true,
             });
 
-            res
-                .status(200)
-                .json({ message: "Gym updated successfully", gym: updatedGym });
+            res.status(200).json({ message: "Gym updated successfully", gym: updatedGym });
         } catch (error) {
             console.error(error);
-            res
-                .status(500)
-                .json({ message: "An error occurred while updating the gym" });
+            res.status(500).json({ message: "An error occurred while updating the gym" });
         }
     }
 
@@ -153,9 +145,7 @@ class GymController {
             }
             res.status(200).json({ gyms });
         } catch (error) {
-            res
-                .status(500)
-                .json({ message: "An error occurred while adding the gym." });
+            res.status(500).json({ message: "An error occurred while adding the gym." });
         }
     }
 
@@ -170,9 +160,7 @@ class GymController {
             gyms = await Gym.find({ owner: myUserId });
             res.status(200).json({ gyms });
         } catch (error) {
-            res
-                .status(500)
-                .json({ message: "An error occurred while adding the gym." });
+            res.status(500).json({ message: "An error occurred while adding the gym." });
         }
     }
 
@@ -185,9 +173,7 @@ class GymController {
                 return;
             }
             if (gym.owner.toString() !== (await getFromCookie(req, res, "id"))) {
-                res.status(403).json({
-                    message: "Forbidden. You don't have access to this resource",
-                });
+                res.status(403).json({ message: "Forbidden. You don't have access to this resource" });
                 return;
             }
 
