@@ -1,0 +1,160 @@
+openapi: 3.0.0
+info:
+  title: ShapeUp API
+  description: Documentation of ShapeUp's APIs
+  version: "1.0.0"
+
+servers:
+  - url: http://localhost:3000
+    description: Local server
+
+tags:
+  - name: "users"
+    description: "Endpoints related to user data management"
+  - name: "gyms"
+    description: "Endpoints related to gym data management"
+  - name: "reviews"
+    description: "Endpoints related to reviews"
+
+paths:
+  /users/user/{userId}:
+    get:
+      tags:
+        - users
+      summary: Get user details by ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the user to retrieve
+      responses:
+        "200":
+          description: User details retrieved successfully
+        "404":
+          description: User not found
+        "403":
+          description: Unauthorized access
+  /users/updateUserById/{userId}:
+    put:
+      tags:
+        - users
+      summary: Update user details
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the user to update
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                address:
+                  type: string
+                avatar:
+                  type: string
+      responses:
+        "200":
+          description: User updated successfully
+        "400":
+          description: Validation errors
+        "404":
+          description: User not found
+        "500":
+          description: Internal server error
+  /users/signup:
+    post:
+      tags:
+        - users
+      summary: Sign up a new user
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                address:
+                  type: string
+                avatar:
+                  type: string
+                  format: binary
+              required:
+                - email
+                - password
+                - firstName
+                - lastName
+                - address
+      responses:
+        "201":
+          description: User signed up successfully
+        "400":
+          description: Validation errors
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Log in a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        "200":
+          description: User logged in successfully
+        "400":
+          description: Validation errors
+  /users/logout:
+    post:
+      tags:
+        - users
+      summary: Log out the current user
+      responses:
+        "200":
+          description: User logged out successfully
+        "400":
+          description: Validation errors
+  /users/refresh:
+    post:
+      tags:
+        - users
+      summary: Refresh the authentication token
+      responses:
+        "200":
+          description: Token refreshed successfully
+        "400":
+          description: Validation errors

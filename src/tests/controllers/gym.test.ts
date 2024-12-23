@@ -186,9 +186,7 @@ describe("DELETE /gyms/:gymId", () => {
       .delete(`/gyms/${gymId}`);
 
     expect(response.status).toBe(403);
-    expect(response.body.message).toBe(
-      "Forbidden. You don't have access to this resource"
-    );
+    expect(response.body.message).toBe("Forbidden. You don't have access to this resource");
   });
 
   it("should handle server errors gracefully", async () => {
@@ -200,9 +198,7 @@ describe("DELETE /gyms/:gymId", () => {
     const response = await request(app).delete(`/gyms/${gymId}`);
 
     expect(response.status).toBe(500);
-    expect(response.body.message).toBe(
-      "An error occurred while deleting the gym."
-    );
+    expect(response.body.message).toBe("An error occurred while deleting the gym.");
   });
 });
 

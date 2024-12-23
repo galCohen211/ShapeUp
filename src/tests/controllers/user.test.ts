@@ -127,11 +127,11 @@ describe("UserController Endpoints", () => {
             const response = await request(app).get(`/users/user/${userId}`);
 
             expect(response.status).toBe(403);
-            expect(response.body.message).toBe("Unauthorized: Not a USER or GYM-OWNER");
+            expect(response.body.message).toBe("Forbidden: Not a USER or GYM-OWNER");
         });
     });
 
-    describe("PUT /users/updateUser/:userId", () => {
+    describe("PUT /users/updateUserById/:userId", () => {
         afterAll(async () => {
             await mongoose.disconnect();
         });
@@ -152,7 +152,7 @@ describe("UserController Endpoints", () => {
             existingUser.save = mockSave;
 
             const response = await request(app)
-                .put(`/users/updateUser/${userId}`)
+                .put(`/users/updateUserById/${userId}`)
                 .field("firstName", "Or")
                 .field("address", "Second street")
                 .attach("avatar", Buffer.from("image content"), "new-avatar.jpg");
@@ -172,7 +172,7 @@ describe("UserController Endpoints", () => {
             (User.findById as jest.Mock).mockResolvedValue(null);
 
             const response = await request(app)
-                .put(`/users/updateUser/${userId}`)
+                .put(`/users/updateUserById/${userId}`)
                 .send({ firstName: "Or" });
 
             expect(response.status).toBe(404);
@@ -181,7 +181,7 @@ describe("UserController Endpoints", () => {
 
         it("should return 400 for invalid userId", async () => {
             const response = await request(app)
-                .put("/users/updateUser/invalid-id")
+                .put("/users/updateUserById/invalid-id")
                 .send({ firstName: "Or" });
 
             expect(response.status).toBe(400);

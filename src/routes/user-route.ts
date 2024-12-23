@@ -81,7 +81,7 @@ router.get("/user/:userId", UserController.getUserById,
     .withMessage("User ID must be a valid MongoDB ObjectId."),]
 );
 
-router.put("/updateUser/:userId",
+router.put("/updateUserById/:userId",
   upload.fields([{ name: "avatar", maxCount: 1 }]),
   verifyToken([IUserType.GYM_OWNER, IUserType.USER]),
   [
@@ -93,7 +93,7 @@ router.put("/updateUser/:userId",
     body("lastName").optional().isString(),
     body("address").optional().isString(),
   ],
-  UserController.updateUser
+  UserController.updateUserById
 );
 
 export default router;

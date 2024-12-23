@@ -9,7 +9,7 @@ import { ObjectId } from "mongoose";
 
 
 class UserController {
-  static async updateUser(req: Request, res: Response): Promise<void> {
+  static async updateUserById(req: Request, res: Response): Promise<void> {
     const { password, firstName, lastName, address } = req.body;
     const { userId } = req.params;
 
@@ -46,13 +46,11 @@ class UserController {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
       }
-
       await user.save();
 
-      res
-        .status(200)
-        .json({ message: "User details updated successfully", user });
-    } catch (error) {
+      res.status(200).json({ message: "User details updated successfully", user });
+    }
+    catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Internal server error" });
     }
@@ -86,7 +84,7 @@ class UserController {
       }
 
       if (user.type !== IUserType.USER && user.type !== IUserType.GYM_OWNER) {
-        res.status(403).json({ message: "Unauthorized: Not a USER or GYM-OWNER" });
+        res.status(403).json({ message: "Forbidden: Not a USER or GYM-OWNER" });
         return;
       }
 
