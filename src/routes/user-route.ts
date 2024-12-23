@@ -114,5 +114,19 @@ router.post(
   UserController.addFavoriteGym
 );
 
+router.get(
+  "/filter",
+  verifyToken([IUserType.GYM_OWNER, IUserType.ADMIN]),
+  [
+    query("search")
+      .notEmpty()
+      .withMessage("Search query is required")
+      .isString()
+      .withMessage("Search query must be a string"),
+  ],
+  UserController.filterUsers
+);
+
+
 
 export default router;

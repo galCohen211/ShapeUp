@@ -194,93 +194,152 @@ describe("UserController Endpoints", () => {
     describe("POST /users/:userId/favoriteGym", () => {
         const userId = new mongoose.Types.ObjectId().toString();
         const gymId = new mongoose.Types.ObjectId().toString();
-    
+
         it("should add a gym to the user's favorites successfully", async () => {
             const mockUser = {
                 _id: userId,
                 favoriteGyms: [],
                 save: jest.fn().mockResolvedValue(true),
             };
-    
+
             const mockGym = {
                 _id: gymId,
                 name: "Mock Gym",
             };
-    
+
             (User.findById as jest.Mock).mockResolvedValue(mockUser);
             (Gym.findById as jest.Mock).mockResolvedValue(mockGym);
-    
+
             const response = await request(app)
                 .post(`/users/${userId}/favoriteGym`)
                 .send({ gymId });
-    
+
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("Gym added to favorites successfully");
             expect(response.body.favoriteGyms).toContain(gymId);
             expect(mockUser.favoriteGyms).toContain(gymId);
             expect(mockUser.save).toHaveBeenCalled();
         });
-    
+
         it("should return 404 if the gym does not exist", async () => {
             (Gym.findById as jest.Mock).mockResolvedValue(null);
-    
+
             const response = await request(app)
                 .post(`/users/${userId}/favoriteGym`)
                 .send({ gymId });
-    
+
             expect(response.status).toBe(404);
             expect(response.body.message).toBe("Gym not found");
         });
-    
+
         it("should return 404 if the user does not exist", async () => {
             const mockGym = {
                 _id: gymId,
                 name: "Mock Gym",
             };
-    
+
             (Gym.findById as jest.Mock).mockResolvedValue(mockGym);
             (User.findById as jest.Mock).mockResolvedValue(null);
-    
+
             const response = await request(app)
                 .post(`/users/${userId}/favoriteGym`)
                 .send({ gymId });
-    
+
             expect(response.status).toBe(404);
             expect(response.body.message).toBe("User not found");
         });
-    
+
         it("should return 400 if the gym is already in the user's favorites", async () => {
             const mockUser = {
                 _id: userId,
                 favoriteGyms: [gymId],
                 save: jest.fn(),
             };
-    
+
             const mockGym = {
                 _id: gymId,
                 name: "Mock Gym",
             };
-    
+
             (User.findById as jest.Mock).mockResolvedValue(mockUser);
             (Gym.findById as jest.Mock).mockResolvedValue(mockGym);
-    
+
             const response = await request(app)
                 .post(`/users/${userId}/favoriteGym`)
                 .send({ gymId });
-    
+
             expect(response.status).toBe(400);
             expect(response.body.message).toBe("Gym already in favorites");
         });
-    
+
         it("should return 500 if there is a server error", async () => {
             (User.findById as jest.Mock).mockRejectedValue(new Error("Server error"));
-    
+
             const response = await request(app)
                 .post(`/users/${userId}/favoriteGym`)
                 .send({ gymId });
-    
+
             expect(response.status).toBe(500);
             expect(response.body.message).toBe("Internal server error");
         });
-    });    
+    });
+
+    describe("GET /users/filter", () => {
+        it("should return 200 and the filtered user data", async () => {
+            const mockUsers = [
+                {
+                    _id: new mongoose.Types.ObjectId().toString(),
+                    firstName: "John",
+                    lastName: "Doe",
+                    email: "johndoe@example.com",
+                },
+                {
+                    _id: new mongoose.Types.ObjectId().toString(),
+                    firstName: "Jane",
+                    lastName: "Smith",
+                    email: "janesmith@example.com",
+                },
+            ];
+
+            const searchQuery = "john";
+
+            (User.find as jest.Mock).mockResolvedValue(mockUsers);
+
+            const response = await request(app).get(`/users/filter?search=${searchQuery}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body.users).toHaveLength(2);
+            expect(response.body.users[0].email).toBe("johndoe@example.com");
+        });
+
+        it("should return 404 if no users match the search query", async () => {
+            const searchQuery = "nonexistent";
+
+            (User.find as jest.Mock).mockResolvedValue([]);
+
+            const response = await request(app).get(`/users/filter?search=${searchQuery}`);
+
+            expect(response.status).toBe(404);
+            expect(response.body.message).toBe("No users found matching the search criteria");
+        });
+
+        it("should return 400 if the search query is missing", async () => {
+            const response = await request(app).get(`/users/filter`);
+
+            expect(response.status).toBe(400);
+            expect(response.body.errors).toBeDefined();
+        });
+
+        it("should return 500 if there is a server error", async () => {
+            (User.find as jest.Mock).mockRejectedValue(new Error("Server error"));
+
+            const searchQuery = "error";
+
+            const response = await request(app).get(`/users/filter?search=${searchQuery}`);
+
+            expect(response.status).toBe(500);
+            expect(response.body.message).toBe("Internal server error");
+        });
+    });
+
 });
