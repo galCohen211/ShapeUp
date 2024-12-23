@@ -97,7 +97,7 @@ router.put("/updateUser/:userId",
 );
 
 router.post(
-  "/:userId/favoriteGym",
+  "/addFavoriteGym/:userId",
   verifyToken([IUserType.USER]),
   [
     param("userId")

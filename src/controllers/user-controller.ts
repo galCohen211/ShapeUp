@@ -142,6 +142,8 @@ class UserController {
     try {
       const searchRegex = new RegExp(search, "i");
 
+      // Perform a case-insensitive search using regular expressions on the firstName, lastName, and email fields
+      // of the User collection to find users that match the search query.
       const users = await User.find({
         $or: [
           { firstName: { $regex: searchRegex } },
@@ -160,7 +162,6 @@ class UserController {
       res.status(500).json({ message: "Internal server error" });
     }
   }
-
 
 }
 
