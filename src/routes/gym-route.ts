@@ -67,4 +67,17 @@ router.get(
 
 router.delete("/:gymId", verifyToken([IUserType.GYM_OWNER]), GymController.deleteGym);
 
+router.get(
+    "/filter",
+    [
+        query("search")
+            .notEmpty()
+            .withMessage("Search query is required")
+            .isString()
+            .withMessage("Search query must be a string")
+    ],
+    GymController.filterGyms
+);
+
+
 export default router;
