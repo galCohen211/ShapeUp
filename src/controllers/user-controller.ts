@@ -1,18 +1,16 @@
 import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
-import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
+import { ObjectId } from "mongoose";
 import {getMessagesBetweenTwoUsers} from "../chat/chat-logic";
 import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
 
-import { ObjectId } from "mongoose";
-
 
 class UserController {
   static async updateUserById(req: Request, res: Response): Promise<void> {
-    const { password, firstName, lastName, address } = req.body;
+    const { firstName, lastName, city, street } = req.body;
     const { userId } = req.params;
 
     const errors = validationResult(req);
@@ -41,13 +39,10 @@ class UserController {
       // Update user fields
       if (firstName) user.firstName = firstName;
       if (lastName) user.lastName = lastName;
-      if (address) user.address = address;
+      if (city) user.city = city;
+      if (street) user.street = street;
       if (avatarUrl) user.avatarUrl = avatarUrl;
 
-      if (password) {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
-      }
       await user.save();
 
       res.status(200).json({ message: "User details updated successfully", user });
@@ -85,7 +80,7 @@ class UserController {
         return;
       }
 
-      if (user.type !== IUserType.USER && user.type !== IUserType.GYM_OWNER) {
+      if (user.role !== IUserType.USER && user.role !== IUserType.GYM_OWNER) {
         res.status(403).json({ message: "Forbidden: Not a USER or GYM-OWNER" });
         return;
       }
@@ -165,7 +160,7 @@ class UserController {
     }
   }
 
-    static async GetUserChats(req: Request, res: Response): Promise<void> {
+    static async getUserChats(req: Request, res: Response): Promise<void> {
         const {userId1, userId2} = req.query;
         const chat = await getMessagesBetweenTwoUsers([(userId1 as unknown) as ObjectId, (userId2 as unknown) as ObjectId]);
     

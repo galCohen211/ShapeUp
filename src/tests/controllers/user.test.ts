@@ -56,8 +56,8 @@ describe("UserController Endpoints", () => {
                 password: "123456",
                 firstName: "Gym",
                 lastName: "Owner",
-                address: "Somewhere",
-                type: "gym_owner",
+                city: "Somewhere",
+                role: "gym_owner",
                 favoriteGyms: [],
                 avatarUrl: "gym-owner.jpg",
             };
@@ -68,7 +68,7 @@ describe("UserController Endpoints", () => {
 
             expect(response.status).toBe(200);
             expect(response.body).toHaveProperty("email", "gymowner@example.com");
-            expect(response.body.type).toBe("gym_owner");
+            expect(response.body.role).toBe("gym_owner");
         });
 
         it("should return 404 if user is not found", async () => {
@@ -96,8 +96,8 @@ describe("UserController Endpoints", () => {
                 password: "123456",
                 firstName: "Regular",
                 lastName: "User",
-                address: "Somewhere",
-                type: "user",
+                city: "Somewhere",
+                role: "user",
                 favoriteGyms: [],
                 avatarUrl: "user.jpg",
             };
@@ -108,7 +108,7 @@ describe("UserController Endpoints", () => {
 
             expect(response.status).toBe(200);
             expect(response.body).toHaveProperty("email", "user@example.com");
-            expect(response.body.type).toBe("user");
+            expect(response.body.role).toBe("user");
         });
 
         it("should return 403 if the user is not a regular user or gym owner", async () => {
@@ -118,8 +118,8 @@ describe("UserController Endpoints", () => {
                 password: "123456",
                 firstName: "Gym",
                 lastName: "Owner",
-                address: "Somewhere",
-                type: "bla",
+                city: "Somewhere",
+                role: "bla",
                 favoriteGyms: [],
                 avatarUrl: "gym-owner.jpg",
             };
@@ -144,7 +144,8 @@ describe("UserController Endpoints", () => {
                 _id: userId,
                 firstName: "John",
                 lastName: "Doe",
-                address: "Old Address",
+                city: "Ramat Hasharon",
+                street: "Lamerhav",
                 avatarUrl: "old-avatar.jpg",
                 save: jest.fn(),
             };
@@ -156,14 +157,14 @@ describe("UserController Endpoints", () => {
             const response = await request(app)
                 .put(`/users/updateUserById/${userId}`)
                 .field("firstName", "Or")
-                .field("address", "Second street")
+                .field("street", "Second street")
                 .attach("avatar", Buffer.from("image content"), "new-avatar.jpg");
 
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("User details updated successfully");
 
             expect(existingUser.firstName).toBe("Or");
-            expect(existingUser.address).toBe("Second street");
+            expect(existingUser.street).toBe("Second street");
             expect(existingUser.avatarUrl).toContain("new-avatar");
 
             testImages.push("new-avatar.jpg");

@@ -6,32 +6,47 @@ export enum IUserType {
   USER = "user",
 }
 
+export enum IGender {
+  MALE = "male",
+  FEMALE = "female"
+}
+
 interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
   password?: string;
   firstName: string;
   lastName: string;
-  address?: string;
-  type: IUserType;
+  street?: string;
+  role: IUserType;
   favoriteGyms: Types.ObjectId[];
-  avatarUrl?: string,
-  gymOwnerLicenseImage?: string,
+  avatarUrl?: string;
+  gymOwnerLicenseImage?: string;
   refreshTokens?: string[];
+  birthdate?: Date;
+  gender?: IGender;
+  city?: string;
+  isChatGptAllowed?: boolean;
 }
 
-const UserSchema: Schema<IUser> = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: false },
+
+const UserSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  address: { type: String, required: false },
-  type: { type: String, required: true },
-  favoriteGyms: [{ type: Schema.Types.ObjectId, ref: "Gym" }],
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  street: { type: String },
+  birthdate: { type: Date },
+  gender: { type: String },
+  city: { type: String },
+  isChatGptAllowed: { type: Boolean, default: true },
+  role: { type: String, required: true },
   avatarUrl: { type: String, required: false },
   gymOwnerLicenseImage: { type: String, required: false },
-  refreshTokens: { type: [String], required: false, default: [] }
+  refreshTokens: { type: [String], required: false, default: [] },
+  favoriteGyms: [{ type: Schema.Types.ObjectId, ref: "Gym" }]
 });
+
 
 const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
 export default User;
