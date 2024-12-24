@@ -45,7 +45,7 @@ router.put(
             .isString()
             .withMessage("At least one picture is required"),
     ],
-    GymController.updateGym
+    GymController.updateGymById
 );
 
 router.get(
@@ -65,7 +65,7 @@ router.get(
     GymController.getMyGyms
 );
 
-router.delete("/:gymId", verifyToken([IUserType.GYM_OWNER]), GymController.deleteGym);
+router.delete("/:gymId", verifyToken([IUserType.GYM_OWNER]), GymController.deleteGymById);
 
 router.get(
     "/filter",

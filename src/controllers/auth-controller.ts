@@ -143,7 +143,7 @@ export const login = async (req: Request, res: Response) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).send("Wrong email or password");
+      return res.status(400).send("Wrong email or password");
     }
 
     // This is SSO user - no password in user object
@@ -153,7 +153,7 @@ export const login = async (req: Request, res: Response) => {
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).send("Wrong email or password");
+      return res.status(400).send("Wrong email or password");
     }
 
     if (!process.env.JWT_SECRET) {
@@ -246,7 +246,7 @@ export const refresh = async (req: Request, res: Response) => {
 
     const result = generateJWT(user._id, user.type);
     if (!result) {
-      user.refreshTokens = [""];
+      user.refreshTokens = [];
       await user.save();
       return res.status(400).json({ message: "Missing auth configuration" });
     }
