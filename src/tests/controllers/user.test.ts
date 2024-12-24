@@ -191,7 +191,7 @@ describe("UserController Endpoints", () => {
         });
     });
 
-    describe("POST /users/:userId/favoriteGym", () => {
+    describe("POST /users/addFavoriteGym/:userId", () => {
         const userId = new mongoose.Types.ObjectId().toString();
         const gymId = new mongoose.Types.ObjectId().toString();
 
@@ -211,7 +211,7 @@ describe("UserController Endpoints", () => {
             (Gym.findById as jest.Mock).mockResolvedValue(mockGym);
 
             const response = await request(app)
-                .post(`/users/${userId}/favoriteGym`)
+                .post(`/users/addFavoriteGym/${userId}`)
                 .send({ gymId });
 
             expect(response.status).toBe(200);
@@ -225,7 +225,7 @@ describe("UserController Endpoints", () => {
             (Gym.findById as jest.Mock).mockResolvedValue(null);
 
             const response = await request(app)
-                .post(`/users/${userId}/favoriteGym`)
+                .post(`/users/addFavoriteGym/${userId}`)
                 .send({ gymId });
 
             expect(response.status).toBe(404);
@@ -242,7 +242,7 @@ describe("UserController Endpoints", () => {
             (User.findById as jest.Mock).mockResolvedValue(null);
 
             const response = await request(app)
-                .post(`/users/${userId}/favoriteGym`)
+                .post(`/users/addFavoriteGym/${userId}`)
                 .send({ gymId });
 
             expect(response.status).toBe(404);
@@ -265,7 +265,7 @@ describe("UserController Endpoints", () => {
             (Gym.findById as jest.Mock).mockResolvedValue(mockGym);
 
             const response = await request(app)
-                .post(`/users/${userId}/favoriteGym`)
+                .post(`/users/addFavoriteGym/${userId}`)
                 .send({ gymId });
 
             expect(response.status).toBe(400);
@@ -276,7 +276,7 @@ describe("UserController Endpoints", () => {
             (User.findById as jest.Mock).mockRejectedValue(new Error("Server error"));
 
             const response = await request(app)
-                .post(`/users/${userId}/favoriteGym`)
+                .post(`/users/addFavoriteGym/${userId}`)
                 .send({ gymId });
 
             expect(response.status).toBe(500);

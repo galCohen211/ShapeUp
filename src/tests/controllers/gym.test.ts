@@ -319,14 +319,21 @@ describe("GET /gyms", () => {
 
       const searchQuery = "Fitness";
 
-      (Gym.find as jest.Mock).mockResolvedValue(mockGyms);
+      (Gym.find as jest.Mock).mockImplementation((query) => {
+        return Promise.resolve(
+          mockGyms.filter((gym) =>
+            gym.name.includes(query.$or[0].name.$regex.source)
+          )
+        );
+      });
 
       const response = await request(app).get(`/gyms/filter?search=${searchQuery}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.gyms).toHaveLength(2);
-      expect(response.body.gyms[0].name).toBe("Fitness World");
+      expect(response.body.gyms).toHaveLength(1); // Expect only one gym to match
+      expect(response.body.gyms[0]).toHaveProperty("name", "Fitness World");
     });
+
 
     it("should return 404 if no gyms match the search query", async () => {
       const searchQuery = "nonexistent";
