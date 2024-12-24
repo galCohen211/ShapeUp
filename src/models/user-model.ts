@@ -13,7 +13,7 @@ interface IUser extends Document {
   firstName: string;
   lastName: string;
   street?: string; 
-  type: IUserType;
+  role: IUserType;
   favoriteGyms: Types.ObjectId[];
   avatarUrl?: string;
   gymOwnerLicenseImage?: string;
@@ -35,6 +35,11 @@ const UserSchema = new mongoose.Schema({
   gender: { type: String, enum: ['Male', 'Female'] }, 
   city: { type: String },
   isChatGptAllowed: { type: Boolean, default: true },
+  role: { type: String, required: true },
+  avatarUrl: { type: String, required: false },
+  gymOwnerLicenseImage: { type: String, required: false },
+  refreshTokens: { type: [String], required: false, default: [] },
+  favoriteGyms: [{ type: Schema.Types.ObjectId, ref: "Gym" }]
 });
 
 

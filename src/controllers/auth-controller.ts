@@ -160,7 +160,7 @@ export const login = async (req: Request, res: Response) => {
       return { message: "Missing auth configuration" };
     }
 
-    const result = generateJWT(user._id, user.type);
+    const result = generateJWT(user._id, user.role);
     const accessToken = result.accessToken;
     const refreshToken = result.refreshToken;
 
@@ -244,7 +244,7 @@ export const refresh = async (req: Request, res: Response) => {
       return;
     }
 
-    const result = generateJWT(user._id, user.type);
+    const result = generateJWT(user._id, user.role);
     if (!result) {
       user.refreshTokens = [];
       await user.save();
@@ -293,7 +293,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
 
   // SSO user - don't register, just create token
   if (user) {
-    return generateJWT(user._id, user.type);
+    return generateJWT(user._id, user.role);
   }
 
   try {
@@ -326,7 +326,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
       gymOwnerLicenseImage: gymOwnerLicenseImage
     }).save();
 
-    const result = generateJWT(newUser._id, newUser.type);
+    const result = generateJWT(newUser._id, newUser.role);
     if (result.refreshToken) {
       newUser.refreshTokens?.push(result.refreshToken)
     }

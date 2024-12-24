@@ -82,7 +82,7 @@ class UserController {
         return;
       }
 
-      if (user.type !== IUserType.USER && user.type !== IUserType.GYM_OWNER) {
+      if (user.role !== IUserType.USER && user.role !== IUserType.GYM_OWNER) {
         res.status(403).json({ message: "Forbidden: Not a USER or GYM-OWNER" });
         return;
       }
