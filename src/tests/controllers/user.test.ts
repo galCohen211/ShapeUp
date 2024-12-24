@@ -338,7 +338,7 @@ describe("UserController Endpoints", () => {
     it("should return 500 if there is a server error", async () => {
         (User.find as jest.Mock).mockRejectedValue(new Error("Server error"));
 
-        const searchQuery = "error";
+        const searchQuery = "generalSearch";
 
         const response = await request(app).get(`/users/filter?search=${searchQuery}`);
 
