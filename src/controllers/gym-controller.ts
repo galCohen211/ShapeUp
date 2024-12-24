@@ -195,6 +195,42 @@ class GymController {
             res.status(500).json({ message: "An error occurred while deleting the gym." });
         }
     }
+
+    static async filterGyms(req: Request, res: Response): Promise<void> {
+        const { search } = req.query;
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            res.status(400).json({ errors: errors.array() });
+            return;
+        }
+
+        if (!search || typeof search !== "string") {
+            res.status(400).json({ message: "Search query is required and must be a string" });
+            return;
+        }
+
+        try {
+            const searchRegex = new RegExp(search, "i");
+
+            const gyms = await Gym.find({
+                $or: [
+                    { name: { $regex: searchRegex } },
+                    { location: { $regex: searchRegex } }
+                ]
+            });
+
+            if (gyms.length === 0) {
+                res.status(404).json({ message: "No gyms found matching the search criteria" });
+                return;
+            }
+
+            res.status(200).json({ gyms });
+        } catch (error) {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
 }
 
 export default GymController;

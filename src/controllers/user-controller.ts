@@ -5,6 +5,8 @@ import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
 import {getMessagesBetweenTwoUsers} from "../chat/chat-logic";
 import User, { IUserType } from "../models/user-model";
+import Gym from "../models/gym-model";
+
 import { ObjectId } from "mongoose";
 
 
@@ -93,6 +95,76 @@ class UserController {
       res.status(500).json({ message: "Server error" });
     }
   }
+
+  static async addFavoriteGym(req: Request, res: Response): Promise<void> {
+    const { userId } = req.params;
+    const { gymId } = req.body;
+
+    try {
+      const gym = await Gym.findById(gymId);
+      if (!gym) {
+        res.status(404).json({ message: "Gym not found" });
+        return;
+      }
+      const user = await User.findById(userId);
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+      if (user.favoriteGyms.includes(gymId)) {
+        res.status(400).json({ message: "Gym already in favorites" });
+        return;
+      }
+      user.favoriteGyms.push(gymId);
+      await user.save();
+
+      res.status(200).json({
+        message: "Gym added to favorites successfully",
+        favoriteGyms: user.favoriteGyms,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  static async filterUsers(req: Request, res: Response): Promise<void> {
+    const { search } = req.query;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+      return;
+    }
+
+    if (!search || typeof search !== "string") {
+      res.status(400).json({ message: "Search query is required and must be a string" });
+      return;
+    }
+
+    try {
+      const searchRegex = new RegExp(search, "i");
+
+      // Perform a case-insensitive search using regular expressions on the firstName, lastName, and email fields
+      // of the User collection to find users that match the search query.
+      const users = await User.find({
+        $or: [
+          { firstName: { $regex: searchRegex } },
+          { lastName: { $regex: searchRegex } },
+          { email: { $regex: searchRegex } }
+        ]
+      });
+
+      if (users.length === 0) {
+        res.status(404).json({ message: "No users found matching the search criteria" });
+        return;
+      }
+
+      res.status(200).json({ users });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
     static async GetUserChats(req: Request, res: Response): Promise<void> {
         const {userId1, userId2} = req.query;
         const chat = await getMessagesBetweenTwoUsers([(userId1 as unknown) as ObjectId, (userId2 as unknown) as ObjectId]);

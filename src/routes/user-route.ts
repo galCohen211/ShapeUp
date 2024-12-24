@@ -96,4 +96,37 @@ router.put("/updateUserById/:userId",
   UserController.updateUserById
 );
 
+router.post(
+  "/addFavoriteGym/:userId",
+  verifyToken([IUserType.USER]),
+  [
+    param("userId")
+      .notEmpty()
+      .withMessage("User ID is required.")
+      .isMongoId()
+      .withMessage("User ID must be a valid MongoDB ObjectId."),
+    body("gymId")
+      .notEmpty()
+      .withMessage("Gym ID is required.")
+      .isMongoId()
+      .withMessage("Gym ID must be a valid MongoDB ObjectId."),
+  ],
+  UserController.addFavoriteGym
+);
+
+router.get(
+  "/filter",
+  verifyToken([IUserType.GYM_OWNER, IUserType.ADMIN]),
+  [
+    query("search")
+      .notEmpty()
+      .withMessage("Search query is required")
+      .isString()
+      .withMessage("Search query must be a string"),
+  ],
+  UserController.filterUsers
+);
+
+
+
 export default router;
