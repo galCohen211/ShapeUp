@@ -119,7 +119,7 @@ describe("UserController Endpoints", () => {
                 firstName: "Gym",
                 lastName: "Owner",
                 city: "Somewhere",
-                type: "bla",
+                role: "bla",
                 favoriteGyms: [],
                 avatarUrl: "gym-owner.jpg",
             };
