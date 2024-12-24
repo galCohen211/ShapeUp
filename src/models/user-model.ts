@@ -6,21 +6,26 @@ export enum IUserType {
   USER = "user",
 }
 
+export enum IGenderType {
+  Male = "male",
+  Female = "female"
+}
+
 interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
   password?: string;
   firstName: string;
   lastName: string;
-  street?: string; 
+  street?: string;
   role: IUserType;
   favoriteGyms: Types.ObjectId[];
   avatarUrl?: string;
   gymOwnerLicenseImage?: string;
   refreshTokens?: string[];
   birthdate?: Date;
-  gender?: string;
-  city?: string; 
+  gender?: IGenderType;
+  city?: string;
   isChatGptAllowed?: boolean;
 }
 
@@ -30,9 +35,9 @@ const UserSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  street: { type: String }, 
-  birthdate: { type: Date }, 
-  gender: { type: String, enum: ['Male', 'Female'] }, 
+  street: { type: String },
+  birthdate: { type: Date },
+  gender: { type: String },
   city: { type: String },
   isChatGptAllowed: { type: Boolean, default: true },
   role: { type: String, required: true },
