@@ -6,7 +6,7 @@ export enum IUserType {
   USER = "user",
 }
 
-export enum IGenderType {
+export enum IGender {
   Male = "male",
   Female = "female"
 }
@@ -24,7 +24,7 @@ interface IUser extends Document {
   gymOwnerLicenseImage?: string;
   refreshTokens?: string[];
   birthdate?: Date;
-  gender?: IGenderType;
+  gender?: IGender;
   city?: string;
   isChatGptAllowed?: boolean;
 }
