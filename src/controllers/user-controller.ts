@@ -1,13 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
-import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
+import { ObjectId } from "mongoose";
 import {getMessagesBetweenTwoUsers} from "../chat/chat-logic";
 import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
-
-import { ObjectId } from "mongoose";
 
 
 class UserController {
@@ -162,7 +160,7 @@ class UserController {
     }
   }
 
-    static async GetUserChats(req: Request, res: Response): Promise<void> {
+    static async getUserChats(req: Request, res: Response): Promise<void> {
         const {userId1, userId2} = req.query;
         const chat = await getMessagesBetweenTwoUsers([(userId1 as unknown) as ObjectId, (userId2 as unknown) as ObjectId]);
     
