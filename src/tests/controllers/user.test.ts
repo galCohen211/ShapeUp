@@ -303,43 +303,47 @@ describe("UserController Endpoints", () => {
 
             const searchQuery = "john";
 
-            (User.find as jest.Mock).mockResolvedValue(mockUsers);
+            (User.find as jest.Mock).mockImplementation((query) => {
+                const regex = new RegExp(query.$or[0].firstName.$regex, "i");
+                return Promise.resolve(mockUsers.filter(user => regex.test(user.firstName)));
+            });
 
             const response = await request(app).get(`/users/filter?search=${searchQuery}`);
 
             expect(response.status).toBe(200);
-            expect(response.body.users).toHaveLength(2);
+            expect(response.body.users).toHaveLength(1); // Expect only one user to match
             expect(response.body.users[0].email).toBe("johndoe@example.com");
-        });
-
-        it("should return 404 if no users match the search query", async () => {
-            const searchQuery = "nonexistent";
-
-            (User.find as jest.Mock).mockResolvedValue([]);
-
-            const response = await request(app).get(`/users/filter?search=${searchQuery}`);
-
-            expect(response.status).toBe(404);
-            expect(response.body.message).toBe("No users found matching the search criteria");
-        });
-
-        it("should return 400 if the search query is missing", async () => {
-            const response = await request(app).get(`/users/filter`);
-
-            expect(response.status).toBe(400);
-            expect(response.body.errors).toBeDefined();
-        });
-
-        it("should return 500 if there is a server error", async () => {
-            (User.find as jest.Mock).mockRejectedValue(new Error("Server error"));
-
-            const searchQuery = "error";
-
-            const response = await request(app).get(`/users/filter?search=${searchQuery}`);
-
-            expect(response.status).toBe(500);
-            expect(response.body.message).toBe("Internal server error");
         });
     });
 
+
+    it("should return 404 if no users match the search query", async () => {
+        const searchQuery = "nonexistent";
+
+        (User.find as jest.Mock).mockResolvedValue([]);
+
+        const response = await request(app).get(`/users/filter?search=${searchQuery}`);
+
+        expect(response.status).toBe(404);
+        expect(response.body.message).toBe("No users found matching the search criteria");
+    });
+
+    it("should return 400 if the search query is missing", async () => {
+        const response = await request(app).get(`/users/filter`);
+
+        expect(response.status).toBe(400);
+        expect(response.body.errors).toBeDefined();
+    });
+
+    it("should return 500 if there is a server error", async () => {
+        (User.find as jest.Mock).mockRejectedValue(new Error("Server error"));
+
+        const searchQuery = "error";
+
+        const response = await request(app).get(`/users/filter?search=${searchQuery}`);
+
+        expect(response.status).toBe(500);
+        expect(response.body.message).toBe("Internal server error");
+    });
 });
+
