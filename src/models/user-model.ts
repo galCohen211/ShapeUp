@@ -12,26 +12,31 @@ interface IUser extends Document {
   password?: string;
   firstName: string;
   lastName: string;
-  address?: string;
+  street?: string; 
   type: IUserType;
   favoriteGyms: Types.ObjectId[];
-  avatarUrl?: string,
-  gymOwnerLicenseImage?: string,
+  avatarUrl?: string;
+  gymOwnerLicenseImage?: string;
   refreshTokens?: string[];
+  birthdate?: Date;
+  gender?: string;
+  city?: string; 
+  isChatGptAllowed?: boolean;
 }
 
-const UserSchema: Schema<IUser> = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: false },
+
+const UserSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  address: { type: String, required: false },
-  type: { type: String, required: true },
-  favoriteGyms: [{ type: Schema.Types.ObjectId, ref: "Gym" }],
-  avatarUrl: { type: String, required: false },
-  gymOwnerLicenseImage: { type: String, required: false },
-  refreshTokens: { type: [String], required: false, default: [] }
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  street: { type: String }, 
+  birthdate: { type: Date }, 
+  gender: { type: String, enum: ['Male', 'Female'] }, 
+  city: { type: String },
+  isChatGptAllowed: { type: Boolean, default: true },
 });
+
 
 const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
 export default User;

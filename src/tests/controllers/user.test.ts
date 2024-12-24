@@ -144,7 +144,8 @@ describe("UserController Endpoints", () => {
                 _id: userId,
                 firstName: "John",
                 lastName: "Doe",
-                address: "Old Address",
+                city: "Ramat Hasharon",
+                street: "Lamerhav",
                 avatarUrl: "old-avatar.jpg",
                 save: jest.fn(),
             };
@@ -156,14 +157,14 @@ describe("UserController Endpoints", () => {
             const response = await request(app)
                 .put(`/users/updateUserById/${userId}`)
                 .field("firstName", "Or")
-                .field("address", "Second street")
+                .field("street", "Second street")
                 .attach("avatar", Buffer.from("image content"), "new-avatar.jpg");
 
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("User details updated successfully");
 
             expect(existingUser.firstName).toBe("Or");
-            expect(existingUser.address).toBe("Second street");
+            expect(existingUser.street).toBe("Second street");
             expect(existingUser.avatarUrl).toContain("new-avatar");
 
             testImages.push("new-avatar.jpg");

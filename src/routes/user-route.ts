@@ -88,10 +88,10 @@ router.put("/updateUserById/:userId",
     param("userId")
       .notEmpty().withMessage("User ID is required.")
       .isMongoId().withMessage("User ID must be a valid MongoDB ObjectId."),
-    body("password").optional(),
     body("firstName").optional().isString(),
     body("lastName").optional().isString(),
-    body("address").optional().isString(),
+    body("city").optional().isString(),
+    body("street").optional().isString(),
   ],
   UserController.updateUserById
 );

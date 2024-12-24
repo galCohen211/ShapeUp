@@ -12,7 +12,7 @@ import { ObjectId } from "mongoose";
 
 class UserController {
   static async updateUserById(req: Request, res: Response): Promise<void> {
-    const { password, firstName, lastName, address } = req.body;
+    const { firstName, lastName, city, street } = req.body;
     const { userId } = req.params;
 
     const errors = validationResult(req);
@@ -41,13 +41,10 @@ class UserController {
       // Update user fields
       if (firstName) user.firstName = firstName;
       if (lastName) user.lastName = lastName;
-      if (address) user.address = address;
+      if (city) user.city = city;
+      if (street) user.street = street;
       if (avatarUrl) user.avatarUrl = avatarUrl;
 
-      if (password) {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
-      }
       await user.save();
 
       res.status(200).json({ message: "User details updated successfully", user });
