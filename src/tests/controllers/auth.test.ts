@@ -75,6 +75,7 @@ describe("Auth Endpoints", () => {
 
         expect(response.status).toBe(201);
         expect(response.body.message).toBe("User registered successfully");
+        expect(response.body.error).not.toBeDefined();
 
       testImages.push("test-image1.jpg");
     });

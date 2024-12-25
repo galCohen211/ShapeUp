@@ -80,12 +80,11 @@ export const signup = async (req: Request, res: Response) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log("1");
-    res.status(400).json({ errors: errors.array(), message: errors.array() }); // add message to the response
+    res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
     return;
   }
 
-  const { email, password, firstName, lastName, address, gymOwnerLicenseImage, street, city, birthdate, gender } = req.body;
+  const { email, password, firstName, lastName, gymOwnerLicenseImage, street, city, birthdate, gender } = req.body;
 
   let userRole: IUserType = IUserType.USER; // default type is user
   if (gymOwnerLicenseImage) {
@@ -94,8 +93,7 @@ export const signup = async (req: Request, res: Response) => {
 
   const avatar = req.files && "avatar" in req.files ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
   if (!avatar) {
-    console.log("2");
-    return res.status(400).json({ error: "Please upload an avatar" });
+    return res.status(400).json({ message: "Please upload an avatar",error: "avatar is not defined" });
   }
   const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
 
@@ -299,7 +297,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
 
   // SSO user - don't register, just create token
   if (user) {
-    return generateJWT(user._id, user.role);
+    return generateJWT(user._id, user.role); // why?
   }
 
   try {
