@@ -35,7 +35,7 @@ passport.use(
           email: profile.email,
           firstName: profile.name.givenName,
           lastName: profile.name.familyName,
-          userType: IUserType.USER
+          userRole: IUserType.USER
         });
 
         if ("accessToken" in res) {
@@ -80,19 +80,21 @@ export const signup = async (req: Request, res: Response) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(400).json({ errors: errors.array() });
+    console.log("1");
+    res.status(400).json({ errors: errors.array(), message: errors.array() }); // add message to the response
     return;
   }
 
-  const { email, password, firstName, lastName, address, gymOwnerLicenseImage } = req.body;
+  const { email, password, firstName, lastName, address, gymOwnerLicenseImage, street, city, birthdate, gender } = req.body;
 
-  let userType: IUserType = IUserType.USER; // default type is user
+  let userRole: IUserType = IUserType.USER; // default type is user
   if (gymOwnerLicenseImage) {
-    userType = IUserType.GYM_OWNER;
+    userRole = IUserType.GYM_OWNER;
   }
 
   const avatar = req.files && "avatar" in req.files ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
   if (!avatar) {
+    console.log("2");
     return res.status(400).json({ error: "Please upload an avatar" });
   }
   const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
@@ -100,16 +102,20 @@ export const signup = async (req: Request, res: Response) => {
   try {
     const result = await registerGeneralUser({
       email,
+      password,
       firstName,
       lastName,
-      password,
-      address,
-      userType,
+      street,
+      city,
+      userRole,
+      birthdate,
+      gender,
       avatarUrl,
-      gymOwnerLicenseImage
+      gymOwnerLicenseImage // null if not gym owner
     });
 
-    if (result.message) {
+    if (result.message) { // bad check, improve
+      console.log("3");
       return res.status(400).json({ message: result.message });
     }
 
@@ -124,9 +130,9 @@ export const signup = async (req: Request, res: Response) => {
         userId: result._id
       });
     }
-  } catch (error) {
-    console.error("Error during signup:", error);
-    return res.status(500).json({ message: "Internal server error" });
+  } catch (err) {
+    console.error("Error during signup:", err);
+    return res.status(500).json({ message: "Internal server error" }); // add error message
   }
 };
 
@@ -283,12 +289,12 @@ export const refresh = async (req: Request, res: Response) => {
 }
 
 const registerGeneralUser = async (params: RegisterUserParams) => {
-  const { email, firstName, lastName, password, address, userType, gymOwnerLicenseImage, avatarUrl } = params;
+  const { email, password, firstName, lastName, street, city, userRole, birthdate, gender, avatarUrl, gymOwnerLicenseImage } = params;
   const user = await User.findOne({ email });
 
   // "regular" user
   if (user && password) {
-    return { message: "User already exists" };
+    return { message: "User already exists" }; // error, 400?
   }
 
   // SSO user - don't register, just create token
@@ -299,8 +305,8 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
   try {
     let hashedPassword: string | null = null;
 
-    if (!address) {
-      let address: string | null = null;
+    if (!city) { // check all ifs, omit or add others
+      let city: string | null = null;
     }
     if (!gymOwnerLicenseImage) {
       let gymOwnerLicenseImage: string | null = null;
@@ -309,7 +315,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
       let avatarUrl: string | null = null;
     }
 
-    if (password) {
+    if (password) { // move to signup?
       const salt = await bcrypt.genSalt(10);
       hashedPassword = await bcrypt.hash(password, salt);
     }
@@ -319,11 +325,16 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
       password: hashedPassword, // if SSO is used, the value is null
       firstName: firstName,
       lastName: lastName,
-      address: address,
-      type: userType,
-      favoriteGyms: [],
+      street: street,
+      city: city,
+      role: userRole,
+      birthdate: birthdate,
+      gender: gender,
       avatarUrl: avatarUrl,
-      gymOwnerLicenseImage: gymOwnerLicenseImage
+      refreshTokens: [],
+      gymOwnerLicenseImage: gymOwnerLicenseImage,
+      favoriteGyms: [],
+      isChatGptAllowed: true
     }).save();
 
     const result = generateJWT(newUser._id, newUser.role);
@@ -332,7 +343,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
     }
     await newUser.save(); // save the refreshToken
 
-    return result;
+    return result; // why?
   }
   catch (err) {
     return { message: "Failed to register user", error: err };

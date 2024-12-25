@@ -18,33 +18,33 @@ interface IUser extends Document {
   firstName: string;
   lastName: string;
   street?: string;
+  city?: string;
   role: IUserType;
-  favoriteGyms: Types.ObjectId[];
-  avatarUrl?: string;
-  gymOwnerLicenseImage?: string;
-  refreshTokens?: string[];
   birthdate?: Date;
   gender?: IGender;
-  city?: string;
+  avatarUrl?: string;
+  refreshTokens?: string[];
+  gymOwnerLicenseImage?: string;
+  favoriteGyms: Types.ObjectId[];
   isChatGptAllowed?: boolean;
 }
 
 
 const UserSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
   street: { type: String },
+  city: { type: String },
+  role: { type: String, required: true }, // IUserType
   birthdate: { type: Date },
   gender: { type: String },
-  city: { type: String },
-  isChatGptAllowed: { type: Boolean, default: true },
-  role: { type: String, required: true },
   avatarUrl: { type: String, required: false },
-  gymOwnerLicenseImage: { type: String, required: false },
   refreshTokens: { type: [String], required: false, default: [] },
-  favoriteGyms: [{ type: Schema.Types.ObjectId, ref: "Gym" }]
+  gymOwnerLicenseImage: { type: String, required: false },
+  favoriteGyms: [{ type: Schema.Types.ObjectId, ref: "Gym" }],
+  isChatGptAllowed: { type: Boolean, default: true }
 });
 
 

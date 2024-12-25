@@ -6,7 +6,7 @@ import path from "path";
 import jwt from "jsonwebtoken";
 
 import app from "../../server";
-import User from "../../models/user-model";
+import User, {IUserType, IGender} from "../../models/user-model";
 
 jest.mock("../../models/user-model");
 
@@ -52,7 +52,10 @@ describe("Auth Endpoints", () => {
         password: "12345",
         firstName: "John",
         lastName: "Doe",
-        address: "First street",
+        street: "First street",
+        city: "Duke City",
+        birthdate: new Date(),
+        gender: IGender.MALE,
         avatar: ["http://localhost/uploads/test-image1.jpg"],
         refreshTokens: [],
         save: jest.fn().mockResolvedValue(true),
@@ -64,11 +67,14 @@ describe("Auth Endpoints", () => {
         .field("password", "12345")
         .field("firstName", "John")
         .field("lastName", "Doe")
-        .field("address", "First street")
+        .field("street", "First street")
+        .field("city", "Duke City")
+        .field("birthdate", new Date().toISOString())
+        .field("gender", IGender.MALE)
         .attach("avatar", Buffer.from("image content"), "test-image1.jpg");
 
-      expect(response.status).toBe(201);
-      expect(response.body.message).toBe("User registered successfully");
+        expect(response.status).toBe(201);
+        expect(response.body.message).toBe("User registered successfully");
 
       testImages.push("test-image1.jpg");
     });

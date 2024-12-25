@@ -1,14 +1,17 @@
 import { JwtPayload } from "jsonwebtoken";
 
-import { IUserType } from "../models/user-model";
+import { IUserType, IGender } from "../models/user-model";
 
 export interface RegisterUserParams {
     email: string;
+    password?: string;
     firstName: string;
     lastName: string;
-    password?: string;
-    address?: string;
-    userType?: IUserType;
+    street?: string;
+    city?: string;
+    userRole?: IUserType;
+    birthdate?: Date;
+    gender?: IGender;
     avatarUrl?: string;
     gymOwnerLicenseImage?: string;
 }
