@@ -140,7 +140,7 @@ export const login = async (req: Request, res: Response) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(400).json({ errors: errors.array() });
+    res.status(400).json({ errors: errors.array() }); // add message to the response
     return;
   }
 
@@ -149,20 +149,20 @@ export const login = async (req: Request, res: Response) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).send("Wrong email or password");
+      return res.status(400).send("Wrong email or password"); // 401
     }
 
     // This is SSO user - no password in user object
     if (!user.password) {
-      return res.status(400).send("Wrong email or password");
+      return res.status(400).send("Wrong email or password"); // 401
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).send("Wrong email or password");
+      return res.status(400).send("Wrong email or password"); // 401
     }
 
-    if (!process.env.JWT_SECRET) {
+    if (!process.env.JWT_SECRET) { // omit?
       return { message: "Missing auth configuration" };
     }
 
@@ -182,15 +182,15 @@ export const login = async (req: Request, res: Response) => {
     }
     await user.save(); // save the refresh token in user object
 
-    return res.status(200).send({
+    return res.status(200).send({ // add message?
       email: user.email,
       accessToken: accessToken,
       refreshToken: refreshToken,
     });
 
   }
-  catch (error) {
-    console.error("Error during login:", error);
+  catch (err) {
+    console.error("Error during login:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 }
@@ -223,9 +223,9 @@ export const logout = async (req: Request, res: Response) => {
 
     res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
     return res.status(200).send({ message: "Logged out successfully" });
-  } catch (error) {
-    console.error("Error during logout:", error);
-    return res.status(500).json({ message: "Server error" });
+  } catch (err) {
+    console.error("Error during logout:", err);
+    return res.status(500).json({ message: "Server error" }); // add error message
   }
 };
 
@@ -284,7 +284,7 @@ export const refresh = async (req: Request, res: Response) => {
     });
 
   } catch (err) {
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" }); // add error message
   }
 }
 
@@ -397,8 +397,8 @@ export const getFromCookie = async (req: Request, res: Response, property: strin
       res.status(400).json({ message: `'${property}' not found in token` });
     }
 
-  } catch (error) {
-    res.status(400).json({ message: "Invalid token", error: error });
+  } catch (err) {
+    res.status(400).json({ message: "Invalid token", error: err });
   }
 }
 
