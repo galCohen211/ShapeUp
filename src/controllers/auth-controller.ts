@@ -97,19 +97,23 @@ export const signup = async (req: Request, res: Response) => {
   }
   const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
 
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+
   try {
     const result = await registerGeneralUser({
-      email,
-      password,
-      firstName,
-      lastName,
-      street,
-      city,
-      userRole,
-      birthdate,
-      gender,
-      avatarUrl,
-      gymOwnerLicenseImage // null if not gym owner
+      email: email,
+      password: hashedPassword,
+      firstName: firstName,
+      lastName: lastName,
+      street: street,
+      city: city,
+      userRole: userRole,
+      birthdate: birthdate,
+      gender: gender,
+      avatarUrl: avatarUrl,
+      gymOwnerLicenseImage: gymOwnerLicenseImage // null if not gym owner
     });
 
     if (result.message) {
@@ -119,7 +123,6 @@ export const signup = async (req: Request, res: Response) => {
         return res.status(400).json({ message: result.message });
       }
     }
-
 
     if ("accessToken" in result) {
       res.cookie("access_token", result.accessToken, {
@@ -221,7 +224,7 @@ export const logout = async (req: Request, res: Response) => {
     res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
-    return res.status(500).json({ message: "Server error", error: err });
+    return res.status(500).json({ message: "Internal server error", error: err });
   }
 };
 
@@ -280,7 +283,7 @@ export const refresh = async (req: Request, res: Response) => {
     });
 
   } catch (err) {
-    return res.status(500).json({ message: "Server error", error: err });
+    return res.status(500).json({ message: "Internal server error", error: err });
   }
 }
 
@@ -299,26 +302,10 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
   }
 
   try {
-    let hashedPassword: string | null = null;
-
-    if (!city) { // check all ifs, omit or add others
-      let city: string | null = null;
-    }
-    if (!gymOwnerLicenseImage) {
-      let gymOwnerLicenseImage: string | null = null;
-    }
-    if (!avatarUrl) {
-      let avatarUrl: string | null = null;
-    }
-
-    if (password) { // move to signup?
-      const salt = await bcrypt.genSalt(10);
-      hashedPassword = await bcrypt.hash(password, salt);
-    }
 
     const newUser = await new User({
       email: email,
-      password: hashedPassword, // if SSO is used, the value is null
+      password: password, // if SSO is used, the value is null
       firstName: firstName,
       lastName: lastName,
       street: street,

@@ -37,7 +37,7 @@ const UserSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   street: { type: String },
   city: { type: String },
-  role: { type: String, enum: Object.values(IUserType), required: true },
+  role: { type: String, required: true, enum: Object.values(IUserType) },
   birthdate: { type: Date },
   gender: { type: String },
   avatarUrl: { type: String, required: false },
