@@ -6,7 +6,7 @@ import path from "path";
 import jwt from "jsonwebtoken";
 
 import app from "../../server";
-import User, {IUserType, IGender} from "../../models/user-model";
+import User, { IUserType, IGender } from "../../models/user-model";
 
 jest.mock("../../models/user-model");
 
@@ -73,9 +73,9 @@ describe("Auth Endpoints", () => {
         .field("gender", IGender.MALE)
         .attach("avatar", Buffer.from("image content"), "test-image1.jpg");
 
-        expect(response.status).toBe(201);
-        expect(response.body.message).toBe("User registered successfully");
-        expect(response.body.error).not.toBeDefined();
+      expect(response.status).toBe(201);
+      expect(response.body.message).toBe("User registered successfully");
+      expect(response.body.error).not.toBeDefined();
 
       testImages.push("test-image1.jpg");
     });
@@ -88,9 +88,11 @@ describe("Auth Endpoints", () => {
       password: "$2b$12$kiwSU0JHcdsDVJLOxDD2AekohHwS5RVU8E5wZerlnFE7/Jibvr10W", // bcrypt for 12345
       firstName: "John",
       lastName: "Doe",
-      address: "First Street",
-      type: "USER",
-      avatarUrl: "http://example.com/avatar.jpg",
+      street: "First street",
+      city: "Duke City",
+      birthdate: new Date(),
+      gender: IGender.MALE,
+      avatar: "http://example.com/avatar.jpg",
       refreshTokens: [],
       save: jest.fn().mockResolvedValue(true),
     };
@@ -174,8 +176,10 @@ describe("Auth Endpoints", () => {
       password: "$2b$12$kiwSU0JHcdsDVJLOxDD2AekohHwS5RVU8E5wZerlnFE7/Jibvr10W", // bcrypt for 12345
       firstName: "John",
       lastName: "Doe",
-      address: "First Street",
-      type: "USER",
+      street: "First street",
+      city: "Duke City",
+      birthdate: new Date(),
+      gender: IGender.MALE,
       avatarUrl: "http://example.com/avatar.jpg",
       refreshTokens: [myRefreshToken],
       save: jest.fn().mockResolvedValue(true),
@@ -241,8 +245,10 @@ describe("Auth Endpoints", () => {
       password: "$2b$12$kiwSU0JHcdsDVJLOxDD2AekohHwS5RVU8E5wZerlnFE7/Jibvr10W", // bcrypt for 12345
       firstName: "John",
       lastName: "Doe",
-      address: "First Street",
-      type: "USER",
+      street: "First street",
+      city: "Duke City",
+      birthdate: new Date(),
+      gender: IGender.MALE,
       avatarUrl: "http://example.com/avatar.jpg",
       refreshTokens: [myRefreshToken],
       save: jest.fn().mockResolvedValue(true),
@@ -265,7 +271,5 @@ describe("Auth Endpoints", () => {
       expect(response.body.accessToken).toBeDefined();
       expect(response.body.refreshToken).toBeDefined();
     });
-
   });
-
 });

@@ -219,10 +219,9 @@ export const logout = async (req: Request, res: Response) => {
     await user.save();
 
     res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
-    return res.status(200).send({ message: "Logged out successfully" });
+    return res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
-    console.error("Error during logout:", err);
-    return res.status(500).json({ message: "Server error" }); // add error message
+    return res.status(500).json({ message: "Server error", error: err });
   }
 };
 
@@ -281,7 +280,7 @@ export const refresh = async (req: Request, res: Response) => {
     });
 
   } catch (err) {
-    return res.status(500).json({ message: "Server error" }); // add error message
+    return res.status(500).json({ message: "Server error", error: err });
   }
 }
 
