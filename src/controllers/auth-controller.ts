@@ -86,7 +86,7 @@ export const signup = async (req: Request, res: Response) => {
 
   const { email, password, firstName, lastName, street, city, birthdate, gender, gymOwnerLicenseImage } = req.body;
 
-  let userRole: IUserType = IUserType.USER; // default type is user
+  let userRole: IUserType = IUserType.USER; // default role is user
   if (gymOwnerLicenseImage) {
     userRole = IUserType.GYM_OWNER;
   }
@@ -112,10 +112,14 @@ export const signup = async (req: Request, res: Response) => {
       gymOwnerLicenseImage // null if not gym owner
     });
 
-    if (result.message) { // bad check, improve
-      console.log("3");
-      return res.status(400).json({ message: result.message });
+    if (result.message) {
+      if ("status" in result) {
+        return res.status(result.status).json({ message: result.message });
+      } else {
+        return res.status(400).json({ message: result.message });
+      }
     }
+
 
     if ("accessToken" in result) {
       res.cookie("access_token", result.accessToken, {
@@ -157,10 +161,6 @@ export const login = async (req: Request, res: Response) => {
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ message: "Wrong email or password" });
-    }
-
-    if (!process.env.JWT_SECRET) { // omit?
-      return { message: "Missing auth configuration" };
     }
 
     const result = generateJWT(user._id, user.role);
@@ -290,12 +290,12 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
 
   // "regular" user
   if (user && password) {
-    return { message: "User already exists" }; // error, 400?
+    return { message: "User already exists", status: 400 };
   }
 
   // SSO user - don't register, just create token
   if (user) {
-    return generateJWT(user._id, user.role); // why?
+    return generateJWT(user._id, user.role);
   }
 
   try {
@@ -339,26 +339,26 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
     }
     await newUser.save(); // save the refreshToken
 
-    return result; // why?
+    return result;
   }
   catch (err) {
-    return { message: "Failed to register user", error: err };
+    return { message: "Failed to register user", error: err, status: 500 };
   }
 }
 
-const generateJWT = (userId: Types.ObjectId, type: IUserType) => {
+const generateJWT = (userId: Types.ObjectId, role: IUserType) => {
   if (!process.env.JWT_SECRET) {
     return { message: "Missing auth configuration" };
   }
 
   const accessToken = jwt.sign(
-    { id: userId.toString(), type: type },
+    { id: userId.toString(), type: role },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRATION }
   );
 
   const refreshToken = jwt.sign(
-    { id: userId.toString(), type: type },
+    { id: userId.toString(), type: role },
     process.env.JWT_SECRET,
     { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
   );
