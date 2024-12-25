@@ -100,7 +100,6 @@ export const signup = async (req: Request, res: Response) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-
   try {
     const result = await registerGeneralUser({
       email: email,
