@@ -110,9 +110,10 @@ describe("Auth Endpoints", () => {
       expect(response.body.accessToken).toBeDefined();
       expect(response.body.refreshToken).toBeDefined();
       expect(response.body.email).toBe("johndoe123@gmail.com");
+      expect(response.body.message).toBe("Logged in successfully");
     });
 
-    it("should return 400 for incorrect password", async () => {
+    it("should return 401 for incorrect password", async () => {
       User.findOne = jest.fn().mockResolvedValue(mockUser);
       bcrypt.compare = jest.fn().mockResolvedValue(false); // Password mismatch
 
@@ -123,11 +124,11 @@ describe("Auth Endpoints", () => {
           password: "wrongpassword",
         });
 
-      expect(response.status).toBe(400);
-      expect(response.text).toBe("Wrong email or password");
+      expect(response.status).toBe(401);
+      expect(response.body.message).toBe("Wrong email or password");
     });
 
-    it("should return 400 if user does not exist", async () => {
+    it("should return 401 if user does not exist", async () => {
       User.findOne = jest.fn().mockResolvedValue(null);
 
       const response = await request(app)
@@ -137,8 +138,8 @@ describe("Auth Endpoints", () => {
           password: "12345",
         });
 
-      expect(response.status).toBe(400);
-      expect(response.text).toBe("Wrong email or password");
+      expect(response.status).toBe(401);
+      expect(response.body.message).toBe("Wrong email or password");
     });
 
     it("should return 400 if required fields are missing", async () => {
@@ -150,7 +151,8 @@ describe("Auth Endpoints", () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
+      expect(response.body.error).toBeDefined();
+      expect(response.body.message).toBe("Validation array is not empty");
     });
   });
 

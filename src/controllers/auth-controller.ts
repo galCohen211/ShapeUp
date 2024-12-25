@@ -84,7 +84,7 @@ export const signup = async (req: Request, res: Response) => {
     return;
   }
 
-  const { email, password, firstName, lastName, gymOwnerLicenseImage, street, city, birthdate, gender } = req.body;
+  const { email, password, firstName, lastName, street, city, birthdate, gender, gymOwnerLicenseImage } = req.body;
 
   let userRole: IUserType = IUserType.USER; // default type is user
   if (gymOwnerLicenseImage) {
@@ -93,7 +93,7 @@ export const signup = async (req: Request, res: Response) => {
 
   const avatar = req.files && "avatar" in req.files ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
   if (!avatar) {
-    return res.status(400).json({ message: "Please upload an avatar",error: "avatar is not defined" });
+    return res.status(400).json({ message: "Please upload an avatar", error: "avatar is not defined" });
   }
   const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
 
@@ -129,8 +129,7 @@ export const signup = async (req: Request, res: Response) => {
       });
     }
   } catch (err) {
-    console.error("Error during signup:", err);
-    return res.status(500).json({ message: "Internal server error" }); // add error message
+    return res.status(500).json({ message: "Internal server error", error: err });
   }
 };
 
@@ -138,7 +137,7 @@ export const login = async (req: Request, res: Response) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(400).json({ errors: errors.array() }); // add message to the response
+    res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
     return;
   }
 
@@ -147,17 +146,17 @@ export const login = async (req: Request, res: Response) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).send("Wrong email or password"); // 401
+      return res.status(401).json({ message: "Wrong email or password" });
     }
 
     // This is SSO user - no password in user object
     if (!user.password) {
-      return res.status(400).send("Wrong email or password"); // 401
+      return res.status(401).json({ message: "Wrong email or password" });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).send("Wrong email or password"); // 401
+      return res.status(401).json({ message: "Wrong email or password" });
     }
 
     if (!process.env.JWT_SECRET) { // omit?
@@ -180,7 +179,8 @@ export const login = async (req: Request, res: Response) => {
     }
     await user.save(); // save the refresh token in user object
 
-    return res.status(200).send({ // add message?
+    return res.status(200).json({
+      message: "Logged in successfully",
       email: user.email,
       accessToken: accessToken,
       refreshToken: refreshToken,
@@ -188,8 +188,7 @@ export const login = async (req: Request, res: Response) => {
 
   }
   catch (err) {
-    console.error("Error during login:", err);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error", error: err });
   }
 }
 
