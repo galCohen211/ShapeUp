@@ -352,13 +352,13 @@ const generateJWT = (userId: Types.ObjectId, role: IUserType) => {
   }
 
   const accessToken = jwt.sign(
-    { id: userId.toString(), type: role },
+    { id: userId.toString(), role: role },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRATION }
   );
 
   const refreshToken = jwt.sign(
-    { id: userId.toString(), type: role },
+    { id: userId.toString(), role: role },
     process.env.JWT_SECRET,
     { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
   );

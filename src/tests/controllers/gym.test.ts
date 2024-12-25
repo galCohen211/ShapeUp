@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
 import { getFromCookie } from "../../controllers/auth-controller";
+import { IUserType } from "../../models/user-model";
 
 jest.mock("../../models/gym-model");
 jest.mock("../../controllers/auth-controller");
@@ -125,7 +126,7 @@ describe("GymController Endpoints", () => {
 jest.mock('../../middleware/verifyToken.ts', () => ({
   __esModule: true,
   default: jest.fn(() => (req: any, res: any, next: any) => {
-    req.user = { id: "mocked-user-id", type: "gym_owner" };
+    req.user = { id: "mocked-user-id", role: IUserType.GYM_OWNER };
     next();
   }),
 }));

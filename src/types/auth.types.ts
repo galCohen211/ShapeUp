@@ -18,5 +18,5 @@ export interface RegisterUserParams {
 
 export interface TokenPayload extends JwtPayload {
     id: string;
-    type: IUserType;
+    role: IUserType;
 }

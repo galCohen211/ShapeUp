@@ -14,7 +14,7 @@ jest.mock("../../models/user-model");
 jest.mock('../../middleware/verifyToken.ts', () => ({
   __esModule: true,
   default: jest.fn(() => (req: any, res: any, next: any) => {
-    req.user = { id: "mocked-user-id", type: "gym_owner" };
+    req.user = { id: "mocked-user-id", role: IUserType.GYM_OWNER };
     next();
   }),
 }));
@@ -165,7 +165,7 @@ describe("Auth Endpoints", () => {
     }
 
     const myRefreshToken = jwt.sign(
-      { id: "123", type: "user" },
+      { id: "123", role: IUserType.USER },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRATION }
     );
@@ -210,7 +210,7 @@ describe("Auth Endpoints", () => {
       }
 
       const notInListToken = jwt.sign(
-        { id: "123", type: "user" },
+        { id: "123", role: IUserType.USER },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRATION }
       );
@@ -234,7 +234,7 @@ describe("Auth Endpoints", () => {
     }
 
     const myRefreshToken = jwt.sign(
-      { id: "123", type: "user" },
+      { id: "123", role: IUserType.USER },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRATION }
     );

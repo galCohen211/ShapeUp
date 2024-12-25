@@ -20,7 +20,7 @@ const verifyToken = (allowedRoles: Array<IUserType>) => {
             const result = jwt.verify(token, process.env.JWT_SECRET) as TokenPayload;
 
             // check if the user role is allowed
-            if (!allowedRoles.includes(result.type)) {
+            if (!allowedRoles.includes(result.role)) {
                 res.status(403).send("Forbidden. You don't have access to this resource");
                 return;
             }
