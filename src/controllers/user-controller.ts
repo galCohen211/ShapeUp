@@ -10,7 +10,7 @@ import Gym from "../models/gym-model";
 
 class UserController {
   static async updateUserById(req: Request, res: Response): Promise<void> {
-    const { firstName, lastName, city, street } = req.body;
+    const { firstName, lastName, street, city } = req.body;
     const { userId } = req.params;
 
     const errors = validationResult(req);

@@ -101,15 +101,14 @@ paths:
           required: true
           schema:
             type: string
-            format: uuid
           description: The ID of the user to retrieve
       responses:
         "200":
           description: User details retrieved successfully
-        "404":
-          description: User not found
         "403":
           description: Unauthorized access
+        "404":
+          description: User not found
   /users/updateUserById/{userId}:
     put:
       tags:
@@ -121,25 +120,33 @@ paths:
           required: true
           schema:
             type: string
-            format: uuid
           description: The ID of the user to update
       requestBody:
-        required: true
         content:
           multipart/form-data:
             schema:
               type: object
               properties:
-                password:
-                  type: string
                 firstName:
                   type: string
+                  description: The user first name
+                  example: Bobi
                 lastName:
                   type: string
-                address:
+                  description: The user last name
+                  example: Smithi
+                street:
                   type: string
+                  description: The user street
+                  example: 321 Main St
+                city:
+                  type: string
+                  description: The user city
+                  example: Los Angeles
                 avatar:
                   type: string
+                  description: The user avatar file
+                  format: binary
       responses:
         "200":
           description: User updated successfully
