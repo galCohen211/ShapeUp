@@ -28,7 +28,7 @@ app.use(cookieParser());
 const PORT = process.env.PORT || 3000;
 
 const server = http.createServer();
-const socketIOServer = new Server(server, {
+export const socketIOServer = new Server(server, {
   path: "/users-chat",
   cors: {
     origin: "*",
@@ -36,8 +36,11 @@ const socketIOServer = new Server(server, {
   },
 });
 initChat(socketIOServer)
-server.listen(process.env.HTTP_SERVER_PORT, () => {
-  console.log("Socket.IO server running on http://localhost:" + process.env.HTTP_SERVER_PORT);
+server.listen(0, () => {
+  const port = (server.address() as any).port;
+  process.env.HTTP_SERVER_PORT = port;
+  console.log(`Server is running on port ${port}`);
+  console.log(`${process.env.HTTP_SERVER_PORT}`);
 });
 
 app.use(cors());

@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 
-import app from "../../server";
+import app, { socketIOServer } from "../../server";
 import User from "../../models/user-model";
 
 jest.mock("../../models/user-model");
@@ -30,6 +30,7 @@ describe("UserController Endpoints", () => {
         fs.unlinkSync(filePath);
       }
     });
+    socketIOServer.close();
   });
 
   describe("GET /users/user/:userId", () => {

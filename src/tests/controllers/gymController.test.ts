@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../../server";
+import app, { socketIOServer } from "../../server";
 import Gym from "../../models/gym-model";
 import mongoose from "mongoose";
 import fs from "fs";
@@ -27,6 +27,7 @@ describe("GymController Endpoints", () => {
         fs.unlinkSync(filePath);
       }
     });
+    socketIOServer.close();
   });
 
   describe("POST /gyms", () => {
