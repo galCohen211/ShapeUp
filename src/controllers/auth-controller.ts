@@ -8,7 +8,6 @@ import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oaut
 
 import User, { IUserType } from "../models/user-model";
 import { RegisterUserParams, TokenPayload } from "../types/auth.types";
-import { error } from "console";
 
 
 // Gooogle SSO
