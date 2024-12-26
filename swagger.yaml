@@ -23,56 +23,6 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    UserSignup:
-      type: object
-      required:
-        - email
-        - password
-        - firstName
-        - lastName
-        - street
-        - city
-        - birthdate
-        - gender
-        - avatar
-      properties:
-        email:
-          type: string
-          description: The user email
-          example: bob@gmail.com
-        password:
-          type: string
-          description: The user password
-          example: "123456"
-        firstName:
-          type: string
-          description: The user first name
-          example: Bob
-        lastName:
-          type: string
-          description: The user last name
-          example: Smith
-        street:
-          type: string
-          description: The user street address
-          example: 123 Main St
-        city:
-          type: string
-          description: The user city
-          example: San Francisco
-        birthdate:
-          type: string
-          format: date
-          description: The user birthdate
-          example: "1990-01-01"
-        gender:
-          type: IGender
-          description: The user gender
-          example: male
-        avatar:
-          type: string
-          format: binary
-          description: The user avatar file
     User:
       type: object
       required:
@@ -99,6 +49,126 @@ components:
           example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
 
 paths:
+  /users/signup:
+    post:
+      tags:
+        - users
+      summary: Sign up a new user
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - firstName
+                - lastName
+                - street
+                - city
+                - birthdate
+                - gender
+                - avatar
+              properties:
+                email:
+                  type: string
+                  description: The user email
+                  example: bob@gmail.com
+                password:
+                  type: string
+                  description: The user password
+                  example: "123456"
+                firstName:
+                  type: string
+                  description: The user first name
+                  example: Bob
+                lastName:
+                  type: string
+                  description: The user last name
+                  example: Smith
+                street:
+                  type: string
+                  description: The user street address
+                  example: 123 Main St
+                city:
+                  type: string
+                  description: The user city
+                  example: San Francisco
+                birthdate:
+                  type: string
+                  format: date
+                  description: The user birthdate
+                  example: "1990-01-01"
+                gender:
+                  type: IGender
+                  description: The user gender
+                  example: male
+                avatar:
+                  type: string
+                  format: binary
+                  description: The user avatar file
+      responses:
+        "201":
+          description: User registered successfully
+        "400":
+          description: Validation array is not empty
+        "500":
+          description: Internal server error
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Log in a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        "200":
+          description: User logged in successfully
+        "400":
+          description: Validation array is not empty
+        "401":
+          description: Unauthorized access
+  /users/logout:
+    post:
+      tags:
+        - users
+      summary: Log out the current user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRefresh'
+      responses:
+        "200":
+          description: User logged out successfully
+        "400":
+          description: Invalid refresh token
+        "500":
+          description: Internal server error
+  /users/refresh:
+    post:
+      tags:
+        - users
+      summary: Refresh the authentication token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRefresh'
+      responses:
+        "200":
+          description: New tokens generated
+        "400":
+          description: Invalid refresh token
+        "500":
+          description: Internal server error
   /users/user/{userId}:
     get:
       tags:
@@ -163,77 +233,5 @@ paths:
           description: Validation errors
         "404":
           description: User not found
-        "500":
-          description: Internal server error
-  /users/signup:
-    post:
-      tags:
-        - users
-      summary: Sign up a new user
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/UserSignup'
-      responses:
-        "201":
-          description: User registered successfully
-        "400":
-          description: Validation array is not empty
-        "500":
-          description: Internal server error
-  /users/login:
-    post:
-      tags:
-        - users
-      summary: Log in a user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-      responses:
-        "200":
-          description: User logged in successfully
-        "400":
-          description: Validation array is not empty
-        "401":
-          description: Unauthorized access
-  /users/logout:
-    post:
-      tags:
-        - users
-      summary: Log out the current user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LogoutRefresh'
-      responses:
-        "200":
-          description: User logged out successfully
-        "400":
-          description: Invalid refresh token
-        "500":
-          description: Internal server error
-  /users/refresh:
-    post:
-      tags:
-        - users
-      summary: Refresh the authentication token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LogoutRefresh'
-      responses:
-        "200":
-          description: New tokens generated
-        "400":
-          description: Invalid refresh token
         "500":
           description: Internal server error
