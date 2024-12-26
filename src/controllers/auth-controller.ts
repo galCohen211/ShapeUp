@@ -8,6 +8,7 @@ import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oaut
 
 import User, { IUserType } from "../models/user-model";
 import { RegisterUserParams, TokenPayload } from "../types/auth.types";
+import { error } from "console";
 
 
 // Gooogle SSO
@@ -200,8 +201,8 @@ export const logout = async (req: Request, res: Response) => {
     const refreshToken = req.body.refreshToken;
     const decoded = await get_decoded(req, res, refreshToken);
 
-    if (!decoded || 'error' in decoded) {
-      return res.status(400).json({ error: "Invalid decoded" });
+    if (!decoded || !("id" in decoded)) {
+      return res.status(400).json({ message: "error while decoding refreshToken" });
     }
 
     const user = await User.findOne({ _id: decoded.id });
@@ -231,8 +232,8 @@ export const refresh = async (req: Request, res: Response) => {
   const refreshToken = req.body.refreshToken;
   const decoded = await get_decoded(req, res, refreshToken);
 
-  if (!decoded || 'error' in decoded) {
-    return res.status(400).json({ error: "Invalid decoded" });
+  if (!decoded || !("id" in decoded)) {
+    return res.status(400).json({ message: "error while decoding refreshToken" });
   }
 
   try {
@@ -376,11 +377,11 @@ export const getFromCookie = async (req: Request, res: Response, property: strin
     if (decoded && decoded[property]) {
       return decoded[property];
     } else {
-      res.status(400).json({ message: `'${property}' not found in token` });
+      res.status(400).json({ message: `'${property}' not found in access token` });
     }
 
   } catch (err) {
-    res.status(400).json({ message: "Invalid token", error: err });
+    res.status(500).json({ message: "Internal server error", error: err });
   }
 }
 
@@ -392,7 +393,7 @@ const get_decoded = async (req: Request, res: Response, refreshToken: string) =>
   }
 
   if (!process.env.JWT_SECRET) {
-    return { error: "Missing auth configuration" };
+    return { message: "Missing auth configuration" };
   }
 
   const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;

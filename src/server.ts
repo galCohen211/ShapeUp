@@ -35,18 +35,18 @@ app.use(cookieParser());
 // Access variables using process.env
 const PORT = process.env.PORT || 3000;
 
-const server = http.createServer();
-const socketIOServer = new Server(server, {
-  path: "/users-chat",
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
-initChat(socketIOServer)
-server.listen(process.env.HTTP_SERVER_PORT, () => {
-  console.log("Socket.IO server running on http://localhost:" + process.env.HTTP_SERVER_PORT);
-});
+// const server = http.createServer();
+// const socketIOServer = new Server(server, {
+//   path: "/users-chat",
+//   cors: {
+//     origin: "*",
+//     methods: ["GET", "POST"],
+//   },
+// });
+// initChat(socketIOServer)
+// server.listen(process.env.HTTP_SERVER_PORT, () => {
+//   console.log("Socket.IO server running on http://localhost:" + process.env.HTTP_SERVER_PORT);
+// });
 
 app.use(cors());
 app.use("/init", initRouter);
