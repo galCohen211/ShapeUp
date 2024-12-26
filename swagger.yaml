@@ -88,6 +88,15 @@ components:
       example:
         email: 'bob@gmail.com'
         password: '123456'
+    LogoutRefresh:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: The user refresh token
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
 
 paths:
   /users/user/{userId}:
@@ -202,11 +211,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                refreshToken:
-                  type: string
-                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+              $ref: '#/components/schemas/LogoutRefresh'
       responses:
         "200":
           description: User logged out successfully
@@ -224,11 +229,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                refreshToken:
-                  type: string
-                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+              $ref: '#/components/schemas/LogoutRefresh'
       responses:
         "200":
           description: New tokens generated
