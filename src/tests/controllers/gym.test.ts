@@ -14,7 +14,7 @@ describe("GymController Endpoints", () => {
   const testImages: string[] = [];
 
   afterAll(async () => {
-    await mongoose.disconnect();
+    await mongoose.disconnect();    
     testImages.forEach((testImage) => {
       const filePattern = new RegExp(
         `${testImage.replace(/\.[^/.]+$/, "")}-.*\\.(png|jpg|jpeg)$`
@@ -187,9 +187,7 @@ describe("DELETE /gyms/:gymId", () => {
       .delete(`/gyms/${gymId}`);
 
     expect(response.status).toBe(403);
-    expect(response.body.message).toBe(
-      "Forbidden. You don't have access to this resource"
-    );
+    expect(response.body.message).toBe("Forbidden. You don't have access to this resource");
   });
 
   it("should handle server errors gracefully", async () => {
@@ -201,9 +199,7 @@ describe("DELETE /gyms/:gymId", () => {
     const response = await request(app).delete(`/gyms/${gymId}`);
 
     expect(response.status).toBe(500);
-    expect(response.body.message).toBe(
-      "An error occurred while deleting the gym."
-    );
+    expect(response.body.message).toBe("An error occurred while deleting the gym.");
   });
 });
 
@@ -306,5 +302,69 @@ describe("GET /gyms", () => {
     expect(response.body.gyms[0]).toHaveProperty("name", "Gym 1");
     expect(response.body.gyms[0].owner).toBe(ownerId.toString());
   });
+
+  describe("GET /gyms/filter", () => {
+    it("should return 200 and the filtered gym data", async () => {
+      const mockGyms = [
+        {
+          _id: new mongoose.Types.ObjectId().toString(),
+          name: "Fitness World",
+          location: "New York",
+        },
+        {
+          _id: new mongoose.Types.ObjectId().toString(),
+          name: "Health Hub",
+          location: "San Francisco",
+        },
+      ];
+
+      const searchQuery = "Fitness";
+
+      (Gym.find as jest.Mock).mockImplementation((query) => {
+        return Promise.resolve(
+          mockGyms.filter((gym) =>
+            gym.name.includes(query.$or[0].name.$regex.source)
+          )
+        );
+      });
+
+      const response = await request(app).get(`/gyms/filter?search=${searchQuery}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.gyms).toHaveLength(1); // Expect only one gym to match
+      expect(response.body.gyms[0]).toHaveProperty("name", "Fitness World");
+    });
+
+
+    it("should return 404 if no gyms match the search query", async () => {
+      const searchQuery = "nonexistent";
+
+      (Gym.find as jest.Mock).mockResolvedValue([]);
+
+      const response = await request(app).get(`/gyms/filter?search=${searchQuery}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe("No gyms found matching the search criteria");
+    });
+
+    it("should return 400 if the search query is missing", async () => {
+      const response = await request(app).get(`/gyms/filter?search=`);
+
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it("should return 500 if there is a server error", async () => {
+      (Gym.find as jest.Mock).mockRejectedValue(new Error("Server error"));
+
+      const searchQuery = "error";
+
+      const response = await request(app).get(`/gyms/filter?search=${searchQuery}`);
+
+      expect(response.status).toBe(500);
+      expect(response.body.message).toBe("Internal server error");
+    });
+  });
+
 
 });
