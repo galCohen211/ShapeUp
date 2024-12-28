@@ -92,11 +92,11 @@ export const signup = async (req: Request, res: Response) => {
   }
 
   const avatar = req.files && "avatar" in req.files ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
-  // if (!avatar) {
-  //   return res.status(400).json({ error: "Please upload an avatar" });
-  // }
-  // const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
-  const avatarUrl = '';
+  if (!avatar) {
+    return res.status(400).json({ error: "Please upload an avatar" });
+  }
+  const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
+
   try {
     const result = await registerGeneralUser({
       email,
