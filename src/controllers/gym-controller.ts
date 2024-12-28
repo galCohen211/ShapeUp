@@ -21,9 +21,7 @@ class GymController {
             const owner = req.query.owner as string;
 
             if (!req.files || !(req.files as Express.Multer.File[]).length) {
-                res
-                    .status(400)
-                    .json({ message: "Please upload at least one picture." });
+                res.status(400).json({ message: "Please upload at least one picture." });
                 return;
             }
 
@@ -49,14 +47,12 @@ class GymController {
                 gym: newGym,
             });
         } catch (error) {
-            res
-                .status(500)
-                .json({ message: "An error occurred while adding the gym." });
+            res.status(500).json({ message: "An error occurred while adding the gym." });
         }
     }
 
-    // Edit gym details
-    static async updateGym(req: Request, res: Response): Promise<void> {
+    // Update gym details
+    static async updateGymById(req: Request, res: Response): Promise<void> {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -119,14 +115,10 @@ class GymController {
                 new: true,
             });
 
-            res
-                .status(200)
-                .json({ message: "Gym updated successfully", gym: updatedGym });
+            res.status(200).json({ message: "Gym updated successfully", gym: updatedGym });
         } catch (error) {
             console.error(error);
-            res
-                .status(500)
-                .json({ message: "An error occurred while updating the gym" });
+            res.status(500).json({ message: "An error occurred while updating the gym" });
         }
     }
 
@@ -153,9 +145,7 @@ class GymController {
             }
             res.status(200).json({ gyms });
         } catch (error) {
-            res
-                .status(500)
-                .json({ message: "An error occurred while adding the gym." });
+            res.status(500).json({ message: "An error occurred while adding the gym." });
         }
     }
 
@@ -170,13 +160,11 @@ class GymController {
             gyms = await Gym.find({ owner: myUserId });
             res.status(200).json({ gyms });
         } catch (error) {
-            res
-                .status(500)
-                .json({ message: "An error occurred while adding the gym." });
+            res.status(500).json({ message: "An error occurred while adding the gym." });
         }
     }
 
-    static async deleteGym(req: Request, res: Response): Promise<void> {
+    static async deleteGymById(req: Request, res: Response): Promise<void> {
         try {
             const { gymId } = req.params;
             const gym = await Gym.findById(gymId);
@@ -185,9 +173,7 @@ class GymController {
                 return;
             }
             if (gym.owner.toString() !== (await getFromCookie(req, res, "id"))) {
-                res.status(403).json({
-                    message: "Forbidden. You don't have access to this resource",
-                });
+                res.status(403).json({ message: "Forbidden. You don't have access to this resource" });
                 return;
             }
 
@@ -206,11 +192,45 @@ class GymController {
             }
             res.status(200).json({ message: "Gym deleted successfully" });
         } catch (error) {
-            res
-                .status(500)
-                .json({ message: "An error occurred while deleting the gym." });
+            res.status(500).json({ message: "An error occurred while deleting the gym." });
         }
     }
+
+    static async filterGyms(req: Request, res: Response): Promise<void> {
+        const { search } = req.query;
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            res.status(400).json({ errors: errors.array() });
+            return;
+        }
+
+        if (!search || typeof search !== "string") {
+            res.status(400).json({ message: "Search query is required and must be a string" });
+            return;
+        }
+
+        try {
+            const searchRegex = new RegExp(search, "i");
+
+            const gyms = await Gym.find({
+                $or: [
+                    { name: { $regex: searchRegex } },
+                    { location: { $regex: searchRegex } }
+                ]
+            });
+
+            if (gyms.length === 0) {
+                res.status(404).json({ message: "No gyms found matching the search criteria" });
+                return;
+            }
+
+            res.status(200).json({ gyms });
+        } catch (error) {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
 }
 
 export default GymController;
