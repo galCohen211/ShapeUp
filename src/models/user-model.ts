@@ -27,8 +27,8 @@ interface IUser extends Document {
   gender?: IGender;
   city?: string;
   isChatGptAllowed?: boolean;
+  chatGptAccess: Date;
 }
-
 
 const UserSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
@@ -40,6 +40,7 @@ const UserSchema = new mongoose.Schema({
   gender: { type: String },
   city: { type: String },
   isChatGptAllowed: { type: Boolean, default: true },
+  chatGptAccess: { type: Date },
   role: { type: String, required: true },
   avatarUrl: { type: String, required: false },
   gymOwnerLicenseImage: { type: String, required: false },

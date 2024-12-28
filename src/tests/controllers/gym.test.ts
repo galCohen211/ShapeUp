@@ -14,7 +14,7 @@ describe("GymController Endpoints", () => {
   const testImages: string[] = [];
 
   afterAll(async () => {
-    await mongoose.disconnect();
+    await mongoose.disconnect();    
     testImages.forEach((testImage) => {
       const filePattern = new RegExp(
         `${testImage.replace(/\.[^/.]+$/, "")}-.*\\.(png|jpg|jpeg)$`

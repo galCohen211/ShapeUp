@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../server';
+import app, { socketIOServer } from '../../server';
 import Review from '../../models/review-model';
 import Gym from '../../models/gym-model';
 import User, { IUserType } from '../../models/user-model';
@@ -9,9 +9,14 @@ jest.mock('../../models/review-model');
 jest.mock('../../models/gym-model');
 jest.mock('../../models/user-model');
 
+
 describe('POST /reviews', () => {
   const mockUserToken = jwt.sign({ id: 'mockUserId', type: IUserType.USER }, process.env.JWT_SECRET || 'testsecret');
   const mockAdminToken = jwt.sign({ id: 'mockAdminId', type: IUserType.ADMIN }, process.env.JWT_SECRET || 'testsecret');
+
+  afterAll(async () => {
+    socketIOServer.close();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

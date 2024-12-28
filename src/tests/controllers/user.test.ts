@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
 
-import app from "../../server";
+import app, { socketIOServer } from "../../server";
 import User from "../../models/user-model";
 import Gym from "../../models/gym-model";
 
@@ -28,6 +28,7 @@ describe("UserController Endpoints", () => {
 
     afterAll(async () => {
         await mongoose.disconnect();
+        socketIOServer.close();
 
         for (const testImage of testImages) {
             const filePattern = new RegExp(
