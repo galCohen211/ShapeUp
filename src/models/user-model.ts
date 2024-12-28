@@ -26,8 +26,7 @@ interface IUser extends Document {
   birthdate?: Date;
   gender?: IGender;
   city?: string;
-  isChatGptAllowed?: boolean;
-  chatGptAccess: Date;
+  chatGptAccess: Date; // added this
 }
 
 const UserSchema = new mongoose.Schema({
@@ -39,8 +38,7 @@ const UserSchema = new mongoose.Schema({
   birthdate: { type: Date },
   gender: { type: String },
   city: { type: String },
-  isChatGptAllowed: { type: Boolean, default: true },
-  chatGptAccess: { type: Date },
+  chatGptAccess: { type: Date }, // added this
   role: { type: String, required: true },
   avatarUrl: { type: String, required: false },
   gymOwnerLicenseImage: { type: String, required: false },

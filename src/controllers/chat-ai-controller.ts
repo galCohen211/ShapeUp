@@ -6,6 +6,7 @@ class chatAIController {
     static async ask_question(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.params.id;
+            const { question } = req.body;
             const user = await User.findById(userId);
             if (!user) {
                 res.status(404).json({ message: "User not found" });
@@ -17,7 +18,6 @@ class chatAIController {
                 return;
             }
             const hf = new HfInference(process.env.AI_API_KEY);
-            const question = "Hi, I want you to help me generate a workout program. My focus is legs. I workout 4 times a week. I'm a male Don't ask any additional questions"
             const response = await hf.textGeneration({
             model: "tiiuae/falcon-7b-instruct",
             inputs: `${question}`,
