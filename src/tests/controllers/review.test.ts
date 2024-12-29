@@ -10,8 +10,8 @@ jest.mock('../../models/gym-model');
 jest.mock('../../models/user-model');
 
 describe('POST /reviews', () => {
-  const mockUserToken = jwt.sign({ id: 'mockUserId', type: IUserType.USER }, process.env.JWT_SECRET || 'testsecret');
-  const mockAdminToken = jwt.sign({ id: 'mockAdminId', type: IUserType.ADMIN }, process.env.JWT_SECRET || 'testsecret');
+  const mockUserToken = jwt.sign({ id: 'mockUserId', role: IUserType.USER }, process.env.JWT_SECRET || 'testsecret');
+  const mockAdminToken = jwt.sign({ id: 'mockAdminId', role: IUserType.ADMIN }, process.env.JWT_SECRET || 'testsecret');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -109,8 +109,8 @@ jest.mock('../../models/review-model');
 jest.mock('../../models/user-model');
 
 describe('PUT /reviews/:reviewId', () => {
-  const mockUserToken = jwt.sign({ id: 'mockUserId', type: 'user' }, process.env.JWT_SECRET || 'testsecret');
-  const mockAdminToken = jwt.sign({ id: 'mockAdminId', type: 'ADMIN' }, process.env.JWT_SECRET || 'testsecret');
+  const mockUserToken = jwt.sign({ id: 'mockUserId', role: IUserType.USER }, process.env.JWT_SECRET || 'testsecret');
+  const mockAdminToken = jwt.sign({ id: 'mockAdminId', role: IUserType.ADMIN }, process.env.JWT_SECRET || 'testsecret');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -182,8 +182,8 @@ jest.mock('../../models/gym-model');
 jest.mock('../../models/user-model');
 
 describe('GET /reviews', () => {
-  const mockUserToken = jwt.sign({ id: 'mockUserId', type: 'user' }, process.env.JWT_SECRET || 'testsecret');
-  const mockAdminToken = jwt.sign({ id: 'mockAdminId', type: 'ADMIN' }, process.env.JWT_SECRET || 'testsecret');
+  const mockUserToken = jwt.sign({ id: 'mockUserId', role: IUserType.USER }, process.env.JWT_SECRET || 'testsecret');
+  const mockAdminToken = jwt.sign({ id: 'mockAdminId', role: IUserType.ADMIN }, process.env.JWT_SECRET || 'testsecret');
 
   beforeEach(() => {
     jest.clearAllMocks();

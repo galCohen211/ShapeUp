@@ -6,7 +6,7 @@ import path from "path";
 import jwt from "jsonwebtoken";
 
 import app from "../../server";
-import User from "../../models/user-model";
+import User, { IUserType, IGender } from "../../models/user-model";
 
 jest.mock("../../models/user-model");
 
@@ -14,7 +14,7 @@ jest.mock("../../models/user-model");
 jest.mock('../../middleware/verifyToken.ts', () => ({
   __esModule: true,
   default: jest.fn(() => (req: any, res: any, next: any) => {
-    req.user = { id: "mocked-user-id", type: "gym_owner" };
+    req.user = { id: "mocked-user-id", role: IUserType.GYM_OWNER };
     next();
   }),
 }));
@@ -52,7 +52,10 @@ describe("Auth Endpoints", () => {
         password: "12345",
         firstName: "John",
         lastName: "Doe",
-        address: "First street",
+        street: "First street",
+        city: "Duke City",
+        birthdate: new Date(),
+        gender: IGender.MALE,
         avatar: ["http://localhost/uploads/test-image1.jpg"],
         refreshTokens: [],
         save: jest.fn().mockResolvedValue(true),
@@ -64,11 +67,15 @@ describe("Auth Endpoints", () => {
         .field("password", "12345")
         .field("firstName", "John")
         .field("lastName", "Doe")
-        .field("address", "First street")
+        .field("street", "First street")
+        .field("city", "Duke City")
+        .field("birthdate", new Date().toISOString())
+        .field("gender", IGender.MALE)
         .attach("avatar", Buffer.from("image content"), "test-image1.jpg");
 
-      expect(response.status).toBe(201);
-      expect(response.body.message).toBe("User registered successfully");
+        expect(response.body.message).toBe("User registered successfully");
+        expect(response.status).toBe(201);
+      expect(response.body.error).not.toBeDefined();
 
       testImages.push("test-image1.jpg");
     });
@@ -81,9 +88,11 @@ describe("Auth Endpoints", () => {
       password: "$2b$12$kiwSU0JHcdsDVJLOxDD2AekohHwS5RVU8E5wZerlnFE7/Jibvr10W", // bcrypt for 12345
       firstName: "John",
       lastName: "Doe",
-      address: "First Street",
-      type: "USER",
-      avatarUrl: "http://example.com/avatar.jpg",
+      street: "First street",
+      city: "Duke City",
+      birthdate: new Date(),
+      gender: IGender.MALE,
+      avatar: "http://example.com/avatar.jpg",
       refreshTokens: [],
       save: jest.fn().mockResolvedValue(true),
     };
@@ -103,9 +112,10 @@ describe("Auth Endpoints", () => {
       expect(response.body.accessToken).toBeDefined();
       expect(response.body.refreshToken).toBeDefined();
       expect(response.body.email).toBe("johndoe123@gmail.com");
+      expect(response.body.message).toBe("Logged in successfully");
     });
 
-    it("should return 400 for incorrect password", async () => {
+    it("should return 401 for incorrect password", async () => {
       User.findOne = jest.fn().mockResolvedValue(mockUser);
       bcrypt.compare = jest.fn().mockResolvedValue(false); // Password mismatch
 
@@ -116,11 +126,11 @@ describe("Auth Endpoints", () => {
           password: "wrongpassword",
         });
 
-      expect(response.status).toBe(400);
-      expect(response.text).toBe("Wrong email or password");
+      expect(response.status).toBe(401);
+      expect(response.body.message).toBe("Wrong email or password");
     });
 
-    it("should return 400 if user does not exist", async () => {
+    it("should return 401 if user does not exist", async () => {
       User.findOne = jest.fn().mockResolvedValue(null);
 
       const response = await request(app)
@@ -130,8 +140,8 @@ describe("Auth Endpoints", () => {
           password: "12345",
         });
 
-      expect(response.status).toBe(400);
-      expect(response.text).toBe("Wrong email or password");
+      expect(response.status).toBe(401);
+      expect(response.body.message).toBe("Wrong email or password");
     });
 
     it("should return 400 if required fields are missing", async () => {
@@ -143,7 +153,8 @@ describe("Auth Endpoints", () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
+      expect(response.body.error).toBeDefined();
+      expect(response.body.message).toBe("Validation array is not empty");
     });
   });
 
@@ -154,7 +165,7 @@ describe("Auth Endpoints", () => {
     }
 
     const myRefreshToken = jwt.sign(
-      { id: "123", type: "user" },
+      { id: "123", role: IUserType.USER },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRATION }
     );
@@ -165,8 +176,10 @@ describe("Auth Endpoints", () => {
       password: "$2b$12$kiwSU0JHcdsDVJLOxDD2AekohHwS5RVU8E5wZerlnFE7/Jibvr10W", // bcrypt for 12345
       firstName: "John",
       lastName: "Doe",
-      address: "First Street",
-      type: "USER",
+      street: "First street",
+      city: "Duke City",
+      birthdate: new Date(),
+      gender: IGender.MALE,
       avatarUrl: "http://example.com/avatar.jpg",
       refreshTokens: [myRefreshToken],
       save: jest.fn().mockResolvedValue(true),
@@ -197,7 +210,7 @@ describe("Auth Endpoints", () => {
       }
 
       const notInListToken = jwt.sign(
-        { id: "123", type: "user" },
+        { id: "123", role: IUserType.USER },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRATION }
       );
@@ -221,7 +234,7 @@ describe("Auth Endpoints", () => {
     }
 
     const myRefreshToken = jwt.sign(
-      { id: "123", type: "user" },
+      { id: "123", role: IUserType.USER },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRATION }
     );
@@ -232,8 +245,10 @@ describe("Auth Endpoints", () => {
       password: "$2b$12$kiwSU0JHcdsDVJLOxDD2AekohHwS5RVU8E5wZerlnFE7/Jibvr10W", // bcrypt for 12345
       firstName: "John",
       lastName: "Doe",
-      address: "First Street",
-      type: "USER",
+      street: "First street",
+      city: "Duke City",
+      birthdate: new Date(),
+      gender: IGender.MALE,
       avatarUrl: "http://example.com/avatar.jpg",
       refreshTokens: [myRefreshToken],
       save: jest.fn().mockResolvedValue(true),
@@ -256,7 +271,5 @@ describe("Auth Endpoints", () => {
       expect(response.body.accessToken).toBeDefined();
       expect(response.body.refreshToken).toBeDefined();
     });
-
   });
-
 });

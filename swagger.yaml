@@ -16,66 +16,39 @@ tags:
   - name: "reviews"
     description: "Endpoints related to reviews"
 
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: The user email
+        password:
+          type: string
+          description: The user password
+      example:
+        email: 'bob@gmail.com'
+        password: '123456'
+    LogoutRefresh:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: The user refresh token
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+
 paths:
-  /users/user/{userId}:
-    get:
-      tags:
-        - users
-      summary: Get user details by ID
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: The ID of the user to retrieve
-      responses:
-        "200":
-          description: User details retrieved successfully
-        "404":
-          description: User not found
-        "403":
-          description: Unauthorized access
-  /users/updateUserById/{userId}:
-    put:
-      tags:
-        - users
-      summary: Update user details
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: The ID of the user to update
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                password:
-                  type: string
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                address:
-                  type: string
-                avatar:
-                  type: string
-      responses:
-        "200":
-          description: User updated successfully
-        "400":
-          description: Validation errors
-        "404":
-          description: User not found
-        "500":
-          description: Internal server error
   /users/signup:
     post:
       tags:
@@ -87,32 +60,61 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                address:
-                  type: string
-                avatar:
-                  type: string
-                  format: binary
               required:
                 - email
                 - password
                 - firstName
                 - lastName
-                - address
+                - street
+                - city
+                - birthdate
+                - gender
+                - avatar
+              properties:
+                email:
+                  type: string
+                  description: The user email
+                  example: bob@gmail.com
+                password:
+                  type: string
+                  description: The user password
+                  example: "123456"
+                firstName:
+                  type: string
+                  description: The user first name
+                  example: Bob
+                lastName:
+                  type: string
+                  description: The user last name
+                  example: Smith
+                street:
+                  type: string
+                  description: The user street address
+                  example: 123 Main St
+                city:
+                  type: string
+                  description: The user city
+                  example: San Francisco
+                birthdate:
+                  type: string
+                  format: date
+                  description: The user birthdate
+                  example: "1990-01-01"
+                gender:
+                  type: IGender
+                  description: The user gender
+                  example: male
+                avatar:
+                  type: string
+                  format: binary
+                  description: The user avatar file
       responses:
         "201":
-          description: User signed up successfully
+          description: User registered successfully
         "400":
-          description: Validation errors
+          description: Validation array is not empty
+        "500":
+          description: Internal server error
   /users/login:
     post:
       tags:
@@ -123,38 +125,115 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-              required:
-                - email
-                - password
+              $ref: '#/components/schemas/User'
       responses:
         "200":
           description: User logged in successfully
         "400":
-          description: Validation errors
+          description: Validation array is not empty
+        "401":
+          description: Unauthorized access
   /users/logout:
     post:
       tags:
         - users
       summary: Log out the current user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRefresh'
       responses:
         "200":
           description: User logged out successfully
         "400":
-          description: Validation errors
+          description: Invalid refresh token
+        "500":
+          description: Internal server error
   /users/refresh:
     post:
       tags:
         - users
       summary: Refresh the authentication token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRefresh'
       responses:
         "200":
-          description: Token refreshed successfully
+          description: New tokens generated
+        "400":
+          description: Invalid refresh token
+        "500":
+          description: Internal server error
+  /users/user/{userId}:
+    get:
+      tags:
+        - users
+      summary: Get user details by ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to retrieve
+      responses:
+        "200":
+          description: User details retrieved successfully
+        "403":
+          description: Unauthorized access
+        "404":
+          description: User not found
+  /users/updateUserById/{userId}:
+    put:
+      tags:
+        - users
+      summary: Update user details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to update
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  description: The user first name
+                  example: Bobi
+                lastName:
+                  type: string
+                  description: The user last name
+                  example: Smithi
+                street:
+                  type: string
+                  description: The user street
+                  example: 321 Main St
+                city:
+                  type: string
+                  description: The user city
+                  example: Los Angeles
+                avatar:
+                  type: string
+                  description: The user avatar file
+                  format: binary
+      responses:
+        "200":
+          description: User updated successfully
         "400":
           description: Validation errors
+        "404":
+          description: User not found
+        "500":
+          description: Internal server error

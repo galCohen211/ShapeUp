@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 
 import app from "../../server";
-import User from "../../models/user-model";
+import User, { IUserType } from "../../models/user-model";
 import Gym from "../../models/gym-model";
 
 jest.mock("../../models/user-model");
@@ -14,7 +14,7 @@ jest.mock("../../models/gym-model");
 jest.mock('../../middleware/verifyToken.ts', () => ({
     __esModule: true,
     default: jest.fn(() => (req: any, res: any, next: any) => {
-        req.user = { id: "mocked-user-id", type: "gym_owner" };
+        req.user = { id: "mocked-user-id", role: IUserType.GYM_OWNER };
         next();
     }),
 }));
@@ -57,7 +57,7 @@ describe("UserController Endpoints", () => {
                 firstName: "Gym",
                 lastName: "Owner",
                 city: "Somewhere",
-                role: "gym_owner",
+                role: IUserType.GYM_OWNER,
                 favoriteGyms: [],
                 avatarUrl: "gym-owner.jpg",
             };
@@ -97,7 +97,7 @@ describe("UserController Endpoints", () => {
                 firstName: "Regular",
                 lastName: "User",
                 city: "Somewhere",
-                role: "user",
+                role: IUserType.USER,
                 favoriteGyms: [],
                 avatarUrl: "user.jpg",
             };

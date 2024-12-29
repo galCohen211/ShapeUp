@@ -1,5 +1,4 @@
 import express from "express";
-import { connectDb } from "./mongodb";
 import cors from "cors";
 import passport from "passport";
 import session from "express-session";
@@ -9,6 +8,7 @@ import yaml from 'yamljs';
 import { Server } from 'socket.io';
 import * as http from "http";
 
+import { connectDb } from "./mongodb";
 import { initChat } from "./chat/chat-server";
 import "./controllers/auth-controller";
 import initRouter from "./routes/init-route";
