@@ -22,6 +22,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
   schemas:
     User:
       type: object
@@ -414,5 +418,62 @@ paths:
           description: Validation errors
         "404":
           description: Gym not found
+        "500":
+          description: Internal server error
+    delete:
+      tags:
+        - gyms
+      summary: Delete a gym
+      # security:
+      #   - bearerAuth: []
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the gym to delete
+      responses:
+        "200":
+          description: Gym deleted successfully
+        "403":
+          description: Unauthorized access
+        "404":
+          description: Gym not found
+        "500":
+          description: Internal server error
+  /gyms/myGyms:
+    get:
+      tags:
+        - gyms
+      summary: Get gyms by owner
+      # security:
+      #   - cookieAuth: []
+      responses:
+        "200":
+          description: Gyms retrieved successfully
+        "400":
+          description: Invalid user ID format
+        "500":
+          description: Internal server error
+  /gyms/filter:
+    get:
+      tags:
+        - gyms
+      summary: Filter gyms by query
+      parameters:
+        - name: search
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The query to filter gyms
+      responses:
+        "200":
+          description: Gyms filtered successfully
+        "400":
+          description: Invalid query
+        "404":
+          description: Gyms not found
         "500":
           description: Internal server error
