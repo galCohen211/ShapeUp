@@ -296,3 +296,123 @@ paths:
           description: Users not found
         "500":
           description: Internal server error
+  /gyms/:
+    post:
+      tags:
+        - gyms
+      summary: Add a new gym
+      parameters:
+        - name: owner
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The ID of the gym owner
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - location
+                - description
+              properties:
+                name:
+                  type: string
+                  description: The gym name
+                  example: ShapeUp Gym
+                location:
+                  type: string
+                  description: The gym street address
+                  example: 123 Main St
+                description:
+                  type: string
+                  description: The gym description
+                  example: The best gym in town
+                pictures: # allow up to 5 pictures
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: The gym pictures
+      responses:
+        "201":
+          description: Gym added successfully
+        "400":
+          description: Validation errors
+        "500":
+          description: Internal server error
+    get:
+      tags:
+        - gyms
+      summary: Get all gyms or get gyms by owner
+      parameters:
+        - name: owner
+          in: query
+          required: false
+          schema:
+            type: string
+          description: The ID of the gym owner
+      responses:
+        "200":
+          description: Gyms retrieved successfully
+        "400":
+          description: Invalid owner ID
+        "404":
+          description: Gyms not found
+        "500":
+          description: Internal server error  
+  /gyms/{gymId}:
+    put:
+      tags:
+        - gyms
+      summary: Update gym details
+      # security:
+      #   - bearerAuth: []
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the gym to update
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The gym name
+                  example: ShapeUp gym updated
+                location:
+                  type: string
+                  description: The gym street address
+                  example: 321 Main St
+                description:
+                  type: string
+                  description: The gym description
+                  example: The best gym in the world
+                amountOfReviews:
+                  type: number
+                  description: The amount of reviews for the gym
+                  example: 5
+                pictures: 
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: The gym pictures
+      responses:
+        "200":
+          description: Gym updated successfully
+        "400":
+          description: Validation errors
+        "404":
+          description: Gym not found
+        "500":
+          description: Internal server error
