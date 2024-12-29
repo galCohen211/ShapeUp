@@ -333,7 +333,7 @@ describe("UserController Endpoints", () => {
         const response = await request(app).get(`/users/filter`);
 
         expect(response.status).toBe(400);
-        expect(response.body.errors).toBeDefined();
+        expect(response.body.error).toBeDefined();
     });
 
     it("should return 500 if there is a server error", async () => {
