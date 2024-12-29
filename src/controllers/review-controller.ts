@@ -3,7 +3,6 @@ import { Request, Response } from "express";
 import { getFromCookie } from "./auth-controller";
 import Gym from "../models/gym-model";
 import User from "../models/user-model";
-import { error } from "console";
 
 class reviewController {
     static async addReview(req: Request, res: Response): Promise<void> {
