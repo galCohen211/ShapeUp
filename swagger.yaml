@@ -237,3 +237,62 @@ paths:
           description: User not found
         "500":
           description: Internal server error
+  /users/addFavoriteGym/{userId}:
+    put:
+      tags:
+        - users
+      summary: Add a gym to user's favorites
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gymId
+              properties:
+                gymId:
+                  type: string
+                  description: The ID of the gym to add to favorites
+                  example: 5f7b3b3b4b3b3b3b3b3b3b3b
+      responses:
+        "200":
+          description: Gym added to favorites successfully
+        "400":
+          description: Validation errors
+        "404":
+          description: User or gym not found
+        "500":
+          description: Internal server error
+  /users/filter:
+    get:
+      tags:
+        - users
+      summary: Filter users by query
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The query to filter users
+      responses:
+        "200":
+          description: Users filtered successfully
+        "400":
+          description: Invalid query
+        "404":
+          description: Users not found
+        "500":
+          description: Internal server error

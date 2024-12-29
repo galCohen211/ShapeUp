@@ -117,8 +117,8 @@ class UserController {
         message: "Gym added to favorites successfully",
         favoriteGyms: user.favoriteGyms,
       });
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
     }
   }
 
@@ -127,7 +127,7 @@ class UserController {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(400).json({ errors: errors.array() });
+      res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
       return;
     }
 
@@ -155,8 +155,8 @@ class UserController {
       }
 
       res.status(200).json({ users });
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
     }
   }
 
