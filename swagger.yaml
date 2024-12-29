@@ -193,6 +193,8 @@ paths:
       tags:
         - users
       summary: Update user details
+      security:
+        - bearerAuth: []
       parameters:
         - name: userId
           in: path
