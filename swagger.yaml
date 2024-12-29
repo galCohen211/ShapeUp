@@ -473,3 +473,94 @@ paths:
           description: Gyms not found
         "500":
           description: Internal server error
+  /reviews/:
+    post:
+      tags:
+        - reviews
+      summary: Add a new review
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - rating
+                - content
+                - gym
+              properties:
+                rating:
+                  type: number
+                  description: The rating of the gym
+                  example: 5
+                content:
+                  type: string
+                  description: The review content
+                  example: The best gym in town
+                gym:
+                  type: string
+                  description: The ID of the gym
+                  example: 5f7b3b3b4b3b3b3b3b3b3b3b
+      responses:
+        "201":
+          description: Review added successfully
+        "400":
+          description: Validation errors
+        "401":
+          description: Unauthorized access
+        "404":
+          description: Gym or user not found
+        "500":
+          description: Internal server error
+    get:
+      tags:
+        - reviews
+      summary: Get all reviews
+      responses:
+        "200":
+          description: Reviews retrieved successfully
+        "500":
+          description: Internal server error
+  /reviews/{reviewId}:
+    put:
+      tags:
+        - reviews
+      summary: Update review details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the review to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - rating
+                - content
+              type: object
+              properties:
+                rating:
+                  type: number
+                  description: The rating of the gym
+                  example: 4
+                content:
+                  type: string
+                  description: The review content
+                  example: The best gym in town
+      responses:
+        "200":
+          description: Review updated successfully
+        "400":
+          description: Validation errors
+        "401":
+          description: Unauthorized access
+        "500":
+          description: Internal server error

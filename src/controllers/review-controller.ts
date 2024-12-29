@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { getFromCookie } from "./auth-controller";
 import Gym from "../models/gym-model";
 import User from "../models/user-model";
+import { error } from "console";
 
 class reviewController {
     static async addReview(req: Request, res: Response): Promise<void> {
@@ -52,8 +53,8 @@ class reviewController {
 
             res.status(201).json({ message: "Review added successfully.", review });
             return;
-        } catch (error) {
-            res.status(500).json({ error: "An error occurred while adding the review." });
+        } catch (err) {
+            res.status(500).json({ message: "An error occurred while adding the review.", error: err });
             return;
         }
     }
@@ -85,7 +86,7 @@ class reviewController {
             return;
 
         } catch (err) {
-            res.status(500).json({ error: "An error occurred while updating the review.", err });
+            res.status(500).json({ message: "An error occurred while updating the review.", error:err });
             return;
         }
 
@@ -97,7 +98,7 @@ class reviewController {
             res.status(200).json({ reviews });
             return;
         } catch (err) {
-            res.status(500).json({ error: "An error occurred while fetching reviews.", err });
+            res.status(500).json({ message: "An error occurred while fetching reviews.", error:err });
             return;
         }
     }
