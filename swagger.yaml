@@ -331,7 +331,7 @@ paths:
                   type: string
                   description: The gym description
                   example: The best gym in town
-                pictures: # allow up to 5 pictures
+                pictures:
                   type: array
                   items:
                     type: string
@@ -369,8 +369,6 @@ paths:
       tags:
         - gyms
       summary: Update gym details
-      # security:
-      #   - bearerAuth: []
       parameters:
         - name: gymId
           in: path
