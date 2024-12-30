@@ -104,6 +104,7 @@ paths:
                   type: IGender
                   description: The user gender
                   example: male
+                  enum: [male, female]
                 avatar:
                   type: string
                   format: binary
