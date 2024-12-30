@@ -129,7 +129,6 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(response.status || 400).json(response);
     }
 
-
     if ("accessToken" in result) {
       res.cookie("access_token", result.accessToken, {
         httpOnly: true,
