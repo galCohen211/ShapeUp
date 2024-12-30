@@ -239,7 +239,7 @@ paths:
         "500":
           description: Internal server error
   /users/addFavoriteGym/{userId}:
-    put:
+    post:
       tags:
         - users
       summary: Add a gym to user's favorites
