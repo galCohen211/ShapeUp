@@ -54,7 +54,7 @@ describe('POST /reviews', () => {
       .send({ rating: 5, content: 'Great gym!', gym: 'mockGymId' });
 
     expect(response.status).toBe(403);
-    expect(response.text).toBe("Forbidden. You don't have access to this resource");
+    expect(response.body.message).toBe("Your role is not allowed to access this resource");
   });
 
   it('should return 400 for invalid rating', async () => {
