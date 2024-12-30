@@ -15,7 +15,7 @@ class UserController {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(400).json({ errors: errors.array() });
+      res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
       return;
     }
 
@@ -47,9 +47,8 @@ class UserController {
 
       res.status(200).json({ message: "User details updated successfully", user });
     }
-    catch (error) {
-      console.error("Error updating user:", error);
-      res.status(500).json({ message: "Internal server error" });
+    catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
     }
   }
 
@@ -86,8 +85,8 @@ class UserController {
       }
 
       res.status(200).json(user);
-    } catch (error) {
-      res.status(500).json({ message: "Server error" });
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
     }
   }
 
