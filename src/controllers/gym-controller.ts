@@ -13,7 +13,7 @@ class GymController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                res.status(400).json({ errors: errors.array() });
+                res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
                 return;
             }
 
@@ -46,8 +46,8 @@ class GymController {
                 message: "Gym added successfully!",
                 gym: newGym,
             });
-        } catch (error) {
-            res.status(500).json({ message: "An error occurred while adding the gym." });
+        } catch (err) {
+            res.status(500).json({ message: "An error occurred while adding the gym.", error: err });
         }
     }
 
@@ -56,7 +56,7 @@ class GymController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                res.status(400).json({ errors: errors.array() });
+                res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
                 return;
             }
 
@@ -116,9 +116,8 @@ class GymController {
             });
 
             res.status(200).json({ message: "Gym updated successfully", gym: updatedGym });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: "An error occurred while updating the gym" });
+        } catch (err) {
+            res.status(500).json({ message: "An error occurred while updating the gym", error: err });
         }
     }
 
@@ -126,7 +125,7 @@ class GymController {
     static async getGyms(req: Request, res: Response): Promise<void> {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            res.status(400).json({ errors: errors.array() });
+            res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
             return;
         }
 
@@ -144,8 +143,8 @@ class GymController {
                 gyms = await Gym.find();
             }
             res.status(200).json({ gyms });
-        } catch (error) {
-            res.status(500).json({ message: "An error occurred while adding the gym." });
+        } catch (err) {
+            res.status(500).json({ message: "An error occurred while adding the gym.", error: err });
         }
     }
 
@@ -159,8 +158,8 @@ class GymController {
             }
             gyms = await Gym.find({ owner: myUserId });
             res.status(200).json({ gyms });
-        } catch (error) {
-            res.status(500).json({ message: "An error occurred while adding the gym." });
+        } catch (err) {
+            res.status(500).json({ message: "An error occurred while adding the gym.", error: err });
         }
     }
 
@@ -191,8 +190,8 @@ class GymController {
                 });
             }
             res.status(200).json({ message: "Gym deleted successfully" });
-        } catch (error) {
-            res.status(500).json({ message: "An error occurred while deleting the gym." });
+        } catch (err) {
+            res.status(500).json({ message: "An error occurred while deleting the gym.", error: err });
         }
     }
 
@@ -201,7 +200,7 @@ class GymController {
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            res.status(400).json({ errors: errors.array() });
+            res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
             return;
         }
 
@@ -226,8 +225,8 @@ class GymController {
             }
 
             res.status(200).json({ gyms });
-        } catch (error) {
-            res.status(500).json({ message: "Internal server error" });
+        } catch (err) {
+            res.status(500).json({ message: "Internal server error", error: err });
         }
     }
 

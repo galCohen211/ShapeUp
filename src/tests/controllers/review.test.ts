@@ -54,7 +54,7 @@ describe('POST /reviews', () => {
       .send({ rating: 5, content: 'Great gym!', gym: 'mockGymId' });
 
     expect(response.status).toBe(403);
-    expect(response.text).toBe("Forbidden. You don't have access to this resource");
+    expect(response.body.message).toBe("Your role is not allowed to access this resource");
   });
 
   it('should return 400 for invalid rating', async () => {
@@ -101,7 +101,7 @@ describe('POST /reviews', () => {
       .send({ rating: 5, content: 'Great gym!', gym: 'mockGymId' });
 
     expect(response.status).toBe(500);
-    expect(response.body.error).toBe('An error occurred while adding the review.');
+    expect(response.body.message).toBe('An error occurred while adding the review.');
   });
 });
 
@@ -173,7 +173,7 @@ describe('PUT /reviews/:reviewId', () => {
       .send({ rating: 4, content: 'Updated review content' });
 
     expect(response.status).toBe(500);
-    expect(response.body.error).toBe('An error occurred while updating the review.');
+    expect(response.body.message).toBe('An error occurred while updating the review.');
   });
 });
 
@@ -223,7 +223,7 @@ describe('GET /reviews', () => {
       .set('Cookie', [`access_token=${mockUserToken}`]);
 
     expect(response.status).toBe(500);
-    expect(response.body.error).toBe('An error occurred while fetching reviews.');
+    expect(response.body.message).toBe('An error occurred while fetching reviews.');
   });
 });
 

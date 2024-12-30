@@ -61,7 +61,7 @@ describe("GymController Endpoints", () => {
     it("should return 400 if required fields are missing", async () => {
       const response = await request(app).post("/gyms").send({});
       expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
+      expect(response.body.error).toBeDefined();
     });
   });
 
@@ -117,7 +117,7 @@ describe("GymController Endpoints", () => {
         .send({ name: "Updated Gym" });
 
       expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
+      expect(response.body.error).toBeDefined();
     });
   });
 });
@@ -351,7 +351,7 @@ describe("GET /gyms", () => {
       const response = await request(app).get(`/gyms/filter?search=`);
 
       expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
+      expect(response.body.error).toBeDefined();
     });
 
     it("should return 500 if there is a server error", async () => {

@@ -21,7 +21,7 @@ const verifyToken = (allowedRoles: Array<IUserType>) => {
 
             // check if the user role is allowed
             if (!allowedRoles.includes(result.role)) {
-                res.status(403).send("Forbidden. You don't have access to this resource");
+                res.status(403).json({message: "Your role is not allowed to access this resource"});
                 return;
             }
             next();

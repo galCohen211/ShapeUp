@@ -73,8 +73,8 @@ describe("Auth Endpoints", () => {
         .field("gender", IGender.MALE)
         .attach("avatar", Buffer.from("image content"), "test-image1.jpg");
 
-        expect(response.body.message).toBe("User registered successfully");
-        expect(response.status).toBe(201);
+      expect(response.body.message).toBe("User registered successfully");
+      expect(response.status).toBe(201);
       expect(response.body.error).not.toBeDefined();
 
       testImages.push("test-image1.jpg");

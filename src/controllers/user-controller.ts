@@ -3,7 +3,7 @@ import path from "path";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { ObjectId } from "mongoose";
-import {getMessagesBetweenTwoUsers} from "../chat/chat-logic";
+import { getMessagesBetweenTwoUsers } from "../chat/chat-logic";
 import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
 
@@ -15,7 +15,7 @@ class UserController {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(400).json({ errors: errors.array() });
+      res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
       return;
     }
 
@@ -47,9 +47,8 @@ class UserController {
 
       res.status(200).json({ message: "User details updated successfully", user });
     }
-    catch (error) {
-      console.error("Error updating user:", error);
-      res.status(500).json({ message: "Internal server error" });
+    catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
     }
   }
 
@@ -86,8 +85,8 @@ class UserController {
       }
 
       res.status(200).json(user);
-    } catch (error) {
-      res.status(500).json({ message: "Server error" });
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
     }
   }
 
@@ -117,8 +116,8 @@ class UserController {
         message: "Gym added to favorites successfully",
         favoriteGyms: user.favoriteGyms,
       });
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
     }
   }
 
@@ -127,7 +126,7 @@ class UserController {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(400).json({ errors: errors.array() });
+      res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
       return;
     }
 
@@ -155,17 +154,17 @@ class UserController {
       }
 
       res.status(200).json({ users });
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
     }
   }
 
-    static async getUserChats(req: Request, res: Response): Promise<void> {
-        const {userId1, userId2} = req.query;
-        const chat = await getMessagesBetweenTwoUsers([(userId1 as unknown) as ObjectId, (userId2 as unknown) as ObjectId]);
-    
-        res.status(200).send(chat);
-    }
+  static async getUserChats(req: Request, res: Response): Promise<void> {
+    const { userId1, userId2 } = req.query;
+    const chat = await getMessagesBetweenTwoUsers([(userId1 as unknown) as ObjectId, (userId2 as unknown) as ObjectId]);
+
+    res.status(200).send(chat);
+  }
 }
 
 export default UserController;

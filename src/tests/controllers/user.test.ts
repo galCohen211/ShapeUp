@@ -86,7 +86,7 @@ describe("UserController Endpoints", () => {
             const response = await request(app).get(`/users/user/${userId}`);
 
             expect(response.status).toBe(500);
-            expect(response.body.message).toBe("Server error");
+            expect(response.body.message).toBe("Internal server error");
         });
 
         it("should return 200 and the user data for a regular user", async () => {
@@ -188,7 +188,7 @@ describe("UserController Endpoints", () => {
                 .send({ firstName: "Or" });
 
             expect(response.status).toBe(400);
-            expect(response.body.errors).toBeDefined();
+            expect(response.body.error).toBeDefined();
         });
     });
 
@@ -333,7 +333,7 @@ describe("UserController Endpoints", () => {
         const response = await request(app).get(`/users/filter`);
 
         expect(response.status).toBe(400);
-        expect(response.body.errors).toBeDefined();
+        expect(response.body.error).toBeDefined();
     });
 
     it("should return 500 if there is a server error", async () => {
