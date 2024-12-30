@@ -116,12 +116,19 @@ export const signup = async (req: Request, res: Response) => {
     });
 
     if (result.message) {
+      const response: { message?: string; status?: number; error?: any } = { message: result.message };
+
       if ("status" in result) {
-        return res.status(result.status).json({ message: result.message });
-      } else {
-        return res.status(400).json({ message: result.message });
+        response.status = result.status;
       }
+
+      if ("error" in result) {
+        response.error = result.error;
+      }
+
+      return res.status(response.status || 400).json(response);
     }
+
 
     if ("accessToken" in result) {
       res.cookie("access_token", result.accessToken, {
