@@ -85,7 +85,7 @@ class reviewController {
             return;
 
         } catch (err) {
-            res.status(500).json({ message: "An error occurred while updating the review.", error:err });
+            res.status(500).json({ message: "An error occurred while updating the review.", error: err });
             return;
         }
 
@@ -97,7 +97,7 @@ class reviewController {
             res.status(200).json({ reviews });
             return;
         } catch (err) {
-            res.status(500).json({ message: "An error occurred while fetching reviews.", error:err });
+            res.status(500).json({ message: "An error occurred while fetching reviews.", error: err });
             return;
         }
     }

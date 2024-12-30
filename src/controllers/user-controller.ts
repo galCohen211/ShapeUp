@@ -3,7 +3,7 @@ import path from "path";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { ObjectId } from "mongoose";
-import {getMessagesBetweenTwoUsers} from "../chat/chat-logic";
+import { getMessagesBetweenTwoUsers } from "../chat/chat-logic";
 import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
 
@@ -159,12 +159,12 @@ class UserController {
     }
   }
 
-    static async getUserChats(req: Request, res: Response): Promise<void> {
-        const {userId1, userId2} = req.query;
-        const chat = await getMessagesBetweenTwoUsers([(userId1 as unknown) as ObjectId, (userId2 as unknown) as ObjectId]);
-    
-        res.status(200).send(chat);
-    }
+  static async getUserChats(req: Request, res: Response): Promise<void> {
+    const { userId1, userId2 } = req.query;
+    const chat = await getMessagesBetweenTwoUsers([(userId1 as unknown) as ObjectId, (userId2 as unknown) as ObjectId]);
+
+    res.status(200).send(chat);
+  }
 }
 
 export default UserController;
