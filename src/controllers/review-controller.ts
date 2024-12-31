@@ -109,7 +109,7 @@ class reviewController {
             res.status(200).json({ reviews });
             return;
         } catch (err) {
-            res.status(500).json({ message: "An error occurred while fetching reviews.", error: err });
+            res.status(500).json({ message: "Internal server error", error: err });
             return;
         }
     }

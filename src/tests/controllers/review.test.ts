@@ -259,7 +259,7 @@ describe('GET /reviews/gym/:gymId', () => {
     expect(response.body.reviews).toHaveLength(0);
   });
  
-  it('should return 400 if gymId is missing', async () => {
+  it('should return 404 if gymId is missing', async () => {
     const response = await request(app)
       .get(`/reviews/gym/`)   
       .set('Cookie', [`access_token=${mockUserToken}`]);
@@ -272,7 +272,7 @@ describe('GET /reviews/gym/:gymId', () => {
       .get(`/reviews/gym/${mockGymId}`)
       .set('Cookie', [`access_token=${mockUserToken}`]);
     expect(response.status).toBe(500);
-    expect(response.body.message).toBe('An error occurred while fetching reviews.');
+    expect(response.body.message).toBe('Internal server error');
   });
 });
 
