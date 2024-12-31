@@ -37,7 +37,7 @@ describe("GymController Endpoints", () => {
       (Gym.prototype.save as jest.Mock).mockResolvedValue({
         _id: new mongoose.Types.ObjectId(),
         name: "Test Gym",
-        location: "Test Location",
+        city: "Test city",
         description: "Test Description",
         pictures: ["http://localhost/uploads/test-image1.jpg"],
         amountOfReviews: 0,
@@ -47,7 +47,7 @@ describe("GymController Endpoints", () => {
       const response = await request(app)
         .post("/gyms")
         .field("name", "Test Gym")
-        .field("location", "Test Location")
+        .field("city", "Test city")
         .field("description", "Test Description")
         .query({ owner: ownerId.toString() })
         .attach("pictures", Buffer.from("image content"), "test-image1.jpg");
@@ -71,7 +71,7 @@ describe("GymController Endpoints", () => {
       const existingGym = {
         _id: gymId,
         name: "Old Gym",
-        location: "Old Location",
+        city: "Old city",
         description: "Old Description",
         pictures: ["http://localhost/uploads/test-image2.jpg"],
       };
@@ -80,14 +80,14 @@ describe("GymController Endpoints", () => {
       (Gym.findByIdAndUpdate as jest.Mock).mockResolvedValue({
         ...existingGym,
         name: "Updated Gym",
-        location: "Updated Location",
+        city: "Updated city",
         description: "Updated Description",
       });
 
       const response = await request(app)
         .put(`/gyms/${gymId}`)
         .field("name", "Updated Gym")
-        .field("location", "Updated Location")
+        .field("city", "Updated city")
         .field("description", "Updated Description")
         .field("pictures", "http://localhost/uploads/test-image2.jpg");
 
@@ -138,7 +138,7 @@ describe("DELETE /gyms/:gymId", () => {
     const existingGym = {
       _id: gymId,
       name: "Test Gym",
-      location: "Test Location",
+      city: "Test city",
       description: "Test Description",
       pictures: ["http://localhost/uploads/test-image1.jpg"],
       owner: ownerId,
@@ -210,7 +210,7 @@ describe("GET /gyms/myGyms", () => {
       {
         _id: new mongoose.Types.ObjectId(),
         name: "Gym 1",
-        location: "Location 1",
+        city: "city 1",
         description: "Description 1",
         pictures: ["http://localhost/uploads/gym1.jpg"],
         owner: ownerId,
@@ -218,7 +218,7 @@ describe("GET /gyms/myGyms", () => {
       {
         _id: new mongoose.Types.ObjectId(),
         name: "Gym 2",
-        location: "Location 2",
+        city: "city 2",
         description: "Description 2",
         pictures: ["http://localhost/uploads/gym2.jpg"],
         owner: ownerId,
@@ -257,7 +257,7 @@ describe("GET /gyms", () => {
       {
         _id: new mongoose.Types.ObjectId(),
         name: "Gym 1",
-        location: "Location 1",
+        city: "city 1",
         description: "Description 1",
         pictures: ["http://localhost/uploads/gym1.jpg"],
         owner: new mongoose.Types.ObjectId(),
@@ -265,7 +265,7 @@ describe("GET /gyms", () => {
       {
         _id: new mongoose.Types.ObjectId(),
         name: "Gym 2",
-        location: "Location 2",
+        city: "city 2",
         description: "Description 2",
         pictures: ["http://localhost/uploads/gym2.jpg"],
         owner: new mongoose.Types.ObjectId(),
@@ -287,7 +287,7 @@ describe("GET /gyms", () => {
       {
         _id: new mongoose.Types.ObjectId(),
         name: "Gym 1",
-        location: "Location 1",
+        city: "city 1",
         description: "Description 1",
         pictures: ["http://localhost/uploads/gym1.jpg"],
         owner: ownerId,
@@ -309,12 +309,12 @@ describe("GET /gyms", () => {
         {
           _id: new mongoose.Types.ObjectId().toString(),
           name: "Fitness World",
-          location: "New York",
+          city: "New York",
         },
         {
           _id: new mongoose.Types.ObjectId().toString(),
           name: "Health Hub",
-          location: "San Francisco",
+          city: "San Francisco",
         },
       ];
 
