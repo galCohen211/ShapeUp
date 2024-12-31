@@ -227,7 +227,7 @@ describe('GET /reviews', () => {
   });
 });
 
-describe('GET /reviews/:gymId', () => {
+describe('GET /reviews/gym/:gymId', () => {
   const mockUserToken = jwt.sign({ id: 'mockUserId', role: IUserType.GYM_OWNER }, process.env.JWT_SECRET || 'testsecret');
   const mockGymId = 'mockGymId';
 
@@ -238,13 +238,12 @@ describe('GET /reviews/:gymId', () => {
   it('should return all reviews for a specific gym successfully with valid token', async () => {
     (Review.find as jest.Mock).mockResolvedValue([
       { id: 'mockReviewId1', rating: 5, content: 'Great gym!', user: 'mockUserId', gym: mockGymId },
-      { id: 'mockReviewId2', rating: 4, content: 'Nice place', user: 'mockUserId', gym: mockGymId }
+      { id: 'mockReviewId2', rating: 4, content: 'Nice place', user: 'mockUserId', gym: mockGymId },
     ]);
 
     const response = await request(app)
-      .get(`/reviews/${mockGymId}`)
+      .get(`/reviews/gym/${mockGymId}`)
       .set('Cookie', [`access_token=${mockUserToken}`]);
-
     expect(response.status).toBe(200);
     expect(response.body.reviews).toHaveLength(2);
     expect(response.body.reviews[0].content).toBe('Great gym!');
@@ -253,22 +252,25 @@ describe('GET /reviews/:gymId', () => {
 
   it('should return an empty array if there are no reviews for the specified gym', async () => {
     (Review.find as jest.Mock).mockResolvedValue([]);
-
     const response = await request(app)
-      .get(`/reviews/${mockGymId}`)
+      .get(`/reviews/gym/${mockGymId}`)
       .set('Cookie', [`access_token=${mockUserToken}`]);
-
     expect(response.status).toBe(200);
     expect(response.body.reviews).toHaveLength(0);
   });
-
+ 
+  it('should return 400 if gymId is missing', async () => {
+    const response = await request(app)
+      .get(`/reviews/gym/`)   
+      .set('Cookie', [`access_token=${mockUserToken}`]);
+    expect(response.status).toBe(404);
+  });
+  
   it('should return 500 for unexpected errors', async () => {
     (Review.find as jest.Mock).mockRejectedValue(new Error('Database error'));
-
     const response = await request(app)
-      .get(`/reviews/${mockGymId}`)
+      .get(`/reviews/gym/${mockGymId}`)
       .set('Cookie', [`access_token=${mockUserToken}`]);
-
     expect(response.status).toBe(500);
     expect(response.body.message).toBe('An error occurred while fetching reviews.');
   });
