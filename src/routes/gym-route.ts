@@ -13,7 +13,7 @@ router.post(
     upload.array("pictures", 5),
     [
         body("name").notEmpty().withMessage("Name is required."),
-        body("location").notEmpty().withMessage("Location is required."),
+        body("city").notEmpty().withMessage("city is required."),
         body("description").notEmpty().withMessage("Description is required."),
         query("owner")
             .notEmpty()
@@ -34,7 +34,7 @@ router.put(
             .isMongoId()
             .withMessage("Gym ID must be a valid MongoDB ObjectId."),
         body("name").optional(),
-        body("location").optional(),
+        body("city").optional(),
         body("description").optional(),
         body("amountOfReviews")
             .optional()

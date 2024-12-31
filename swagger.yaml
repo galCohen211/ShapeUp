@@ -317,14 +317,14 @@ paths:
               type: object
               required:
                 - name
-                - location
+                - city
                 - description
               properties:
                 name:
                   type: string
                   description: The gym name
                   example: ShapeUp Gym
-                location:
+                city:
                   type: string
                   description: The gym street address
                   example: 123 Main St
@@ -388,7 +388,7 @@ paths:
                   type: string
                   description: The gym name
                   example: ShapeUp gym updated
-                location:
+                city:
                   type: string
                   description: The gym street address
                   example: 321 Main St

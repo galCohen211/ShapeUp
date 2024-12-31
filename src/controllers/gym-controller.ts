@@ -17,7 +17,7 @@ class GymController {
                 return;
             }
 
-            const { name, location, description } = req.body;
+            const { name, city, description } = req.body;
             const owner = req.query.owner as string;
 
             if (!req.files || !(req.files as Express.Multer.File[]).length) {
@@ -34,7 +34,7 @@ class GymController {
             const newGym = new Gym({
                 name,
                 pictures,
-                location,
+                city,
                 description,
                 amountOfReviews,
                 owner: new mongoose.Types.ObjectId(owner),
@@ -68,7 +68,7 @@ class GymController {
                 return;
             }
 
-            const { name, location, description, amountOfReviews } = req.body;
+            const { name, city, description, amountOfReviews } = req.body;
 
             // Handle image deletion logic
             let updatedPictures = [...existingGym.pictures];
@@ -105,7 +105,7 @@ class GymController {
             // Update gym details
             const updateData: Partial<Record<string, any>> = {
                 name,
-                location,
+                city,
                 description,
                 amountOfReviews,
                 pictures: updatedPictures,
@@ -215,7 +215,7 @@ class GymController {
             const gyms = await Gym.find({
                 $or: [
                     { name: { $regex: searchRegex } },
-                    { location: { $regex: searchRegex } }
+                    { city: { $regex: searchRegex } }
                 ]
             });
 
