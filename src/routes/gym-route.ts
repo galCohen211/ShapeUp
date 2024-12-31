@@ -65,7 +65,11 @@ router.get(
     GymController.getMyGyms
 );
 
-router.delete("/:gymId", verifyToken([IUserType.GYM_OWNER]), GymController.deleteGymById);
+router.delete(
+    "/:gymId",
+    verifyToken([IUserType.GYM_OWNER]),
+    GymController.deleteGymById
+);
 
 router.get(
     "/filter",

@@ -9,10 +9,9 @@ jest.mock('../../models/review-model');
 jest.mock('../../models/gym-model');
 jest.mock('../../models/user-model');
 
-
 describe('POST /reviews', () => {
-  const mockUserToken = jwt.sign({ id: 'mockUserId', type: IUserType.USER }, process.env.JWT_SECRET || 'testsecret');
-  const mockAdminToken = jwt.sign({ id: 'mockAdminId', type: IUserType.ADMIN }, process.env.JWT_SECRET || 'testsecret');
+  const mockUserToken = jwt.sign({ id: 'mockUserId', role: IUserType.USER }, process.env.JWT_SECRET || 'testsecret');
+  const mockAdminToken = jwt.sign({ id: 'mockAdminId', role: IUserType.ADMIN }, process.env.JWT_SECRET || 'testsecret');
 
   afterAll(async () => {
     socketIOServer.close();
@@ -59,7 +58,7 @@ describe('POST /reviews', () => {
       .send({ rating: 5, content: 'Great gym!', gym: 'mockGymId' });
 
     expect(response.status).toBe(403);
-    expect(response.text).toBe("Forbidden. You don't have access to this resource");
+    expect(response.body.message).toBe("Your role is not allowed to access this resource");
   });
 
   it('should return 400 for invalid rating', async () => {
@@ -106,7 +105,7 @@ describe('POST /reviews', () => {
       .send({ rating: 5, content: 'Great gym!', gym: 'mockGymId' });
 
     expect(response.status).toBe(500);
-    expect(response.body.error).toBe('An error occurred while adding the review.');
+    expect(response.body.message).toBe('An error occurred while adding the review.');
   });
 });
 
@@ -114,8 +113,8 @@ jest.mock('../../models/review-model');
 jest.mock('../../models/user-model');
 
 describe('PUT /reviews/:reviewId', () => {
-  const mockUserToken = jwt.sign({ id: 'mockUserId', type: 'user' }, process.env.JWT_SECRET || 'testsecret');
-  const mockAdminToken = jwt.sign({ id: 'mockAdminId', type: 'ADMIN' }, process.env.JWT_SECRET || 'testsecret');
+  const mockUserToken = jwt.sign({ id: 'mockUserId', role: IUserType.USER }, process.env.JWT_SECRET || 'testsecret');
+  const mockAdminToken = jwt.sign({ id: 'mockAdminId', role: IUserType.ADMIN }, process.env.JWT_SECRET || 'testsecret');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -178,7 +177,7 @@ describe('PUT /reviews/:reviewId', () => {
       .send({ rating: 4, content: 'Updated review content' });
 
     expect(response.status).toBe(500);
-    expect(response.body.error).toBe('An error occurred while updating the review.');
+    expect(response.body.message).toBe('An error occurred while updating the review.');
   });
 });
 
@@ -187,8 +186,8 @@ jest.mock('../../models/gym-model');
 jest.mock('../../models/user-model');
 
 describe('GET /reviews', () => {
-  const mockUserToken = jwt.sign({ id: 'mockUserId', type: 'user' }, process.env.JWT_SECRET || 'testsecret');
-  const mockAdminToken = jwt.sign({ id: 'mockAdminId', type: 'ADMIN' }, process.env.JWT_SECRET || 'testsecret');
+  const mockUserToken = jwt.sign({ id: 'mockUserId', role: IUserType.USER }, process.env.JWT_SECRET || 'testsecret');
+  const mockAdminToken = jwt.sign({ id: 'mockAdminId', role: IUserType.ADMIN }, process.env.JWT_SECRET || 'testsecret');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -228,7 +227,7 @@ describe('GET /reviews', () => {
       .set('Cookie', [`access_token=${mockUserToken}`]);
 
     expect(response.status).toBe(500);
-    expect(response.body.error).toBe('An error occurred while fetching reviews.');
+    expect(response.body.message).toBe('An error occurred while fetching reviews.');
   });
 });
 

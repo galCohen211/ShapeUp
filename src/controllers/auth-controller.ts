@@ -35,7 +35,7 @@ passport.use(
           email: profile.email,
           firstName: profile.name.givenName,
           lastName: profile.name.familyName,
-          userType: IUserType.USER
+          userRole: IUserType.USER
         });
 
         if ("accessToken" in res) {
@@ -80,37 +80,53 @@ export const signup = async (req: Request, res: Response) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(400).json({ errors: errors.array() });
+    res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
     return;
   }
 
-  const { email, password, firstName, lastName, address, gymOwnerLicenseImage } = req.body;
+  const { email, password, firstName, lastName, street, city, birthdate, gender, gymOwnerLicenseImage } = req.body;
 
-  let userType: IUserType = IUserType.USER; // default type is user
+  let userRole: IUserType = IUserType.USER; // default role is user
   if (gymOwnerLicenseImage) {
-    userType = IUserType.GYM_OWNER;
+    userRole = IUserType.GYM_OWNER;
   }
 
   const avatar = req.files && "avatar" in req.files ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
   if (!avatar) {
-    return res.status(400).json({ error: "Please upload an avatar" });
+    return res.status(400).json({ message: "Please upload an avatar", error: "avatar is not defined" });
   }
   const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
 
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
   try {
     const result = await registerGeneralUser({
-      email,
-      firstName,
-      lastName,
-      password,
-      address,
-      userType,
-      avatarUrl,
-      gymOwnerLicenseImage
+      email: email,
+      password: hashedPassword,
+      firstName: firstName,
+      lastName: lastName,
+      street: street,
+      city: city,
+      userRole: userRole,
+      birthdate: birthdate,
+      gender: gender,
+      avatarUrl: avatarUrl,
+      gymOwnerLicenseImage: gymOwnerLicenseImage // null if not gym owner
     });
 
     if (result.message) {
-      return res.status(400).json({ message: result.message });
+      const response: { message?: string; status?: number; error?: any } = { message: result.message };
+
+      if ("status" in result) {
+        response.status = result.status;
+      }
+
+      if ("error" in result) {
+        response.error = result.error;
+      }
+
+      return res.status(response.status || 400).json(response);
     }
 
     if ("accessToken" in result) {
@@ -124,9 +140,8 @@ export const signup = async (req: Request, res: Response) => {
         userId: result._id
       });
     }
-  } catch (error) {
-    console.error("Error during signup:", error);
-    return res.status(500).json({ message: "Internal server error" });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal server error", error: err });
   }
 };
 
@@ -134,7 +149,7 @@ export const login = async (req: Request, res: Response) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(400).json({ errors: errors.array() });
+    res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
     return;
   }
 
@@ -143,21 +158,17 @@ export const login = async (req: Request, res: Response) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).send("Wrong email or password");
+      return res.status(401).json({ message: "Wrong email or password" });
     }
 
     // This is SSO user - no password in user object
     if (!user.password) {
-      return res.status(400).send("Wrong email or password");
+      return res.status(401).json({ message: "Wrong email or password" });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).send("Wrong email or password");
-    }
-
-    if (!process.env.JWT_SECRET) {
-      return { message: "Missing auth configuration" };
+      return res.status(401).json({ message: "Wrong email or password" });
     }
 
     const result = generateJWT(user._id, user.role);
@@ -176,16 +187,16 @@ export const login = async (req: Request, res: Response) => {
     }
     await user.save(); // save the refresh token in user object
 
-    return res.status(200).send({
+    return res.status(200).json({
+      message: "Logged in successfully",
       email: user.email,
       accessToken: accessToken,
       refreshToken: refreshToken,
     });
 
   }
-  catch (error) {
-    console.error("Error during login:", error);
-    return res.status(500).json({ message: "Internal server error" });
+  catch (err) {
+    return res.status(500).json({ message: "Internal server error", error: err });
   }
 }
 
@@ -195,8 +206,8 @@ export const logout = async (req: Request, res: Response) => {
     const refreshToken = req.body.refreshToken;
     const decoded = await get_decoded(req, res, refreshToken);
 
-    if (!decoded || 'error' in decoded) {
-      return res.status(400).json({ error: "Invalid decoded" });
+    if (!decoded || !("id" in decoded)) {
+      return res.status(400).json({ message: "error while decoding refreshToken" });
     }
 
     const user = await User.findOne({ _id: decoded.id });
@@ -216,10 +227,9 @@ export const logout = async (req: Request, res: Response) => {
     await user.save();
 
     res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
-    return res.status(200).send({ message: "Logged out successfully" });
-  } catch (error) {
-    console.error("Error during logout:", error);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal server error", error: err });
   }
 };
 
@@ -227,8 +237,8 @@ export const refresh = async (req: Request, res: Response) => {
   const refreshToken = req.body.refreshToken;
   const decoded = await get_decoded(req, res, refreshToken);
 
-  if (!decoded || 'error' in decoded) {
-    return res.status(400).json({ error: "Invalid decoded" });
+  if (!decoded || !("id" in decoded)) {
+    return res.status(400).json({ message: "error while decoding refreshToken" });
   }
 
   try {
@@ -278,17 +288,17 @@ export const refresh = async (req: Request, res: Response) => {
     });
 
   } catch (err) {
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Internal server error", error: err });
   }
 }
 
 const registerGeneralUser = async (params: RegisterUserParams) => {
-  const { email, firstName, lastName, password, address, userType, gymOwnerLicenseImage, avatarUrl } = params;
+  const { email, password, firstName, lastName, street, city, userRole, birthdate, gender, avatarUrl, gymOwnerLicenseImage } = params;
   const user = await User.findOne({ email });
 
   // "regular" user
   if (user && password) {
-    return { message: "User already exists" };
+    return { message: "User already exists", status: 400 };
   }
 
   // SSO user - don't register, just create token
@@ -297,33 +307,22 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
   }
 
   try {
-    let hashedPassword: string | null = null;
-
-    if (!address) {
-      let address: string | null = null;
-    }
-    if (!gymOwnerLicenseImage) {
-      let gymOwnerLicenseImage: string | null = null;
-    }
-    if (!avatarUrl) {
-      let avatarUrl: string | null = null;
-    }
-
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      hashedPassword = await bcrypt.hash(password, salt);
-    }
 
     const newUser = await new User({
       email: email,
-      password: hashedPassword, // if SSO is used, the value is null
+      password: password, // if SSO is used, the value is null
       firstName: firstName,
       lastName: lastName,
-      address: address,
-      type: userType,
-      favoriteGyms: [],
+      street: street,
+      city: city,
+      role: userRole,
+      birthdate: birthdate,
+      gender: gender,
       avatarUrl: avatarUrl,
-      gymOwnerLicenseImage: gymOwnerLicenseImage
+      refreshTokens: [],
+      gymOwnerLicenseImage: gymOwnerLicenseImage,
+      favoriteGyms: [],
+      isChatGptAllowed: true
     }).save();
 
     const result = generateJWT(newUser._id, newUser.role);
@@ -335,23 +334,23 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
     return result;
   }
   catch (err) {
-    return { message: "Failed to register user", error: err };
+    return { message: "Failed to register user", error: err, status: 500 };
   }
 }
 
-const generateJWT = (userId: Types.ObjectId, type: IUserType) => {
+const generateJWT = (userId: Types.ObjectId, role: IUserType) => {
   if (!process.env.JWT_SECRET) {
     return { message: "Missing auth configuration" };
   }
 
   const accessToken = jwt.sign(
-    { id: userId.toString(), type: type },
+    { id: userId.toString(), role: role },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRATION }
   );
 
   const refreshToken = jwt.sign(
-    { id: userId.toString(), type: type },
+    { id: userId.toString(), role: role },
     process.env.JWT_SECRET,
     { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
   );
@@ -383,11 +382,11 @@ export const getFromCookie = async (req: Request, res: Response, property: strin
     if (decoded && decoded[property]) {
       return decoded[property];
     } else {
-      res.status(400).json({ message: `'${property}' not found in token` });
+      res.status(400).json({ message: `'${property}' not found in access token` });
     }
 
-  } catch (error) {
-    res.status(400).json({ message: "Invalid token", error: error });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
   }
 }
 
@@ -399,7 +398,7 @@ const get_decoded = async (req: Request, res: Response, refreshToken: string) =>
   }
 
   if (!process.env.JWT_SECRET) {
-    return { error: "Missing auth configuration" };
+    return { message: "Missing auth configuration" };
   }
 
   const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as TokenPayload;

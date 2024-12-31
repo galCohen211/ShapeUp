@@ -2,9 +2,8 @@ import request from "supertest";
 import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
-
 import app, { socketIOServer } from "../../server";
-import User from "../../models/user-model";
+import User, { IUserType } from "../../models/user-model";
 import Gym from "../../models/gym-model";
 
 jest.mock("../../models/user-model");
@@ -14,7 +13,7 @@ jest.mock("../../models/gym-model");
 jest.mock('../../middleware/verifyToken.ts', () => ({
     __esModule: true,
     default: jest.fn(() => (req: any, res: any, next: any) => {
-        req.user = { id: "mocked-user-id", type: "gym_owner" };
+        req.user = { id: "mocked-user-id", role: IUserType.GYM_OWNER };
         next();
     }),
 }));
@@ -58,7 +57,7 @@ describe("UserController Endpoints", () => {
                 firstName: "Gym",
                 lastName: "Owner",
                 city: "Somewhere",
-                role: "gym_owner",
+                role: IUserType.GYM_OWNER,
                 favoriteGyms: [],
                 avatarUrl: "gym-owner.jpg",
             };
@@ -87,7 +86,7 @@ describe("UserController Endpoints", () => {
             const response = await request(app).get(`/users/user/${userId}`);
 
             expect(response.status).toBe(500);
-            expect(response.body.message).toBe("Server error");
+            expect(response.body.message).toBe("Internal server error");
         });
 
         it("should return 200 and the user data for a regular user", async () => {
@@ -98,7 +97,7 @@ describe("UserController Endpoints", () => {
                 firstName: "Regular",
                 lastName: "User",
                 city: "Somewhere",
-                role: "user",
+                role: IUserType.USER,
                 favoriteGyms: [],
                 avatarUrl: "user.jpg",
             };
@@ -189,7 +188,7 @@ describe("UserController Endpoints", () => {
                 .send({ firstName: "Or" });
 
             expect(response.status).toBe(400);
-            expect(response.body.errors).toBeDefined();
+            expect(response.body.error).toBeDefined();
         });
     });
 
@@ -334,7 +333,7 @@ describe("UserController Endpoints", () => {
         const response = await request(app).get(`/users/filter`);
 
         expect(response.status).toBe(400);
-        expect(response.body.errors).toBeDefined();
+        expect(response.body.error).toBeDefined();
     });
 
     it("should return 500 if there is a server error", async () => {
