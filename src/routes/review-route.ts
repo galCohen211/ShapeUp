@@ -15,5 +15,8 @@ router.put("/:reviewId", verifyToken([IUserType.USER]), reviewController.updateR
 // Get all reviews
 router.get("/", reviewController.getAllReviews);
 
+// Get all reviews by gym ID
+router.get("/:gymId", reviewController.getAllReviewsByGymId);
+
 
 export default router;

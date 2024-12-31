@@ -227,4 +227,52 @@ describe('GET /reviews', () => {
   });
 });
 
+describe('GET /reviews/:gymId', () => {
+  const mockUserToken = jwt.sign({ id: 'mockUserId', role: IUserType.GYM_OWNER }, process.env.JWT_SECRET || 'testsecret');
+  const mockGymId = 'mockGymId';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return all reviews for a specific gym successfully with valid token', async () => {
+    (Review.find as jest.Mock).mockResolvedValue([
+      { id: 'mockReviewId1', rating: 5, content: 'Great gym!', user: 'mockUserId', gym: mockGymId },
+      { id: 'mockReviewId2', rating: 4, content: 'Nice place', user: 'mockUserId', gym: mockGymId }
+    ]);
+
+    const response = await request(app)
+      .get(`/reviews/${mockGymId}`)
+      .set('Cookie', [`access_token=${mockUserToken}`]);
+
+    expect(response.status).toBe(200);
+    expect(response.body.reviews).toHaveLength(2);
+    expect(response.body.reviews[0].content).toBe('Great gym!');
+    expect(response.body.reviews[0].gym).toBe(mockGymId);
+  });
+
+  it('should return an empty array if there are no reviews for the specified gym', async () => {
+    (Review.find as jest.Mock).mockResolvedValue([]);
+
+    const response = await request(app)
+      .get(`/reviews/${mockGymId}`)
+      .set('Cookie', [`access_token=${mockUserToken}`]);
+
+    expect(response.status).toBe(200);
+    expect(response.body.reviews).toHaveLength(0);
+  });
+
+  it('should return 500 for unexpected errors', async () => {
+    (Review.find as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+    const response = await request(app)
+      .get(`/reviews/${mockGymId}`)
+      .set('Cookie', [`access_token=${mockUserToken}`]);
+
+    expect(response.status).toBe(500);
+    expect(response.body.message).toBe('An error occurred while fetching reviews.');
+  });
+});
+
+
 
