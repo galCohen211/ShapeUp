@@ -568,6 +568,8 @@ paths:
       tags:
         - reviews
       summary: Get all reviews for a specific gym
+      security:
+        - bearerAuth: []
       description: Retrieve all reviews associated with a specific gym by its ID.
       parameters:
         - name: gymId
