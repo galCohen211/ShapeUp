@@ -10,8 +10,6 @@ import { IUserType } from "../../models/user-model";
 jest.mock("../../models/gym-model");
 jest.mock("../../controllers/auth-controller");
 
-var valid_gym_id: mongoose.Types.ObjectId;
-
 describe("GymController Endpoints", () => {
   const uploadsDir = path.join(__dirname, "../../uploads");
   const testImages: string[] = [];
@@ -36,10 +34,8 @@ describe("GymController Endpoints", () => {
   describe("POST /gyms", () => {
     it("should add a new gym successfully", async () => {
       const ownerId = new mongoose.Types.ObjectId();
-      valid_gym_id = new mongoose.Types.ObjectId();
-      console.log("aaaa" + valid_gym_id);
       (Gym.prototype.save as jest.Mock).mockResolvedValue({
-        _id: valid_gym_id,
+        _id: new mongoose.Types.ObjectId(),
         name: "Test Gym",
         city: "Test city",
         description: "Test Description",
