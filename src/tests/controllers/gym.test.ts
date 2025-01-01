@@ -54,8 +54,6 @@ describe("GymController Endpoints", () => {
 
       expect(response.status).toBe(201);
       expect(response.body.message).toBe("Gym added successfully!");
-      console.log("bbbbb" + response.body);
-      console.log(response.body);
       testImages.push("test-image1.jpg");
     });
 
