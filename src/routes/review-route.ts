@@ -15,5 +15,12 @@ router.put("/:reviewId", verifyToken([IUserType.USER]), reviewController.updateR
 // Get all reviews
 router.get("/", reviewController.getAllReviews);
 
+// Get all reviews by gym ID
+router.get("/gym/:gymId", verifyToken([IUserType.GYM_OWNER]),[
+    param("gymId")
+      .notEmpty().withMessage("Gym ID is required.")
+      .isMongoId().withMessage("Gym ID must be a valid MongoDB ObjectId."),
+] ,reviewController.getAllReviewsByGymId);
+
 
 export default router;
