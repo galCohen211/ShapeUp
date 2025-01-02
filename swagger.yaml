@@ -16,66 +16,39 @@ tags:
   - name: "reviews"
     description: "Endpoints related to reviews"
 
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: The user email
+        password:
+          type: string
+          description: The user password
+      example:
+        email: 'bob@gmail.com'
+        password: '123456'
+    LogoutRefresh:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: The user refresh token
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+
 paths:
-  /users/user/{userId}:
-    get:
-      tags:
-        - users
-      summary: Get user details by ID
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: The ID of the user to retrieve
-      responses:
-        "200":
-          description: User details retrieved successfully
-        "404":
-          description: User not found
-        "403":
-          description: Unauthorized access
-  /users/updateUserById/{userId}:
-    put:
-      tags:
-        - users
-      summary: Update user details
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: The ID of the user to update
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                password:
-                  type: string
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                address:
-                  type: string
-                avatar:
-                  type: string
-      responses:
-        "200":
-          description: User updated successfully
-        "400":
-          description: Validation errors
-        "404":
-          description: User not found
-        "500":
-          description: Internal server error
   /users/signup:
     post:
       tags:
@@ -87,32 +60,62 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                address:
-                  type: string
-                avatar:
-                  type: string
-                  format: binary
               required:
                 - email
                 - password
                 - firstName
                 - lastName
-                - address
+                - street
+                - city
+                - birthdate
+                - gender
+                - avatar
+              properties:
+                email:
+                  type: string
+                  description: The user email
+                  example: bob@gmail.com
+                password:
+                  type: string
+                  description: The user password
+                  example: "123456"
+                firstName:
+                  type: string
+                  description: The user first name
+                  example: Bob
+                lastName:
+                  type: string
+                  description: The user last name
+                  example: Smith
+                street:
+                  type: string
+                  description: The user street address
+                  example: 123 Main St
+                city:
+                  type: string
+                  description: The user city
+                  example: San Francisco
+                birthdate:
+                  type: string
+                  format: date
+                  description: The user birthdate
+                  example: "1990-01-01"
+                gender:
+                  type: IGender
+                  description: The user gender
+                  example: male
+                  enum: [male, female]
+                avatar:
+                  type: string
+                  format: binary
+                  description: The user avatar file
       responses:
         "201":
-          description: User signed up successfully
+          description: User registered successfully
         "400":
-          description: Validation errors
+          description: Validation array is not empty
+        "500":
+          description: Internal server error
   /users/login:
     post:
       tags:
@@ -123,38 +126,461 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-              required:
-                - email
-                - password
+              $ref: '#/components/schemas/User'
       responses:
         "200":
           description: User logged in successfully
         "400":
-          description: Validation errors
+          description: Validation array is not empty
+        "401":
+          description: Unauthorized access
   /users/logout:
     post:
       tags:
         - users
       summary: Log out the current user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRefresh'
       responses:
         "200":
           description: User logged out successfully
         "400":
-          description: Validation errors
+          description: Invalid refresh token
+        "500":
+          description: Internal server error
   /users/refresh:
     post:
       tags:
         - users
       summary: Refresh the authentication token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRefresh'
       responses:
         "200":
-          description: Token refreshed successfully
+          description: New tokens generated
+        "400":
+          description: Invalid refresh token
+        "500":
+          description: Internal server error
+  /users/user/{userId}:
+    get:
+      tags:
+        - users
+      summary: Get user details by ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to retrieve
+      responses:
+        "200":
+          description: User details retrieved successfully
+        "403":
+          description: Unauthorized access
+        "404":
+          description: User not found
+  /users/updateUserById/{userId}:
+    put:
+      tags:
+        - users
+      summary: Update user details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to update
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  description: The user first name
+                  example: Bobi
+                lastName:
+                  type: string
+                  description: The user last name
+                  example: Smithi
+                street:
+                  type: string
+                  description: The user street
+                  example: 321 Main St
+                city:
+                  type: string
+                  description: The user city
+                  example: Los Angeles
+                avatar:
+                  type: string
+                  description: The user avatar file
+                  format: binary
+      responses:
+        "200":
+          description: User updated successfully
         "400":
           description: Validation errors
+        "404":
+          description: User not found
+        "500":
+          description: Internal server error
+  /users/addFavoriteGym/{userId}:
+    post:
+      tags:
+        - users
+      summary: Add a gym to user's favorites
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gymId
+              properties:
+                gymId:
+                  type: string
+                  description: The ID of the gym to add to favorites
+                  example: 5f7b3b3b4b3b3b3b3b3b3b3b
+      responses:
+        "200":
+          description: Gym added to favorites successfully
+        "400":
+          description: Validation errors
+        "404":
+          description: User or gym not found
+        "500":
+          description: Internal server error
+  /users/filter:
+    get:
+      tags:
+        - users
+      summary: Filter users by query
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The query to filter users
+      responses:
+        "200":
+          description: Users filtered successfully
+        "400":
+          description: Invalid query
+        "404":
+          description: Users not found
+        "500":
+          description: Internal server error
+  /gyms/:
+    post:
+      tags:
+        - gyms
+      summary: Add a new gym
+      parameters:
+        - name: owner
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The ID of the gym owner
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - city
+                - description
+              properties:
+                name:
+                  type: string
+                  description: The gym name
+                  example: ShapeUp Gym
+                city:
+                  type: string
+                  description: The gym street address
+                  example: 123 Main St
+                description:
+                  type: string
+                  description: The gym description
+                  example: The best gym in town
+                pictures:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: The gym pictures
+      responses:
+        "201":
+          description: Gym added successfully
+        "400":
+          description: Validation errors
+        "500":
+          description: Internal server error
+    get:
+      tags:
+        - gyms
+      summary: Get all gyms or get gyms by owner
+      parameters:
+        - name: owner
+          in: query
+          required: false
+          schema:
+            type: string
+          description: The ID of the gym owner
+      responses:
+        "200":
+          description: Gyms retrieved successfully
+        "400":
+          description: Invalid owner ID
+        "404":
+          description: Gyms not found
+        "500":
+          description: Internal server error  
+  /gyms/{gymId}:
+    put:
+      tags:
+        - gyms
+      summary: Update gym details
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the gym to update
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The gym name
+                  example: ShapeUp gym updated
+                city:
+                  type: string
+                  description: The gym street address
+                  example: 321 Main St
+                description:
+                  type: string
+                  description: The gym description
+                  example: The best gym in the world
+                amountOfReviews:
+                  type: number
+                  description: The amount of reviews for the gym
+                  example: 5
+                pictures: 
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: The gym pictures
+      responses:
+        "200":
+          description: Gym updated successfully
+        "400":
+          description: Validation errors
+        "404":
+          description: Gym not found
+        "500":
+          description: Internal server error
+    delete:
+      tags:
+        - gyms
+      summary: Delete a gym
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the gym to delete
+      responses:
+        "200":
+          description: Gym deleted successfully
+        "403":
+          description: Unauthorized access
+        "404":
+          description: Gym not found
+        "500":
+          description: Internal server error
+  /gyms/myGyms:
+    get:
+      tags:
+        - gyms
+      summary: Get my gyms
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Gyms retrieved successfully
+        "400":
+          description: Invalid user ID format
+        "500":
+          description: Internal server error
+  /gyms/filter:
+    get:
+      tags:
+        - gyms
+      summary: Filter gyms by query
+      parameters:
+        - name: search
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The query to filter gyms
+      responses:
+        "200":
+          description: Gyms filtered successfully
+        "400":
+          description: Invalid query
+        "404":
+          description: Gyms not found
+        "500":
+          description: Internal server error
+  /reviews/:
+    post:
+      tags:
+        - reviews
+      summary: Add a new review
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - rating
+                - content
+                - gym
+              properties:
+                rating:
+                  type: number
+                  description: The rating of the gym
+                  example: 5
+                content:
+                  type: string
+                  description: The review content
+                  example: The best gym in town
+                gym:
+                  type: string
+                  description: The ID of the gym
+                  example: 5f7b3b3b4b3b3b3b3b3b3b3b
+      responses:
+        "201":
+          description: Review added successfully
+        "400":
+          description: Validation errors
+        "401":
+          description: Unauthorized access
+        "404":
+          description: Gym or user not found
+        "500":
+          description: Internal server error
+    get:
+      tags:
+        - reviews
+      summary: Get all reviews
+      responses:
+        "200":
+          description: Reviews retrieved successfully
+        "500":
+          description: Internal server error
+  /reviews/{reviewId}:
+    put:
+      tags:
+        - reviews
+      summary: Update review details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the review to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - rating
+                - content
+              type: object
+              properties:
+                rating:
+                  type: number
+                  description: The rating of the gym
+                  example: 4
+                content:
+                  type: string
+                  description: The review content
+                  example: The best gym in town
+      responses:
+        "200":
+          description: Review updated successfully
+        "400":
+          description: Validation errors
+        "401":
+          description: Unauthorized access
+        "500":
+          description: Internal server error
+  /reviews/gym/{gymId}:
+    get:
+      tags:
+        - reviews
+      summary: Get all reviews for a specific gym
+      security:
+        - bearerAuth: []
+      description: Retrieve all reviews associated with a specific gym by its ID.
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the gym to retrieve reviews for
+      responses:
+        "200":
+          description: Reviews retrieved successfully
+        "500":
+          description: An error occurred while fetching reviews
+    

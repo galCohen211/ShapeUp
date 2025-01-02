@@ -44,7 +44,7 @@ async function createGymsAndUsers() {
     const gym1 = new Gym({
       name: "Elite Fitness",
       pictures: ["elite1.jpg", "elite2.jpg"],
-      location: "Downtown",
+      city: "Downtown",
       description: "High-end gym with modern equipment.",
       amountOfReviews: 0,
       owner: gymOwner._id,
@@ -53,7 +53,7 @@ async function createGymsAndUsers() {
     const gym2 = new Gym({
       name: "Community Gym",
       pictures: ["community1.jpg", "community2.jpg"],
-      location: "Suburb",
+      city: "Suburb",
       description: "Affordable gym for all fitness levels.",
       amountOfReviews: 0,
       owner: gymOwner._id,

@@ -2,9 +2,9 @@ import { Request, Response, Router } from "express";
 import passport from "passport";
 import { body, query, param } from "express-validator";
 
-import { IUserType } from "../models/user-model";
-import verifyToken from "../middleware/verifyToken";
 import upload from "../multer";
+import verifyToken from "../middleware/verifyToken";
+import { IUserType } from "../models/user-model";
 import { signup, login, logout, refresh } from "../controllers/auth-controller"
 import UserController from "../controllers/user-controller";
 
@@ -47,7 +47,10 @@ router.post("/signup",
     body("password").notEmpty().withMessage("Password is required"),
     body("firstName").notEmpty().isString().withMessage("First name is required and must be a string"),
     body("lastName").notEmpty().isString().withMessage("Last name is required and must be a string"),
-    body("address").notEmpty().isString().withMessage("Address is required and must be a string"),
+    body("street").notEmpty().isString().withMessage("Street is required and must be a string"),
+    body("city").notEmpty().isString().withMessage("City is required and must be a string"),
+    body("birthdate").notEmpty().isString().withMessage("Birthdate is required and must be a string"),
+    body("gender").notEmpty().withMessage("Gender is required"),
   ],
   (req: Request, res: Response) => {
     signup(req, res);

@@ -12,7 +12,7 @@ class chatAIController {
                 res.status(404).json({ message: "User not found" });
                 return;
             }
-            if(user.chatGptAccess != undefined && Date.now.getTime() - user.chatGptAccess < 1000 * 60 * 60 * 24)
+            if(user.chatGptAccess != undefined && Date.now() - user.chatGptAccess.getTime() < 1000 * 60 * 60 * 24)
             {
                 res.status(404).json({ message: "Not enough time has passed" });
                 return;
@@ -23,11 +23,11 @@ class chatAIController {
             inputs: `${question}`,
             });
             let filtered_response_text = response.generated_text.substring(question.length);
-            user.chatGptAccess = Date.now;
+            user.chatGptAccess = new Date();
             await user.save();
             res.status(200).json({ message: filtered_response_text });
         } catch (error) {
-            res.status(500).json({ error: "Error in server" });
+            res.status(500).json({ error: "Internal server error" });
             return;
         }    
         
