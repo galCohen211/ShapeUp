@@ -65,15 +65,15 @@ router.get(
     GymController.getMyGyms
 );
 
-router.get("/:gymId", GymController.getGymById);
+router.get("/:gymId", [param("gymId").notEmpty()], GymController.getGymById);
 
 router.delete(
     "/:gymId",
     verifyToken([IUserType.GYM_OWNER]),
     GymController.deleteGymById
 );
-router.get(
 
+router.get(
     "/filter",
     [
         query("search")
