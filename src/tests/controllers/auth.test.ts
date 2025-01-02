@@ -4,8 +4,7 @@ import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
-
-import app from "../../server";
+import app, { socketIOServer } from "../../server";
 import User, { IUserType, IGender } from "../../models/user-model";
 
 jest.mock("../../models/user-model");
@@ -25,7 +24,8 @@ describe("Auth Endpoints", () => {
 
   afterAll(async () => {
     await mongoose.disconnect();
-
+    socketIOServer.close();
+    
     for (const testImage of testImages) {
       const filePattern = new RegExp(
         `${testImage.replace(/\.[^/.]+$/, "")}-.*\\.(png|jpg|jpeg)$`

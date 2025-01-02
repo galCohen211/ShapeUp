@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../../server";
+import app, { socketIOServer } from "../../server";
 import Gym from "../../models/gym-model";
 import mongoose from "mongoose";
 import fs from "fs";
@@ -15,7 +15,7 @@ describe("GymController Endpoints", () => {
   const testImages: string[] = [];
 
   afterAll(async () => {
-    await mongoose.disconnect();
+    await mongoose.disconnect();    
     testImages.forEach((testImage) => {
       const filePattern = new RegExp(
         `${testImage.replace(/\.[^/.]+$/, "")}-.*\\.(png|jpg|jpeg)$`
@@ -28,6 +28,7 @@ describe("GymController Endpoints", () => {
         fs.unlinkSync(filePath);
       }
     });
+    socketIOServer.close();
   });
 
   describe("POST /gyms", () => {
