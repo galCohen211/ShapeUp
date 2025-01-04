@@ -75,8 +75,7 @@ describe("GymController Endpoints", () => {
         pictures: ["http://localhost/uploads/test-image2.jpg"],
       };
       (Gym.findById as jest.Mock).mockResolvedValue(existingGym);
-      const response = await request(app)
-        .get(`/gyms/${gymId}`)
+      const response = await request(app).get(`/gyms/${gymId}`);
       expect(response.status).toBe(200);
       expect(response.body.message).toBe("Gym extracted successfully");
     });
