@@ -84,6 +84,10 @@ router.get(
 );
 
 
-router.get("/:gymId", [param("gymId").notEmpty()], GymController.getGymById);
+router.get("/:gymId",
+    [
+        param("gymId").notEmpty()
+    ],
+    GymController.getGymById);
 
 export default router;

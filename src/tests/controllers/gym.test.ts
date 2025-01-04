@@ -69,9 +69,9 @@ describe("GymController Endpoints", () => {
       const gymId = new mongoose.Types.ObjectId().toString();
       const existingGym = {
         _id: gymId,
-        name: "Old Gym",
-        city: "Old city",
-        description: "Old Description",
+        name: "Gym",
+        city: "City",
+        description: "Description",
         pictures: ["http://localhost/uploads/test-image2.jpg"],
       };
       (Gym.findById as jest.Mock).mockResolvedValue(existingGym);
