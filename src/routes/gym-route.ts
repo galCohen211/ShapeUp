@@ -84,39 +84,6 @@ router.get(
 );
 
 
-/**
- * @swagger
- * /gyms/{gymId}:
- *   get:
- *     summary: Get a gym by ID
- *     description: Retrieves a specific gym by its ID
- *     tags:
- *       - Comment
- *     parameters:
- *       - in: path
- *         name: gymId
- *         required: true
- *         description: The ID of the gym to retrieve
- *         schema:
- *           type: string
- *           example: '60c72b2f5f1b2c001fbcf73f'
- *     responses:
- *       '200':
- *         description: Successfully retrieved the gym
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 commentById:
- *                   $ref: '#/components/schemas/Comment'
- *       '400':
- *         description: Bad request or error fetching the comment
- *       '404':
- *         description: Comment not found
- *       '500':
- *         description: Internal server error
- */
 router.get("/:gymId", [param("gymId").notEmpty()], GymController.getGymById);
 
 export default router;
