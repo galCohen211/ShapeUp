@@ -15,7 +15,8 @@ describe("GymController Endpoints", () => {
   const testImages: string[] = [];
 
   afterAll(async () => {
-    await mongoose.disconnect();    
+    await mongoose.disconnect();
+    socketIOServer.close();
     testImages.forEach((testImage) => {
       const filePattern = new RegExp(
         `${testImage.replace(/\.[^/.]+$/, "")}-.*\\.(png|jpg|jpeg)$`
@@ -28,13 +29,11 @@ describe("GymController Endpoints", () => {
         fs.unlinkSync(filePath);
       }
     });
-    socketIOServer.close();
   });
 
   describe("POST /gyms", () => {
     it("should add a new gym successfully", async () => {
       const ownerId = new mongoose.Types.ObjectId();
-
       (Gym.prototype.save as jest.Mock).mockResolvedValue({
         _id: new mongoose.Types.ObjectId(),
         name: "Test Gym",
@@ -55,7 +54,6 @@ describe("GymController Endpoints", () => {
 
       expect(response.status).toBe(201);
       expect(response.body.message).toBe("Gym added successfully!");
-
       testImages.push("test-image1.jpg");
     });
 
@@ -63,6 +61,23 @@ describe("GymController Endpoints", () => {
       const response = await request(app).post("/gyms").send({});
       expect(response.status).toBe(400);
       expect(response.body.error).toBeDefined();
+    });
+  });
+
+  describe("GET /gyms/:gymId", () => {
+    it("should get gym details by id successfully", async () => {
+      const gymId = new mongoose.Types.ObjectId().toString();
+      const existingGym = {
+        _id: gymId,
+        name: "Gym",
+        city: "City",
+        description: "Description",
+        pictures: ["http://localhost/uploads/test-image2.jpg"],
+      };
+      (Gym.findById as jest.Mock).mockResolvedValue(existingGym);
+      const response = await request(app).get(`/gyms/${gymId}`);
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe("Gym extracted successfully");
     });
   });
 

@@ -366,6 +366,26 @@ paths:
         "500":
           description: Internal server error  
   /gyms/{gymId}:
+    get:
+      tags:
+        - gyms
+      summary: Get gym details by id
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the gym to get
+      responses:
+        "200":
+          description: Gym extracted successfully
+        "400":
+          description: Validation errors
+        "404":
+          description: Gym not found
+        "500":
+          description: Internal server error
     put:
       tags:
         - gyms
