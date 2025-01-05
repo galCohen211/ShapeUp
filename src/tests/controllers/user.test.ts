@@ -134,7 +134,7 @@ describe("UserController Endpoints", () => {
     });
 
     describe("Delete /users/:userId", () => {
-        it("should return 200 if the user is was deleted successfully", async () => {
+        it("should return 200 if the user was deleted successfully", async () => {
             const userId = new mongoose.Types.ObjectId().toString();
             const existingUser = {
                 _id: userId,
