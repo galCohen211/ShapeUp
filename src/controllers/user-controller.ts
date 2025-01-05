@@ -98,7 +98,7 @@ class UserController {
           res.status(200).json({ message: "User deleted successfully" });
             return;
         }
-          res.status(404).json({ message: "User not found", hhhh: user, id: userId });
+          res.status(404).json({ message: "User not found"});
         } catch (err) {
           res.status(500).json({ message: "An error occurred while deleting the User.", error: err });
     }
