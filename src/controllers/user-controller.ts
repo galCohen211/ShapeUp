@@ -90,6 +90,20 @@ class UserController {
     }
   }
 
+  static async deleteUserById(req: Request, res: Response): Promise<void> {
+    try {
+        const { userId } = req.params;
+        const user = await User.findByIdAndDelete(userId);
+        if (user) {
+          res.status(200).json({ message: "User deleted successfully" });
+            return;
+        }
+          res.status(404).json({ message: "User not found", hhhh: user, id: userId });
+        } catch (err) {
+          res.status(500).json({ message: "An error occurred while deleting the User.", error: err });
+    }
+  }
+
   static async addFavoriteGym(req: Request, res: Response): Promise<void> {
     const { userId } = req.params;
     const { gymId } = req.body;

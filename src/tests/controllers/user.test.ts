@@ -133,6 +133,29 @@ describe("UserController Endpoints", () => {
         });
     });
 
+    describe("Delete /users/:userId", () => {
+        it("should return 200 if the user is was deleted successfully", async () => {
+            const userId = new mongoose.Types.ObjectId().toString();
+            const existingUser = {
+                _id: userId,
+                firstName: "John",
+                lastName: "Doe",
+                city: "Ramat Hasharon",
+                street: "Lamerhav",
+                avatarUrl: "old-avatar.jpg",
+                save: jest.fn(),
+            };
+
+            (User.findByIdAndDelete as jest.Mock).mockResolvedValue(existingUser);
+            const mockSave = jest.fn();
+            existingUser.save = mockSave;
+
+            const response = await request(app).delete(`/users/${userId}`);
+            expect(response.status).toBe(200);
+            expect(response.body.message).toBe("User deleted successfully");
+        })});
+
+
     describe("PUT /users/updateUserById/:userId", () => {
         afterAll(async () => {
             await mongoose.disconnect();

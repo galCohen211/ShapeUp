@@ -130,6 +130,13 @@ router.get(
   UserController.filterUsers
 );
 
-
+router.delete("/:userId" , UserController.deleteUserById,
+  verifyToken([IUserType.USER]),
+  [param("userId")
+    .notEmpty()
+    .withMessage("User ID is required.")
+    .isMongoId()
+    .withMessage("User ID must be a valid MongoDB ObjectId.")]
+);
 
 export default router;

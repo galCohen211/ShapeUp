@@ -116,6 +116,29 @@ paths:
           description: Validation array is not empty
         "500":
           description: Internal server error
+  /users/{userId}:
+    delete:
+        tags:
+          - users
+        summary: Delete a user by id
+        security:
+          - bearerAuth: []
+        parameters:
+          - name: userId
+            in: path
+            required: true
+            schema:
+              type: string
+            description: The ID of the user to delete
+        responses:
+          "200":
+            description: User deleted successfully
+          "403":
+            description: Unauthorized access
+          "404":
+            description: User not found
+          "500":
+            description: Internal server error
   /users/login:
     post:
       tags:
