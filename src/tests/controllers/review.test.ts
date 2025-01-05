@@ -4,6 +4,7 @@ import Review from '../../models/review-model';
 import Gym from '../../models/gym-model';
 import User, { IUserType } from '../../models/user-model';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 jest.mock('../../models/review-model');
 jest.mock('../../models/gym-model');
@@ -119,6 +120,20 @@ describe('PUT /reviews/:reviewId', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+    it("should return 200 if the review was deleted successfully", async () => {
+      (Review.findByIdAndDelete as jest.Mock).mockResolvedValue({
+        id: 'mockReviewId',
+        rating: 4,
+        content: 'Updated review content',
+        user: 'mockUserId',
+        gym: 'mockGymId',
+      });
+      
+      const response = await request(app).delete('/reviews/mockReviewId').set('Cookie', [`access_token=${mockUserToken}`]);
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe("Review deleted successfully");
+  })
 
   it('should update a review successfully with valid inputs and token', async () => {
     (Review.findByIdAndUpdate as jest.Mock).mockResolvedValue({
