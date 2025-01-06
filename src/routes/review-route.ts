@@ -9,6 +9,9 @@ const router = express.Router();
 // Add a new review
 router.post("/", verifyToken([IUserType.USER]), reviewController.addReview);
 
+// Delete a review
+router.delete("/:reviewId", verifyToken([IUserType.USER]), reviewController.deleteReviewById);
+
 // Update a review
 router.put("/:reviewId", verifyToken([IUserType.USER]), reviewController.updateReviewById);
 
