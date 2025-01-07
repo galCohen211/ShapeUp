@@ -15,6 +15,8 @@ tags:
     description: "Endpoints related to gym data management"
   - name: "reviews"
     description: "Endpoints related to reviews"
+  - name: "ChatAI"
+    description: "Endpoints related to chat AI"
 
 components:
   securitySchemes:
@@ -49,6 +51,35 @@ components:
           example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
 
 paths:
+  /askChatAi/{userId}:
+    post:
+      tags:
+        - ChatAI
+      summary: Ask a chat AI a question.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user who asked the question.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                question:
+                  type: string
+                  description: The user question
+                  example: Please give me a workout plan
+      responses:
+        "200":
+          description: Got the response
+        "404":
+          description: User doesn't exist or not enough time has passed
+        "500":
+          description: Internal Server Error
   /users/signup:
     post:
       tags:
