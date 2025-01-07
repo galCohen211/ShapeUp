@@ -5,9 +5,11 @@ import path from "path";
 import app, { socketIOServer } from "../../server";
 import User, { IUserType } from "../../models/user-model";
 import Gym from "../../models/gym-model";
+import { getFromCookie } from "../../controllers/auth-controller";
 
 jest.mock("../../models/user-model");
 jest.mock("../../models/gym-model");
+jest.mock("../../controllers/auth-controller");
 
 // This mock replaces the original `verifyToken` function
 jest.mock('../../middleware/verifyToken.ts', () => ({
@@ -147,10 +149,12 @@ describe("UserController Endpoints", () => {
             };
 
             (User.findByIdAndDelete as jest.Mock).mockResolvedValue(existingUser);
+            (getFromCookie as jest.Mock).mockResolvedValue(userId.toString());
+
             const mockSave = jest.fn();
             existingUser.save = mockSave;
 
-            const response = await request(app).delete(`/users/${userId}`);
+            const response = await request(app).delete(`/users/${userId}`).set("access_token", "id=" + userId);
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("User deleted successfully");
         })});

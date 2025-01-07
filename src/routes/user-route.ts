@@ -131,7 +131,7 @@ router.get(
 );
 
 router.delete("/:userId" , UserController.deleteUserById,
-  verifyToken([IUserType.USER]),
+  verifyToken([IUserType.USER, IUserType.ADMIN]),
   [param("userId")
     .notEmpty()
     .withMessage("User ID is required.")

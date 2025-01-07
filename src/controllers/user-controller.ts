@@ -92,7 +92,12 @@ class UserController {
 
   static async deleteUserById(req: Request, res: Response): Promise<void> {
     try {
-        const { userId } = req.params;
+      const { userId } = req.params;
+      const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
+          return;
+        }
         const user = await User.findByIdAndDelete(userId);
         if (user) {
           res.status(200).json({ message: "User deleted successfully" });
@@ -100,7 +105,7 @@ class UserController {
         }
           res.status(404).json({ message: "User not found"});
         } catch (err) {
-          res.status(500).json({ message: "An error occurred while deleting the User.", error: err });
+          res.status(500).json({ message: "Internal Server Error", error: err });
     }
   }
 
