@@ -92,8 +92,8 @@ class UserController {
 
   static async deleteUserById(req: Request, res: Response): Promise<void> {
     try {
-      const { userId } = req.params;
-      const errors = validationResult(req);
+        const { userId } = req.params;
+        const errors = validationResult(req);
         if (!errors.isEmpty()) {
           res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
           return;
