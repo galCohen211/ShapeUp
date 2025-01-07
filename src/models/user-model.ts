@@ -22,13 +22,13 @@ interface IUser extends Document {
   role: IUserType;
   birthdate?: Date;
   gender?: IGender;
+  chatGptAccess: Date;
   avatarUrl?: string;
   refreshTokens?: string[];
   gymOwnerLicenseImage?: string;
   favoriteGyms: Types.ObjectId[];
-  isChatGptAllowed?: boolean;
+  
 }
-
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -40,11 +40,11 @@ const UserSchema = new mongoose.Schema({
   role: { type: String, required: true, enum: Object.values(IUserType) },
   birthdate: { type: Date },
   gender: { type: String },
+  chatGptAccess: { type: Date },
   avatarUrl: { type: String, required: false },
   refreshTokens: { type: [String], required: false, default: [] },
   gymOwnerLicenseImage: { type: String, required: false },
   favoriteGyms: [{ type: Schema.Types.ObjectId, ref: "Gym" }],
-  isChatGptAllowed: { type: Boolean, default: true }
 });
 
 
