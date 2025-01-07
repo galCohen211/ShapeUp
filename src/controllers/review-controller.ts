@@ -57,6 +57,20 @@ class reviewController {
             return;
         }
     }
+    
+    static async deleteReviewById(req: Request, res: Response): Promise<void> {
+        try {
+            const { reviewId } = req.params;
+            const review = await Review.findByIdAndDelete(reviewId);
+            if (!review) {
+                res.status(404).json({ message: "Review not found" });
+                return;
+            }
+            res.status(200).json({ message: "Review deleted successfully" });
+        } catch (err) {
+            res.status(500).json({ message: "An error occurred while deleting the gym.", error: err });
+        }
+    }
 
     static async updateReviewById(req: Request, res: Response): Promise<void> {
         try {

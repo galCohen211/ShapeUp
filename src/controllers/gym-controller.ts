@@ -44,7 +44,7 @@ class GymController {
 
             res.status(201).json({
                 message: "Gym added successfully!",
-                gym: newGym,
+                gym: newGym
             });
         } catch (err) {
             res.status(500).json({ message: "An error occurred while adding the gym.", error: err });
@@ -160,6 +160,29 @@ class GymController {
             res.status(200).json({ gyms });
         } catch (err) {
             res.status(500).json({ message: "An error occurred while adding the gym.", error: err });
+        }
+    }
+
+    // Get gym details by Id
+    static async getGymById(req: Request, res: Response): Promise<void> {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
+                return;
+            }
+
+            const { gymId } = req.params;
+
+            const existingGym = await Gym.findById(gymId);
+            if (!existingGym) {
+                res.status(404).json({ message: "Gym not found" });
+                return;
+            }
+
+            res.status(200).json({ message: "Gym extracted successfully", gym: existingGym });
+        } catch (err) {
+            res.status(500).json({ message: "Internal server error", error: err });
         }
     }
 

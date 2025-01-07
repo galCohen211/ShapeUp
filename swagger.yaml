@@ -397,6 +397,26 @@ paths:
         "500":
           description: Internal server error  
   /gyms/{gymId}:
+    get:
+      tags:
+        - gyms
+      summary: Get gym details by id
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the gym to get
+      responses:
+        "200":
+          description: Gym extracted successfully
+        "400":
+          description: Validation errors
+        "404":
+          description: Gym not found
+        "500":
+          description: Internal server error
     put:
       tags:
         - gyms
@@ -554,6 +574,28 @@ paths:
         "500":
           description: Internal server error
   /reviews/{reviewId}:
+    delete:
+        tags:
+          - reviews
+        summary: Delete a review by id
+        security:
+          - bearerAuth: []
+        parameters:
+          - name: reviewId
+            in: path
+            required: true
+            schema:
+              type: string
+            description: The ID of the review to delete
+        responses:
+          "200":
+            description: Review deleted successfully
+          "403":
+            description: Unauthorized access
+          "404":
+            description: Review not found
+          "500":
+            description: Internal server error
     put:
       tags:
         - reviews
