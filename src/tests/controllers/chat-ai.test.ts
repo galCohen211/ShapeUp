@@ -11,7 +11,7 @@ jest.mock("../../models/user-model");
 jest.mock('../../middleware/verifyToken.ts', () => ({
     __esModule: true,
     default: jest.fn(() => (req: any, res: any, next: any) => {
-        req.user = { id: "mocked-user-id", role: IUserType.GYM_OWNER };
+        req.user = { id: "mocked-user-id", role: IUserType.USER };
         next();
     }),
 }));
@@ -55,7 +55,7 @@ describe("Chat AI Controller Endpoints", () => {
                 firstName: "Gym",
                 lastName: "Owner",
                 city: "Somewhere",
-                role: IUserType.GYM_OWNER,
+                role: IUserType.USER,
                 favoriteGyms: [],
                 avatarUrl: "gym-owner.jpg",
             };
@@ -63,7 +63,6 @@ describe("Chat AI Controller Endpoints", () => {
             (User.findById as jest.Mock).mockResolvedValue(mockGymOwner);
 
             const response = await request(app).post(`/askChatAi/${userId}`).send({ question: "Please give me a workout plan" });
-            console.log(response);
             expect(response.status).toBe(200);
         });
 
@@ -75,7 +74,7 @@ describe("Chat AI Controller Endpoints", () => {
                 firstName: "Gym",
                 lastName: "Owner",
                 city: "Somewhere",
-                role: IUserType.GYM_OWNER,
+                role: IUserType.USER,
                 favoriteGyms: [],
                 avatarUrl: "gym-owner.jpg",
             };

@@ -5,7 +5,7 @@ import verifyToken from "../middleware/verifyToken";
 
 const router = express.Router();
 
-router.post("/:id", chatAIController.ask_question);
+router.post("/:id", verifyToken([IUserType.USER]), chatAIController.ask_question);
 
 
 export default router;
