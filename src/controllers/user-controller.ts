@@ -7,6 +7,8 @@ import { getMessagesBetweenTwoUsers } from "../chat/chat-logic";
 import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
 
+import { getFromCookie } from "./auth-controller";
+
 
 class UserController {
   static async updateUserById(req: Request, res: Response): Promise<void> {
@@ -93,12 +95,25 @@ class UserController {
   static async deleteUserById(req: Request, res: Response): Promise<void> {
     try {
         const { userId } = req.params;
+        const cookie_user_id = await getFromCookie(req, res, "id");
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
           res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
           return;
         }
-        const user = await User.findByIdAndDelete(userId);
+        let user = await User.findById(userId);
+
+        if (!user) {
+          res.status(404).json({ message: "User not found" });
+          return;
+        }
+
+        if (user.role !== IUserType.ADMIN && userId !== cookie_user_id) {
+          res.status(403).json({ message: "Forbidden operation" });
+          return;
+        }
+
+        user = await User.findByIdAndDelete(userId);
         if (user) {
           res.status(200).json({ message: "User deleted successfully" });
             return;

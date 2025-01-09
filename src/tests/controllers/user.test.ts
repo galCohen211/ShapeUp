@@ -147,7 +147,8 @@ describe("UserController Endpoints", () => {
                 avatarUrl: "old-avatar.jpg",
                 save: jest.fn(),
             };
-
+            
+            (User.findById as jest.Mock).mockResolvedValue(existingUser);
             (User.findByIdAndDelete as jest.Mock).mockResolvedValue(existingUser);
             (getFromCookie as jest.Mock).mockResolvedValue(userId.toString());
 
