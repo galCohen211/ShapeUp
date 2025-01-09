@@ -653,5 +653,5 @@ paths:
         "200":
           description: Reviews retrieved successfully
         "500":
-          description: An error occurred while fetching reviews
+          description: Internal server error
     

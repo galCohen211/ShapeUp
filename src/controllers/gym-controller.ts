@@ -47,7 +47,7 @@ class GymController {
                 gym: newGym
             });
         } catch (err) {
-            res.status(500).json({ message: "An error occurred while adding the gym.", error: err });
+            res.status(500).json({ message: "Internal server error", error: err });
         }
     }
 
@@ -117,7 +117,7 @@ class GymController {
 
             res.status(200).json({ message: "Gym updated successfully", gym: updatedGym });
         } catch (err) {
-            res.status(500).json({ message: "An error occurred while updating the gym", error: err });
+            res.status(500).json({ message: "Internal server error", error: err });
         }
     }
 
@@ -144,7 +144,7 @@ class GymController {
             }
             res.status(200).json({ gyms });
         } catch (err) {
-            res.status(500).json({ message: "An error occurred while adding the gym.", error: err });
+            res.status(500).json({ message: "Internal server error", error: err });
         }
     }
 
@@ -159,7 +159,7 @@ class GymController {
             gyms = await Gym.find({ owner: myUserId });
             res.status(200).json({ gyms });
         } catch (err) {
-            res.status(500).json({ message: "An error occurred while adding the gym.", error: err });
+            res.status(500).json({ message: "Internal server error", error: err });
         }
     }
 
@@ -214,7 +214,7 @@ class GymController {
             }
             res.status(200).json({ message: "Gym deleted successfully" });
         } catch (err) {
-            res.status(500).json({ message: "An error occurred while deleting the gym.", error: err });
+            res.status(500).json({ message: "Internal server error", error: err });
         }
     }
 
