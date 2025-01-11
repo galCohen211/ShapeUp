@@ -305,6 +305,35 @@ paths:
           description: User or gym not found
         "500":
           description: Internal server error
+  /users/deleteFavoriteGymById:
+    delete:
+      tags:
+        - users
+      summary: Delete a gym from user's favorites
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gymId
+              properties:
+                gymId:
+                  type: string
+                  description: The ID of the gym to delete from favorites
+                  example: 5f7b3b3b4b3b3b3b3b3b3b3b
+      responses:
+        "200":
+          description: Gym deleted from favorites successfully
+        "400":
+          description: Validation errors
+        "404":
+          description: User or gym not found
+        "500":
+          description: Internal server error
   /users/filter:
     get:
       tags:
@@ -655,5 +684,5 @@ paths:
         "200":
           description: Reviews retrieved successfully
         "500":
-          description: An error occurred while fetching reviews
+          description: Internal server error
     

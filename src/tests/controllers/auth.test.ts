@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
+
 import app, { socketIOServer } from "../../server";
 import User, { IUserType, IGender } from "../../models/user-model";
 
