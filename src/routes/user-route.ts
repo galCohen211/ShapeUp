@@ -130,7 +130,7 @@ router.get(
   UserController.filterUsers
 );
 
-router.delete("/:userId" , UserController.deleteUserById,
+router.delete("/" , UserController.deleteUserById,
   verifyToken([IUserType.USER, IUserType.ADMIN]),
   [param("userId")
     .notEmpty()

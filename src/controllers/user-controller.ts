@@ -93,27 +93,26 @@ class UserController {
   }
 
   static async deleteUserById(req: Request, res: Response): Promise<void> {
+    const myUserId = await getFromCookie(req, res, "id");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
+      return;
+    }
     try {
-        const { userId } = req.params;
-        const cookie_user_id = await getFromCookie(req, res, "id");
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-          res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
-          return;
-        }
-        let user = await User.findById(userId);
+        let user = await User.findById(myUserId);
 
         if (!user) {
           res.status(404).json({ message: "User not found" });
           return;
         }
 
-        if (user.role !== IUserType.ADMIN && userId !== cookie_user_id) {
-          res.status(403).json({ message: "Forbidden operation" });
+        if (user.role !== IUserType.ADMIN && user.role !== IUserType.USER) {
+            res.status(403).json({ message: "Forbidden operation" });
           return;
         }
 
-        user = await User.findByIdAndDelete(userId);
+        user = await User.findByIdAndDelete(myUserId);
         if (user) {
           res.status(200).json({ message: "User deleted successfully" });
             return;
