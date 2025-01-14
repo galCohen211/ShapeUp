@@ -15,6 +15,7 @@ import initRouter from "./routes/init-route";
 import GymRouter from "./routes/gym-route"
 import userRouter from "./routes/user-route";
 import reviewRouter from "./routes/review-route";
+import chatAIRouter from "./routes/chat-ai-route";
 
 const app: any = express();
 const swaggerDocument = yaml.load('./swagger.yaml');
@@ -53,6 +54,7 @@ app.use("/init", initRouter);
 app.use("/gyms", GymRouter);
 app.use("/users", userRouter);
 app.use("/reviews", reviewRouter);
+app.use("/askChatAi", chatAIRouter);
 
 export default app;
 

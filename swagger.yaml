@@ -15,6 +15,8 @@ tags:
     description: "Endpoints related to gym data management"
   - name: "reviews"
     description: "Endpoints related to reviews"
+  - name: "ChatAI"
+    description: "Endpoints related to chat AI"
 
 components:
   securitySchemes:
@@ -49,6 +51,35 @@ components:
           example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
 
 paths:
+  /askChatAi/{userId}:
+    post:
+      tags:
+        - ChatAI
+      summary: Ask a chat AI a question.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user who asked the question.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                question:
+                  type: string
+                  description: The user question
+                  example: Please give me a workout plan
+      responses:
+        "200":
+          description: Got the response
+        "404":
+          description: User doesn't exist or not enough time has passed
+        "500":
+          description: Internal Server Error
   /users/signup:
     post:
       tags:
@@ -268,6 +299,35 @@ paths:
       responses:
         "200":
           description: Gym added to favorites successfully
+        "400":
+          description: Validation errors
+        "404":
+          description: User or gym not found
+        "500":
+          description: Internal server error
+  /users/deleteFavoriteGymById:
+    delete:
+      tags:
+        - users
+      summary: Delete a gym from user's favorites
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gymId
+              properties:
+                gymId:
+                  type: string
+                  description: The ID of the gym to delete from favorites
+                  example: 5f7b3b3b4b3b3b3b3b3b3b3b
+      responses:
+        "200":
+          description: Gym deleted from favorites successfully
         "400":
           description: Validation errors
         "404":
@@ -649,5 +709,5 @@ paths:
         "200":
           description: Reviews retrieved successfully
         "500":
-          description: An error occurred while fetching reviews
+          description: Internal server error
     
