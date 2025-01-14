@@ -8,9 +8,6 @@ import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
 import { getFromCookie } from "./auth-controller";
 
-import { getFromCookie } from "./auth-controller";
-
-
 class UserController {
   static async updateUserById(req: Request, res: Response): Promise<void> {
     const { firstName, lastName, street, city } = req.body;
