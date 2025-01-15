@@ -8,7 +8,6 @@ import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
 import { getFromCookie } from "./auth-controller";
 
-
 class UserController {
   static async updateUserById(req: Request, res: Response): Promise<void> {
     const { firstName, lastName, street, city } = req.body;
@@ -88,6 +87,37 @@ class UserController {
       res.status(200).json(user);
     } catch (err) {
       res.status(500).json({ message: "Internal server error", error: err });
+    }
+  }
+
+  static async deleteUserById(req: Request, res: Response): Promise<void> {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
+      return;
+    }
+    const { userId } = req.params;
+    try {
+      let user = await User.findById(userId);
+
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+
+      if (user.role !== IUserType.ADMIN && user.role !== IUserType.USER) {
+        res.status(403).json({ message: "Forbidden operation" });
+        return;
+      }
+
+      user = await User.findByIdAndDelete(userId);
+      if (user) {
+        res.status(200).json({ message: "User deleted successfully" });
+        return;
+      }
+      res.status(404).json({ message: "User not found" });
+    } catch (err) {
+      res.status(500).json({ message: "Internal Server Error", error: err });
     }
   }
 
