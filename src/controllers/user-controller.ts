@@ -6,7 +6,7 @@ import { ObjectId } from "mongoose";
 import { getMessagesBetweenTwoUsers } from "../chat/chat-logic";
 import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
-
+import { getFromCookie } from "./auth-controller";
 
 class UserController {
   static async updateUserById(req: Request, res: Response): Promise<void> {
@@ -90,7 +90,45 @@ class UserController {
     }
   }
 
+  static async deleteUserById(req: Request, res: Response): Promise<void> {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
+      return;
+    }
+    const { userId } = req.params;
+    try {
+      let user = await User.findById(userId);
+
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+
+      if (user.role !== IUserType.ADMIN && user.role !== IUserType.USER) {
+        res.status(403).json({ message: "Forbidden operation" });
+        return;
+      }
+
+      user = await User.findByIdAndDelete(userId);
+      if (user) {
+        res.status(200).json({ message: "User deleted successfully" });
+        return;
+      }
+      res.status(404).json({ message: "User not found" });
+    } catch (err) {
+      res.status(500).json({ message: "Internal Server Error", error: err });
+    }
+  }
+
   static async addFavoriteGym(req: Request, res: Response): Promise<void> {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
+      return;
+    }
+
     const { userId } = req.params;
     const { gymId } = req.body;
 
@@ -114,6 +152,44 @@ class UserController {
 
       res.status(200).json({
         message: "Gym added to favorites successfully",
+        favoriteGyms: user.favoriteGyms,
+      });
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  }
+
+  static async deleteFavoriteGymById(req: Request, res: Response): Promise<void> {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
+      return;
+    }
+
+    try {
+      const myUserId = await getFromCookie(req, res, "id");
+      const { gymId } = req.body;
+      const gym = await Gym.findById(gymId);
+      if (!gym) {
+        res.status(404).json({ message: "Gym not found" });
+        return;
+      }
+      const user = await User.findById(myUserId);
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+      if (!user.favoriteGyms.includes(gymId)) {
+        res.status(400).json({ message: "Gym is not in user's favorites" });
+        return;
+      }
+
+      user.favoriteGyms = user.favoriteGyms.filter((id) => id.toString() !== gymId);
+      await user.save();
+
+      res.status(200).json({
+        message: "Gym removed from favorites successfully",
         favoriteGyms: user.favoriteGyms,
       });
     } catch (err) {

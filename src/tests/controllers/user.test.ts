@@ -2,12 +2,15 @@ import request from "supertest";
 import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
+
 import app, { socketIOServer } from "../../server";
 import User, { IUserType } from "../../models/user-model";
 import Gym from "../../models/gym-model";
+import { getFromCookie } from "../../controllers/auth-controller";
 
 jest.mock("../../models/user-model");
 jest.mock("../../models/gym-model");
+jest.mock("../../controllers/auth-controller");
 
 // This mock replaces the original `verifyToken` function
 jest.mock('../../middleware/verifyToken.ts', () => ({
@@ -132,6 +135,33 @@ describe("UserController Endpoints", () => {
             expect(response.body.message).toBe("Forbidden: Not a USER or GYM-OWNER");
         });
     });
+
+    describe("Delete /users/", () => {
+        it("should return 200 if the user was deleted successfully", async () => {
+            const userId = new mongoose.Types.ObjectId().toString();
+            const existingUser = {
+                _id: userId,
+                firstName: "John",
+                lastName: "Doe",
+                city: "Ramat Hasharon",
+                street: "Lamerhav",
+                avatarUrl: "old-avatar.jpg",
+                role: IUserType.USER,
+                save: jest.fn(),
+            };
+            
+            (User.findById as jest.Mock).mockResolvedValue(existingUser);
+            (User.findByIdAndDelete as jest.Mock).mockResolvedValue(existingUser);
+            (getFromCookie as jest.Mock).mockResolvedValue(userId.toString());
+
+            const mockSave = jest.fn();
+            existingUser.save = mockSave;
+
+            const response = await request(app).delete(`/users/`).set("access_token", "id=" + userId);
+            expect(response.status).toBe(200);
+            expect(response.body.message).toBe("User deleted successfully");
+        })});
+
 
     describe("PUT /users/updateUserById/:userId", () => {
         afterAll(async () => {
@@ -282,6 +312,33 @@ describe("UserController Endpoints", () => {
 
             expect(response.status).toBe(500);
             expect(response.body.message).toBe("Internal server error");
+        });
+    });
+
+    describe("DELETE /users/deleteFavoriteGymById", () => {
+        it("should delete a gym from the user's favorites successfully", async () => {
+            const userId = new mongoose.Types.ObjectId().toString();
+            const gymId = new mongoose.Types.ObjectId().toString();
+
+            const mockUser = {
+                _id: userId,
+                favoriteGyms: [gymId],
+                save: jest.fn().mockResolvedValue(true),
+            };
+
+            (User.findById as jest.Mock).mockResolvedValue(mockUser);
+            (getFromCookie as jest.Mock).mockResolvedValue(userId.toString());
+
+            const response = await request(app)
+                .delete("/users/deleteFavoriteGymById")
+                .send({ gymId })
+                .set("access_token", "id=" + userId);
+
+
+            expect(response.status).toBe(200);
+            expect(response.body.message).toBe("Gym removed from favorites successfully");
+            expect(mockUser.favoriteGyms).not.toContain(gymId);
+            expect(mockUser.save).toHaveBeenCalled();
         });
     });
 
