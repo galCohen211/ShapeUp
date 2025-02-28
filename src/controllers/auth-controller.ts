@@ -178,7 +178,8 @@ export const login = async (req: Request, res: Response) => {
     if (accessToken) {
       res.cookie("access_token", accessToken, {
         httpOnly: true,
-        maxAge: 60 * 60 * 1000 // 1 hour
+        maxAge: 60 * 60 * 1000, // 1 hour
+        sameSite: "lax"
       })
     }
 

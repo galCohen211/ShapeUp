@@ -7,6 +7,7 @@ import swaggerUi from 'swagger-ui-express';
 import yaml from 'yamljs';
 import { Server } from 'socket.io';
 import * as http from "http";
+import path from 'path';
 
 import { connectDb } from "./mongodb";
 import { initChat } from "./chat/chat-server";
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/src/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Google OAuth
 app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
@@ -49,7 +51,13 @@ server.listen(process.env.HTTP_SERVER_PORT, () => {
   console.log(`Chat server is running on port ${process.env.HTTP_SERVER_PORT}`);
 });
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://localhost:4000"], // Allow both origins
+    credentials: true, // Allow sending cookies
+  })
+);
+
 app.use("/init", initRouter);
 app.use("/gyms", GymRouter);
 app.use("/users", userRouter);
