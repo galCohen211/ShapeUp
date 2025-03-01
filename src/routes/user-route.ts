@@ -84,10 +84,10 @@ router.get("/user/:userId", UserController.getUserById,
     .withMessage("User ID must be a valid MongoDB ObjectId."),]
 );
 
-router.get("/userProfile",
+router.get("/getMyProfile",
   verifyToken([IUserType.ADMIN, IUserType.GYM_OWNER, IUserType.USER]),
   (req: Request, res: Response) => {
-    UserController.getUserProfile(req, res);
+    UserController.getMyProfile(req, res);
   });
 
 router.put("/updateUserById/:userId",

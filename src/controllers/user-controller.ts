@@ -90,7 +90,7 @@ class UserController {
     }
   }
 
-  static async getUserProfile(req: Request, res: Response): Promise<void> {
+  static async getMyProfile(req: Request, res: Response): Promise<void> {
     const userID = await getFromCookie(req, res, "id");
     if (!userID) {
       res.status(404).json({ message: "User not found" });
