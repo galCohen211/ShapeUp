@@ -90,6 +90,31 @@ class UserController {
     }
   }
 
+  static async getMyProfile(req: Request, res: Response): Promise<void> {
+    const userID = await getFromCookie(req, res, "id");
+    if (!userID) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    try {
+      const user = await User.findById(userID);
+
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+
+      let userWithoutSensitiveData = JSON.parse(JSON.stringify(user));
+      delete userWithoutSensitiveData.password;
+      delete userWithoutSensitiveData.refreshTokens;
+      
+      res.status(200).json(userWithoutSensitiveData);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  }
+
   static async deleteUserById(req: Request, res: Response): Promise<void> {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

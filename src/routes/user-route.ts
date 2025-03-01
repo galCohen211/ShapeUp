@@ -84,6 +84,12 @@ router.get("/user/:userId", UserController.getUserById,
     .withMessage("User ID must be a valid MongoDB ObjectId."),]
 );
 
+router.get("/getMyProfile",
+  verifyToken([IUserType.ADMIN, IUserType.GYM_OWNER, IUserType.USER]),
+  (req: Request, res: Response) => {
+    UserController.getMyProfile(req, res);
+  });
+
 router.put("/updateUserById/:userId",
   upload.fields([{ name: "avatar", maxCount: 1 }]),
   verifyToken([IUserType.GYM_OWNER, IUserType.USER]),

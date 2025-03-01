@@ -334,6 +334,20 @@ paths:
           description: User or gym not found
         "500":
           description: Internal server error
+  /users/getMyProfile:
+    get:
+      tags:
+        - users
+      summary: Get my user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User profile retrieved successfully
+        "404":
+          description: User not found
+        "500":
+          description: Internal server error
   /users/filter:
     get:
       tags:
