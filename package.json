@@ -13,6 +13,7 @@
   "author": "Gal & Or & Yoni & Oriya",
   "license": "ISC",
   "dependencies": {
+    "@huggingface/inference": "^2.8.1",
     "@types/express-session": "^1.18.1",
     "@types/passport-google-oauth20": "^2.0.16",
     "bcryptjs": "^2.4.3",
@@ -30,10 +31,10 @@
     "passport": "^0.7.0",
     "passport-google-oauth2": "^0.2.0",
     "passport-google-oauth20": "^2.0.0",
-    "swagger-ui-express": "^5.0.1",
-    "yamljs": "^0.3.0",
     "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@types/axios": "^0.14.4",

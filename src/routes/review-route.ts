@@ -19,7 +19,7 @@ router.put("/:reviewId", verifyToken([IUserType.USER]), reviewController.updateR
 router.get("/", reviewController.getAllReviews);
 
 // Get all reviews by gym ID
-router.get("/gym/:gymId", verifyToken([IUserType.GYM_OWNER]),[
+router.get("/gym/:gymId", verifyToken([IUserType.GYM_OWNER, IUserType.USER]),[
     param("gymId")
       .notEmpty().withMessage("Gym ID is required.")
       .isMongoId().withMessage("Gym ID must be a valid MongoDB ObjectId."),

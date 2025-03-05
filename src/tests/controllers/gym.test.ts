@@ -1,11 +1,12 @@
 import request from "supertest";
-import app, { socketIOServer } from "../../server";
-import Gym from "../../models/gym-model";
 import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
-import { getFromCookie } from "../../controllers/auth-controller";
+
+import app, { socketIOServer } from "../../server";
+import Gym from "../../models/gym-model";
 import { IUserType } from "../../models/user-model";
+import { getFromCookie } from "../../controllers/auth-controller";
 
 jest.mock("../../models/gym-model");
 jest.mock("../../controllers/auth-controller");
@@ -215,7 +216,7 @@ describe("DELETE /gyms/:gymId", () => {
     const response = await request(app).delete(`/gyms/${gymId}`);
 
     expect(response.status).toBe(500);
-    expect(response.body.message).toBe("An error occurred while deleting the gym.");
+    expect(response.body.message).toBe("Internal server error");
   });
 });
 

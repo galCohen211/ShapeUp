@@ -1,10 +1,10 @@
 import request from 'supertest';
+import jwt from 'jsonwebtoken';
+
 import app, { socketIOServer } from '../../server';
 import Review from '../../models/review-model';
 import Gym from '../../models/gym-model';
 import User, { IUserType } from '../../models/user-model';
-import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
 
 jest.mock('../../models/review-model');
 jest.mock('../../models/gym-model');
@@ -106,7 +106,7 @@ describe('POST /reviews', () => {
       .send({ rating: 5, content: 'Great gym!', gym: 'mockGymId' });
 
     expect(response.status).toBe(500);
-    expect(response.body.message).toBe('An error occurred while adding the review.');
+    expect(response.body.message).toBe('Internal server error');
   });
 });
 
@@ -192,7 +192,7 @@ describe('PUT /reviews/:reviewId', () => {
       .send({ rating: 4, content: 'Updated review content' });
 
     expect(response.status).toBe(500);
-    expect(response.body.message).toBe('An error occurred while updating the review.');
+    expect(response.body.message).toBe('Internal server error');
   });
 });
 
@@ -242,7 +242,7 @@ describe('GET /reviews', () => {
       .set('Cookie', [`access_token=${mockUserToken}`]);
 
     expect(response.status).toBe(500);
-    expect(response.body.message).toBe('An error occurred while fetching reviews.');
+    expect(response.body.message).toBe('Internal server error');
   });
 });
 
