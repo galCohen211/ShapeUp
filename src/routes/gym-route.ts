@@ -26,7 +26,7 @@ router.post(
 
 router.put(
     "/:gymId",
-    upload.fields([{ name: "pictures", maxCount: 5 }]),
+    upload.fields([{ name: "pictures[]", maxCount: 5 }]),
     [
         param("gymId")
             .notEmpty()
@@ -42,7 +42,7 @@ router.put(
             .withMessage("Reviews must be a non-negative integer."),
         body("pictures")
             .optional()
-            .isString()
+            .isArray({ min: 1 })
             .withMessage("At least one picture is required"),
     ],
     GymController.updateGymById
