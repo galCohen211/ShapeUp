@@ -33,7 +33,7 @@ class UserController {
       let avatarUrl = user.avatarUrl;
       if (avatar) {
         UserController.deleteOldAvatar(user.avatarUrl);
-        avatarUrl = `/uploads/${avatar.filename}`;
+        avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
       }
 
       // Update user fields
