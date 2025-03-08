@@ -41,7 +41,10 @@ router.get("/auth/google/failure", (req: Request, res: Response) => {
 });
 
 router.post("/signup",
-  upload.fields([{ name: "avatar", maxCount: 1 }]),
+  upload.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "gymOwnerLicenseImage", maxCount: 1 }
+  ]),
   [
     body("email").notEmpty().isEmail().withMessage("Valid email is required"),
     body("password").notEmpty().withMessage("Password is required"),

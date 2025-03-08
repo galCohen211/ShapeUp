@@ -84,11 +84,15 @@ export const signup = async (req: Request, res: Response) => {
     return;
   }
 
-  const { email, password, firstName, lastName, street, city, birthdate, gender, gymOwnerLicenseImage } = req.body;
+  const { email, password, firstName, lastName, street, city, birthdate, gender } = req.body;
 
   let userRole: IUserType = IUserType.USER; // default role is user
+  let gymOwnerLicenseImageUrl: string | undefined;
+
+  const gymOwnerLicenseImage = req.files && "gymOwnerLicenseImage" in req.files ? (req.files["gymOwnerLicenseImage"] as Express.Multer.File[])[0] : null;
   if (gymOwnerLicenseImage) {
     userRole = IUserType.GYM_OWNER;
+    gymOwnerLicenseImageUrl = `${req.protocol}://${req.get("host")}/src/uploads/${gymOwnerLicenseImage.filename}`;
   }
 
   const avatar = req.files && "avatar" in req.files ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
@@ -101,19 +105,24 @@ export const signup = async (req: Request, res: Response) => {
   const hashedPassword = await bcrypt.hash(password, salt);
 
   try {
-    const result = await registerGeneralUser({
-      email: email,
+    const userData: RegisterUserParams = {
+      email,
       password: hashedPassword,
-      firstName: firstName,
-      lastName: lastName,
-      street: street,
-      city: city,
-      userRole: userRole,
-      birthdate: birthdate,
-      gender: gender,
-      avatarUrl: avatarUrl,
-      gymOwnerLicenseImage: gymOwnerLicenseImage // null if not gym owner
-    });
+      firstName,
+      lastName,
+      street,
+      city,
+      userRole,
+      birthdate,
+      gender,
+      avatarUrl,
+    };
+    
+    if (gymOwnerLicenseImageUrl) {
+      userData.gymOwnerLicenseImage = gymOwnerLicenseImageUrl;
+    }
+    
+    const result = await registerGeneralUser(userData);
 
     if (result.message) {
       const response: { message?: string; status?: number; error?: any } = { message: result.message };

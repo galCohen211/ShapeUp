@@ -72,8 +72,8 @@ class GymController {
 
             // Handle image deletion logic
             let updatedPictures = [...existingGym.pictures];
+            const pictures = Array.isArray(req.body.pictures) ? req.body.pictures : [];
 
-            const pictures = req.body.pictures ? req.body.pictures.split(",") : [];
             const imagesToDelete = existingGym.pictures.filter(
                 (image) => !pictures.includes(image)
             );
@@ -92,10 +92,10 @@ class GymController {
 
             // Handle new image uploads
             const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-            if (files && files["pictures"]) {
-                const newPictures = files["pictures"].map(
+            if (files && files["pictures[]"]) {
+                const newPictures = files["pictures[]"].map(
                     (file) =>
-                        `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+                        `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
                 );
                 updatedPictures = pictures.concat(newPictures);
             } else {
