@@ -193,6 +193,10 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (refreshToken) {
+      res.cookie("refresh_token", refreshToken, {
+        maxAge: 60 * 60 * 24 * 1000 * 7, // 1 week
+        sameSite: "lax"
+      })
       user.refreshTokens?.push(refreshToken)
     }
     await user.save(); // save the refresh token in user object
@@ -237,6 +241,7 @@ export const logout = async (req: Request, res: Response) => {
     await user.save();
 
     res.clearCookie("access_token", { httpOnly: true });  // clear the cookie
+    res.clearCookie("refresh_token", { httpOnly: true });  // clear the cookie
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
     return res.status(500).json({ message: "Internal server error", error: err });
