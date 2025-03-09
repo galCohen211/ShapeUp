@@ -17,3 +17,5 @@ dist/
 .idea/
 .DS_Store
 *.swp
+
+src/uploads

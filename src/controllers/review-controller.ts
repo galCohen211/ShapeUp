@@ -119,7 +119,7 @@ class reviewController {
     static async getAllReviewsByGymId(req: Request, res: Response): Promise<void> {
         try {
             const { gymId } = req.params;
-            const reviews = await Review.find({ gym: gymId });
+            const reviews = await Review.find({ gym: gymId }).populate("user", "firstName avatarUrl");
             res.status(200).json({ reviews });
             return;
         } catch (err) {
