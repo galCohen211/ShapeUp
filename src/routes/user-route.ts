@@ -25,11 +25,10 @@ router.get(
 
 router.get(
   "/auth/google/callback",
-  passport.authenticate("google", {
-    // session: false,
-    successRedirect: "/users/auth/google/protected",
-    failureRedirect: "/users/auth/google/failure",
-  })
+  passport.authenticate("google", { failureRedirect: "/users/auth/google/failure" }),
+  (req, res) => {
+    res.redirect("http://localhost:4000/gyms");
+  }
 );
 
 router.get("/auth/google/protected", isLoggedIn, (req: any, res) => {

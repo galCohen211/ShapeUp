@@ -45,6 +45,12 @@ passport.use(
           });
         }
 
+        if ("refreshToken" in res) {
+          request.res?.cookie("refresh_token", res.refreshToken, {
+            maxAge: 60 * 60 * 24 * 1000 * 7 // 1 week
+          });
+        }
+
         if ("error" in res && res.error) {
           return done(res.error, null);
         }
@@ -324,7 +330,12 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
 
   // SSO user - don't register, just create token
   if (user) {
-    return generateJWT(user._id, user.role);
+    const result = generateJWT(user._id, user.role);
+    if (result.refreshToken) {
+      user.refreshTokens?.push(result.refreshToken)
+    }
+    await user.save();
+    return result;
   }
 
   try {
