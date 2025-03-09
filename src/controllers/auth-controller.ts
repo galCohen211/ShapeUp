@@ -117,11 +117,11 @@ export const signup = async (req: Request, res: Response) => {
       gender,
       avatarUrl,
     };
-    
+
     if (gymOwnerLicenseImageUrl) {
       userData.gymOwnerLicenseImage = gymOwnerLicenseImageUrl;
     }
-    
+
     const result = await registerGeneralUser(userData);
 
     if (result.message) {
@@ -143,6 +143,12 @@ export const signup = async (req: Request, res: Response) => {
         httpOnly: true,
         maxAge: 60 * 60 * 1000 // 1 hour
       });
+
+      if ("refreshToken" in result) {
+        res.cookie("refresh_token", result.refreshToken, {
+          maxAge: 60 * 60 * 24 * 1000 * 7 // 1 week
+        });
+      }
 
       return res.status(201).json({
         message: "User registered successfully",
