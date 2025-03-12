@@ -31,11 +31,14 @@ passport.use(
       done: VerifyCallback
     ) {
       try {
+        const avatarUrl = profile.picture;
+
         const res = await registerGeneralUser({
           email: profile.email,
           firstName: profile.name.givenName,
           lastName: profile.name.familyName,
-          userRole: IUserType.USER
+          userRole: IUserType.USER,
+          avatarUrl,
         });
 
         if ("accessToken" in res) {
