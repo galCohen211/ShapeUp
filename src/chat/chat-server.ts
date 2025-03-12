@@ -1,5 +1,5 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { createChatBetweenUsers, AddMessageToChat } from './chat-logic';
+import { createChatBetweenUsers, AddMessageToChat, getMessagesBetweenTwoUsers } from './chat-logic';
 import { IMessage } from '../models/chat-model';
 import { ObjectId } from 'mongoose';
 
@@ -29,17 +29,31 @@ export function initChat(server: SocketIOServer): void {
         
         await AddMessageToChat(userId1, userId2, newMessage as IMessage);
 
-        if (usersSocket[userId1.toString()] != null) {
-            usersSocket[userId1.toString()].send(newMessage);
-            console.log('Sent a message to ' + userId1);      
-        }
-
         if (usersSocket[userId2.toString()] != null) {
-            usersSocket[userId1.toString()].send(newMessage);
+            usersSocket[userId2.toString()].send(newMessage);
             console.log('Sent a message to ' + userId2);
         }
       } catch (err) {
         console.log(`Error when sending a message: ${err}`);
+      }
+    });
+
+    socket.on("get_users_chat", async (userId1: ObjectId, userId2: ObjectId, callback) => {
+      try {
+        console.log(`Fetching chat history for users: ${userId1}, ${userId2}`);
+        
+        const chatHistory = await getMessagesBetweenTwoUsers([userId1, userId2]);
+    
+        if (chatHistory) {
+          console.log("Chat history found:", chatHistory.messages);
+          callback({ messages: chatHistory.messages });
+        } else {
+          console.log("No chat history found.");
+          callback({ messages: [] });
+        }
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+        callback({ messages: [] });
       }
     });
   
