@@ -12,11 +12,6 @@ class chatAIController {
                 res.status(404).json({ message: "User not found" });
                 return;
             }
-            if(user.chatGptAccess != undefined && Date.now() - user.chatGptAccess.getTime() < 1000 * 60 * 60 * 24)
-            {
-                res.status(404).json({ message: "Not enough time has passed" });
-                return;
-            }
             
             const hf = new HfInference(process.env.AI_API_KEY);
             const response = await hf.textGeneration({
