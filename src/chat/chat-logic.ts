@@ -63,20 +63,18 @@ export async function getMessagesBetweenTwoUsers(
 
 export async function getGymChats(ownerId: ObjectId) {
   try {
-    // Find all chats where the gym owner is a participant
     const chats = await chatModel.find({ usersIds: ownerId });
 
     if (!chats || chats.length === 0) {
       return [];
     }
 
-    // Extract the users who have chatted with the owner
     const chatUsers = chats
       .map((chat) => {
         const user = chat.usersIds.find((id) => id.toString() !== ownerId.toString());
         return user ? { userId: user.toString(), name: `User ${user.toString().slice(-4)}` } : null;
       })
-      .filter((user) => user !== null); // Remove null values
+      .filter((user) => user !== null);
 
     return chatUsers;
   } catch (error) {
