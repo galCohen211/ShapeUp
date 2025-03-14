@@ -10,7 +10,6 @@ import User, { IUserType } from "../models/user-model";
 import { RegisterUserParams, TokenPayload } from "../types/auth.types";
 
 
-// Gooogle SSO
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
 const SERVER_URL = process.env.SERVER_URL as string;
@@ -31,7 +30,7 @@ passport.use(
       done: VerifyCallback
     ) {
       try {
-        const avatarUrl = profile.picture;
+        const avatarUrl = `${SERVER_URL}/src/assets/default-avatar.png`;
 
         const res = await registerGeneralUser({
           email: profile.email,
