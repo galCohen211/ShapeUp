@@ -23,7 +23,7 @@ export function initChat(server: SocketIOServer): void {
         await createChatBetweenUsers([userId1, userId2], gymName);
     
         const newMessage = {
-          creator: userId1,
+          sender: userId1,
           text: text
         };
         console.log(gymName);

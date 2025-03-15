@@ -1,13 +1,13 @@
 import {model, ObjectId, Schema} from "mongoose";
 
 export interface IMessage {
-  creator: ObjectId;
+  sender: ObjectId;
   text: string;
   timestamp: Date;
 }
 
 export const messageSchema = new Schema<IMessage>({
-  creator: {
+  sender: {
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true
