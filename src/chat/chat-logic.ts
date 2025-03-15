@@ -60,3 +60,25 @@ export async function getMessagesBetweenTwoUsers(
 
   return usersChat;
 }
+
+export async function getGymChats(ownerId: ObjectId) {
+  try {
+    const chats = await chatModel.find({ usersIds: ownerId });
+
+    if (!chats || chats.length === 0) {
+      return [];
+    }
+
+    const chatUsers = chats
+      .map((chat) => {
+        const user = chat.usersIds.find((id) => id.toString() !== ownerId.toString());
+        return user ? { userId: user.toString(), name: `User ${user.toString().slice(-4)}` } : null;
+      })
+      .filter((user) => user !== null);
+
+    return chatUsers;
+  } catch (error) {
+    console.error("Error fetching gym chats:", error);
+    return [];
+  }
+}

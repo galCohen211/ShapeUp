@@ -1,5 +1,5 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { createChatBetweenUsers, AddMessageToChat } from './chat-logic';
+import { createChatBetweenUsers, AddMessageToChat, getMessagesBetweenTwoUsers, getGymChats } from './chat-logic';
 import { IMessage } from '../models/chat-model';
 import { ObjectId } from 'mongoose';
 
@@ -21,28 +21,52 @@ export function initChat(server: SocketIOServer): void {
     socket.on("communicate", async (userId1: ObjectId, userId2: ObjectId, text: string) => {
       try {
         await createChatBetweenUsers([userId1, userId2]);
-  
+    
         const newMessage = {
           creator: userId1,
           text: text
+        };
+    
+        await AddMessageToChat(userId1, userId2, newMessage as IMessage);
+    
+        if (usersSocket[userId1.toString()]) {
+          usersSocket[userId1.toString()].emit("message", newMessage);
         }
         
-        await AddMessageToChat(userId1, userId2, newMessage as IMessage);
-
-        if (usersSocket[userId1.toString()] != null) {
-            usersSocket[userId1.toString()].send(newMessage);
-            console.log('Sent a message to ' + userId1);      
+        if (usersSocket[userId2.toString()]) {
+          usersSocket[userId2.toString()].emit("message", newMessage);
         }
-
-        if (usersSocket[userId2.toString()] != null) {
-            usersSocket[userId1.toString()].send(newMessage);
-            console.log('Sent a message to ' + userId2);
-        }
+    
+    
       } catch (err) {
-        console.log(`Error when sending a message: ${err}`);
       }
     });
-  
+
+    socket.on("get_users_chat", async (userId1: ObjectId, userId2: ObjectId, callback) => {
+      try {        
+        const chatHistory = await getMessagesBetweenTwoUsers([userId1, userId2]);
+    
+        if (chatHistory) {
+          callback({ messages: chatHistory.messages });
+        } else {
+          callback({ messages: [] });
+        }
+      } catch (error) {
+        callback({ messages: [] });
+      }
+    });
+    
+    socket.on("get_gym_chats", async (ownerId: ObjectId, callback) => {
+      try {    
+        const chatUsers = await getGymChats(ownerId);
+    
+        callback(chatUsers);
+      } catch (error) {
+        console.error("Error fetching gym chats:", error);
+        callback([]);
+      }
+    });
+
     socket.on("disconnect", () => {
       console.log(`The user was disconnected`);
     });
