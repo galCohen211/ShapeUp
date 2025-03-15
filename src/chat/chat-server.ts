@@ -26,8 +26,7 @@ export function initChat(server: SocketIOServer): void {
           sender: userId1,
           text: text
         };
-        console.log(gymName);
-        console.log("$$$$$$$$$$$$$$$");
+        
         await AddMessageToChat(userId1, userId2, gymName, newMessage as IMessage);
     
         if (usersSocket[userId1.toString()]) {
