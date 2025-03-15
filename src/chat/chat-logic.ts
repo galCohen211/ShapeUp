@@ -1,5 +1,6 @@
 import { ObjectId } from "mongoose";
 import { IChat, IMessage, chatModel } from "../models/chat-model";
+import User from "../models/user-model";
 
 export async function createChatBetweenUsers(userIds: ObjectId[]) {
   const existingChat = await chatModel.findOne({
@@ -69,14 +70,17 @@ export async function getGymChats(ownerId: ObjectId) {
       return [];
     }
 
-    const chatUsers = chats
-      .map((chat) => {
-        const user = chat.usersIds.find((id) => id.toString() !== ownerId.toString());
-        return user ? { userId: user.toString(), name: `User ${user.toString().slice(-4)}` } : null;
+    const chatUsers = await Promise.all(
+      chats.map(async (chat) => {
+        const userId = chat.usersIds.find((id) => id.toString() !== ownerId.toString());
+        if (!userId) return null;
+    
+        const user = await User.findById(userId, "firstName lastName");
+        return user ? { userId: userId.toString(), firstName: user.firstName, lastName: user.lastName } : null;
       })
-      .filter((user) => user !== null);
+    );
 
-    return chatUsers;
+    return chatUsers.filter((user) => user !== null);
   } catch (error) {
     console.error("Error fetching gym chats:", error);
     return [];
