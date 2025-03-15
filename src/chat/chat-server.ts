@@ -18,16 +18,17 @@ export function initChat(server: SocketIOServer): void {
       console.log('User Id - ' + userId + ' was disconnected from the chat');
     });
 
-    socket.on("communicate", async (userId1: ObjectId, userId2: ObjectId, text: string) => {
+    socket.on("communicate", async (userId1: ObjectId, userId2: ObjectId, gymName: string, text: string) => {
       try {
-        await createChatBetweenUsers([userId1, userId2]);
+        await createChatBetweenUsers([userId1, userId2], gymName);
     
         const newMessage = {
           creator: userId1,
           text: text
         };
-    
-        await AddMessageToChat(userId1, userId2, newMessage as IMessage);
+        console.log(gymName);
+        console.log("$$$$$$$$$$$$$$$");
+        await AddMessageToChat(userId1, userId2, gymName, newMessage as IMessage);
     
         if (usersSocket[userId1.toString()]) {
           usersSocket[userId1.toString()].emit("message", newMessage);
@@ -42,9 +43,9 @@ export function initChat(server: SocketIOServer): void {
       }
     });
 
-    socket.on("get_users_chat", async (userId1: ObjectId, userId2: ObjectId, callback) => {
+    socket.on("get_users_chat", async (userId1: ObjectId, userId2: ObjectId, gymName: string, callback) => {
       try {        
-        const chatHistory = await getMessagesBetweenTwoUsers([userId1, userId2]);
+        const chatHistory = await getMessagesBetweenTwoUsers([userId1, userId2], gymName);
     
         if (chatHistory) {
           callback({ messages: chatHistory.messages });

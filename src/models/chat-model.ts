@@ -26,6 +26,7 @@ export const messageSchema = new Schema<IMessage>({
 export interface IChat {
   usersIds: ObjectId[];
   messages: IMessage[];
+  gymName: string;
 }
 
 const chatSchema = new Schema<IChat>({
@@ -34,7 +35,11 @@ const chatSchema = new Schema<IChat>({
     ref: "User",
     required: true
   },
-  messages: [messageSchema]
+  messages: [messageSchema],
+  gymName: {
+    type: String,
+    required: true
+  }
 }, {versionKey: false});
 
 export const chatModel = model<IChat>("Users-Chat", chatSchema);

@@ -2,15 +2,17 @@ import { ObjectId } from "mongoose";
 import { IChat, IMessage, chatModel } from "../models/chat-model";
 import User from "../models/user-model";
 
-export async function createChatBetweenUsers(userIds: ObjectId[]) {
+export async function createChatBetweenUsers(userIds: ObjectId[], gymName: string) {
   const existingChat = await chatModel.findOne({
     usersIds: { $all: [userIds[0], userIds[1]] },
+    gymName: gymName
   });
 
   if (existingChat == null) {
     const usersChat: IChat = {
       usersIds: userIds,
-      messages: []
+      messages: [],
+      gymName
     };
 
     await chatModel.create(usersChat);
@@ -24,9 +26,10 @@ export async function createChatBetweenUsers(userIds: ObjectId[]) {
 export async function AddMessageToChat(
   userId1: ObjectId,
   userId2: ObjectId,
+  gymName: string,
   newMessage: IMessage
 ) {
-  const filter = { usersIds: { $all: [userId1, userId2] } };
+  const filter = { usersIds: { $all: [userId1, userId2] }, gymName };
 
   const update = {
     $push: {
@@ -46,18 +49,18 @@ export async function AddMessageToChat(
 }
 
 export async function getMessagesBetweenTwoUsers(
-  usersIds: ObjectId[]
+  usersIds: ObjectId[],
+  gymName: string
 ) {
-  const filter = { usersIds: { $all: usersIds } };
+  const filter = { usersIds: { $all: usersIds }, gymName: gymName };
 
   const usersChat = await chatModel.findOne(filter);
 
-  if (usersChat == null)
-    return;
+  if (!usersChat) return null;
 
-  let sorting_algorithm = (a: IMessage, b: IMessage) => (a.timestamp ? a.timestamp.getTime() : 0) - (b.timestamp ? b.timestamp.getTime() : 0);
-
-  usersChat.toObject().messages = usersChat.messages.sort(sorting_algorithm);
+  usersChat.messages.sort((a: IMessage, b: IMessage) => 
+    (a.timestamp ? a.timestamp.getTime() : 0) - (b.timestamp ? b.timestamp.getTime() : 0)
+  );
 
   return usersChat;
 }
