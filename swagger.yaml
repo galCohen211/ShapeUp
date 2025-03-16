@@ -51,13 +51,13 @@ components:
           example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
 
 paths:
-  /askChatAi/{userId}:
+  /askChatAi/{id}:
     post:
       tags:
         - ChatAI
       summary: Ask a chat AI a question.
       parameters:
-        - name: userId
+        - name: id
           in: path
           required: true
           schema:
@@ -65,14 +65,14 @@ paths:
           description: The ID of the user who asked the question.
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
                 question:
                   type: string
                   description: The user question
-                  example: Please give me a workout plan
+                  example: Please give me a workout plan for a beginner
       responses:
         "200":
           description: Got the response
@@ -170,6 +170,8 @@ paths:
       tags:
         - users
       summary: Log out the current user
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -188,6 +190,8 @@ paths:
       tags:
         - users
       summary: Refresh the authentication token
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -426,7 +430,7 @@ paths:
                 city:
                   type: string
                   description: The gym street address
-                  example: 123 Main St
+                  example: 321 Main St
                 description:
                   type: string
                   description: The gym description
@@ -509,8 +513,8 @@ paths:
                   example: ShapeUp gym updated
                 city:
                   type: string
-                  description: The gym street address
-                  example: 321 Main St
+                  description: The gym city
+                  example: Las Vegas
                 description:
                   type: string
                   description: The gym description
@@ -518,8 +522,8 @@ paths:
                 amountOfReviews:
                   type: number
                   description: The amount of reviews for the gym
-                  example: 5
-                pictures: 
+                  example: 0
+                pictures[]: 
                   type: array
                   items:
                     type: string
