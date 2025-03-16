@@ -1,5 +1,6 @@
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
+import mongoose from "mongoose";
 
 import app, { socketIOServer } from '../../server';
 import Review from '../../models/review-model';
@@ -255,16 +256,33 @@ describe('GET /reviews/gym/:gymId', () => {
   });
 
   it('should return all reviews for a specific gym successfully with valid token', async () => {
-    (Review.find as jest.Mock).mockResolvedValue([
-      { id: 'mockReviewId1', rating: 5, content: 'Great gym!', user: 'mockUserId', gym: mockGymId },
-      { id: 'mockReviewId2', rating: 4, content: 'Nice place', user: 'mockUserId', gym: mockGymId },
-    ]);
+    const mockReviews = [
+      {
+        _id: new mongoose.Types.ObjectId().toString(),
+        rating: 5,
+        content: "Great gym!",
+        user: { _id: "mockUserId", firstName: "John", avatarUrl: "avatar.jpg" },
+        gym: mockGymId,
+      },
+      {
+        _id: new mongoose.Types.ObjectId().toString(),
+        rating: 4,
+        content: "Nice place",
+        user: { _id: "mockUserId", firstName: "Jane", avatarUrl: "avatar2.jpg" },
+        gym: mockGymId,
+      },
+    ];
+
+    (Review.find as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockResolvedValue(mockReviews),
+    });
+
 
     const response = await request(app)
       .get(`/reviews/gym/${mockGymId}`)
       .set('Cookie', [`access_token=${mockUserToken}`]);
+      expect(response.body.reviews).toHaveLength(2);
     expect(response.status).toBe(200);
-    expect(response.body.reviews).toHaveLength(2);
     expect(response.body.reviews[0].content).toBe('Great gym!');
     expect(response.body.reviews[0].gym).toBe(mockGymId);
   });
@@ -277,14 +295,14 @@ describe('GET /reviews/gym/:gymId', () => {
     expect(response.status).toBe(200);
     expect(response.body.reviews).toHaveLength(0);
   });
- 
+
   it('should return 404 if gymId is missing', async () => {
     const response = await request(app)
-      .get(`/reviews/gym/`)   
+      .get(`/reviews/gym/`)
       .set('Cookie', [`access_token=${mockUserToken}`]);
     expect(response.status).toBe(404);
   });
-  
+
   it('should return 500 for unexpected errors', async () => {
     (Review.find as jest.Mock).mockRejectedValue(new Error('Database error'));
     const response = await request(app)

@@ -8,7 +8,7 @@
     "start:prod": "cross-env NODE_ENV=production node dist/server.js",
     "build": "tsc",
     "test:win": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform=\"^.+\\.(ts|tsx)$\":babel-jest --verbose --detectOpenHandles --testPathIgnorePatterns='tests/chat.test.ts'",
-    "test:mac": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform='^.+\\.(ts|tsx)$'=babel-jest --detectOpenHandles --testPathIgnorePatterns='tests/chat.test.ts' -- gym.test.ts"
+    "test:mac": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform='^.+\\.(ts|tsx)$'=babel-jest --detectOpenHandles --testPathIgnorePatterns='tests/chat.test.ts' -- review.test.ts"
   },
   "author": "Gal & Or & Yoni & Oriya",
   "license": "ISC",
