@@ -281,8 +281,8 @@ describe('GET /reviews/gym/:gymId', () => {
     const response = await request(app)
       .get(`/reviews/gym/${mockGymId}`)
       .set('Cookie', [`access_token=${mockUserToken}`]);
-    expect(response.body.reviews).toHaveLength(2);
     expect(response.status).toBe(200);
+    expect(response.body.reviews).toHaveLength(2);
     expect(response.body.reviews[0].content).toBe('Great gym!');
     expect(response.body.reviews[0].gym).toBe(mockGymId);
   });
@@ -321,6 +321,3 @@ describe('GET /reviews/gym/:gymId', () => {
   });
 
 });
-
-
-

@@ -32,7 +32,7 @@ class chatAIController {
 
             let filtered_response_text = response.generated_text.substring(question.length);
             user.chatGptAccess = new Date();
-            await user.save(); // Fix: Save the updated user
+            await user.save();
 
             res.status(200).json({ message: filtered_response_text, date: user.chatGptAccess });
         } catch (err) {

@@ -430,7 +430,7 @@ paths:
                 city:
                   type: string
                   description: The gym street address
-                  example: 321 Main St
+                  example: 123 Main St
                 description:
                   type: string
                   description: The gym description
