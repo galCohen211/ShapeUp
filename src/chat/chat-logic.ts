@@ -65,9 +65,9 @@ export async function getMessagesBetweenTwoUsers(
   return usersChat;
 }
 
-export async function getGymChats(ownerId: ObjectId) {
+export async function getGymChats(ownerId: ObjectId, gymName: string) {
   try {
-    const chats = await chatModel.find({ usersIds: ownerId });
+    const chats = await chatModel.find({ usersIds: ownerId, gymName });
 
     if (!chats || chats.length === 0) {
       return [];

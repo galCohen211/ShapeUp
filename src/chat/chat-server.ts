@@ -56,9 +56,9 @@ export function initChat(server: SocketIOServer): void {
       }
     });
     
-    socket.on("get_gym_chats", async (ownerId: ObjectId, callback) => {
+    socket.on("get_gym_chats", async (ownerId: ObjectId, gymName: string, callback) => {
       try {    
-        const chatUsers = await getGymChats(ownerId);
+        const chatUsers = await getGymChats(ownerId, gymName);
     
         callback(chatUsers);
       } catch (error) {
