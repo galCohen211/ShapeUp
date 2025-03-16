@@ -67,4 +67,3 @@ describe("Chat AI Controller Endpoints", () => {
         });
     });
 });
-

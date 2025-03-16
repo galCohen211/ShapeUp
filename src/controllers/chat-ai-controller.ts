@@ -32,9 +32,9 @@ class chatAIController {
 
             let filtered_response_text = response.generated_text.substring(question.length);
             user.chatGptAccess = new Date();
-            await user.save();
 
             res.status(200).json({ message: filtered_response_text, date: user.chatGptAccess });
+
         } catch (err) {
             console.error("Error in ask_question:", err);
             res.status(500).json({ error: "Internal server error", message: err });
