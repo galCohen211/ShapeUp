@@ -24,7 +24,8 @@ export function initChat(server: SocketIOServer): void {
     
         const newMessage = {
           sender: userId1,
-          text: text
+          text: text,
+          timestamp: new Date()
         };
         
         await AddMessageToChat(userId1, userId2, gymName, newMessage as IMessage);
