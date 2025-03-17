@@ -89,3 +89,17 @@ export async function getGymChats(ownerId: ObjectId, gymName: string) {
     return [];
   }
 }
+
+export async function updateGymName(ownerId: ObjectId, oldGymName: string, newGymName: string) {
+  try {
+    const result = await chatModel.updateMany(
+      { usersIds: ownerId, gymName: oldGymName },
+      { $set: { gymName: newGymName } }
+    );
+
+    return result.modifiedCount;
+  } catch (error) {
+    console.error("Error updating gym name in chats:", error);
+    return 0;
+  }
+}
