@@ -1,5 +1,6 @@
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
+import mongoose from "mongoose";
 
 import app, { socketIOServer } from '../../server';
 import Review from '../../models/review-model';
@@ -121,18 +122,18 @@ describe('PUT /reviews/:reviewId', () => {
     jest.clearAllMocks();
   });
 
-    it("should return 200 if the review was deleted successfully", async () => {
-      (Review.findByIdAndDelete as jest.Mock).mockResolvedValue({
-        id: 'mockReviewId',
-        rating: 4,
-        content: 'Updated review content',
-        user: 'mockUserId',
-        gym: 'mockGymId',
-      });
-      
-      const response = await request(app).delete('/reviews/mockReviewId').set('Cookie', [`access_token=${mockUserToken}`]);
-      expect(response.status).toBe(200);
-      expect(response.body.message).toBe("Review deleted successfully");
+  it("should return 200 if the review was deleted successfully", async () => {
+    (Review.findByIdAndDelete as jest.Mock).mockResolvedValue({
+      id: 'mockReviewId',
+      rating: 4,
+      content: 'Updated review content',
+      user: 'mockUserId',
+      gym: 'mockGymId',
+    });
+
+    const response = await request(app).delete('/reviews/mockReviewId').set('Cookie', [`access_token=${mockUserToken}`]);
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe("Review deleted successfully");
   })
 
   it('should update a review successfully with valid inputs and token', async () => {
@@ -255,10 +256,27 @@ describe('GET /reviews/gym/:gymId', () => {
   });
 
   it('should return all reviews for a specific gym successfully with valid token', async () => {
-    (Review.find as jest.Mock).mockResolvedValue([
-      { id: 'mockReviewId1', rating: 5, content: 'Great gym!', user: 'mockUserId', gym: mockGymId },
-      { id: 'mockReviewId2', rating: 4, content: 'Nice place', user: 'mockUserId', gym: mockGymId },
-    ]);
+    const mockReviews = [
+      {
+        _id: new mongoose.Types.ObjectId().toString(),
+        rating: 5,
+        content: "Great gym!",
+        user: { _id: "mockUserId", firstName: "John", avatarUrl: "avatar.jpg" },
+        gym: mockGymId,
+      },
+      {
+        _id: new mongoose.Types.ObjectId().toString(),
+        rating: 4,
+        content: "Nice place",
+        user: { _id: "mockUserId", firstName: "Jane", avatarUrl: "avatar2.jpg" },
+        gym: mockGymId,
+      },
+    ];
+
+    (Review.find as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockResolvedValue(mockReviews),
+    });
+
 
     const response = await request(app)
       .get(`/reviews/gym/${mockGymId}`)
@@ -269,31 +287,37 @@ describe('GET /reviews/gym/:gymId', () => {
     expect(response.body.reviews[0].gym).toBe(mockGymId);
   });
 
-  it('should return an empty array if there are no reviews for the specified gym', async () => {
-    (Review.find as jest.Mock).mockResolvedValue([]);
+  it("should return an empty array if there are no reviews for the specified gym", async () => {
+    (Review.find as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockResolvedValue([]),
+    });
+
     const response = await request(app)
       .get(`/reviews/gym/${mockGymId}`)
       .set('Cookie', [`access_token=${mockUserToken}`]);
+
     expect(response.status).toBe(200);
     expect(response.body.reviews).toHaveLength(0);
   });
- 
+
   it('should return 404 if gymId is missing', async () => {
     const response = await request(app)
-      .get(`/reviews/gym/`)   
+      .get(`/reviews/gym/`)
       .set('Cookie', [`access_token=${mockUserToken}`]);
     expect(response.status).toBe(404);
   });
-  
-  it('should return 500 for unexpected errors', async () => {
-    (Review.find as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+  it("should return 500 for unexpected errors", async () => {
+    (Review.find as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockRejectedValue(new Error("Database error")),
+    });
+
     const response = await request(app)
       .get(`/reviews/gym/${mockGymId}`)
       .set('Cookie', [`access_token=${mockUserToken}`]);
+
     expect(response.status).toBe(500);
-    expect(response.body.message).toBe('Internal server error');
+    expect(response.body.message).toBe("Internal server error");
   });
+
 });
-
-
-

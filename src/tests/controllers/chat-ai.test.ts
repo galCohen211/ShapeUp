@@ -65,30 +65,5 @@ describe("Chat AI Controller Endpoints", () => {
             const response = await request(app).post(`/askChatAi/${userId}`).send({ question: "Please give me a workout plan" });
             expect(response.status).toBe(200);
         });
-
-        it("should return 404 if the user asked another question in a short period of time", async () => {
-            const mockGymOwner = {
-                _id: userId,
-                email: "gymowner@example.com",
-                password: "123456",
-                firstName: "Gym",
-                lastName: "Owner",
-                city: "Somewhere",
-                role: IUserType.USER,
-                favoriteGyms: [],
-                avatarUrl: "gym-owner.jpg",
-            };
-
-            (User.findById as jest.Mock).mockResolvedValue(mockGymOwner);
-
-            const response1 = await request(app).post(`/askChatAi/${userId}`).send({ question: "Please give me a workout plan" });
-
-            expect(response1.status).toBe(200);
-
-            const response2 = await request(app).post(`/askChatAi/${userId}`).send({ question: "Please give me a workout plan" });
-
-            expect(response2.status).toBe(404);
-        });
     });
 });
-

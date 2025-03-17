@@ -106,7 +106,7 @@ describe("GymController Endpoints", () => {
         .field("name", "Updated Gym")
         .field("city", "Updated city")
         .field("description", "Updated Description")
-        .field("pictures", "http://localhost/uploads/test-image2.jpg");
+        .field("pictures[]", "http://localhost/uploads/test-image2.jpg");
 
       expect(response.status).toBe(200);
       expect(response.body.message).toBe("Gym updated successfully");

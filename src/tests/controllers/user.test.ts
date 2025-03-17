@@ -157,7 +157,7 @@ describe("UserController Endpoints", () => {
             const mockSave = jest.fn();
             existingUser.save = mockSave;
 
-            const response = await request(app).delete(`/users/`).set("access_token", "id=" + userId);
+            const response = await request(app).delete(`/users/${userId}`).set("access_token", "id=" + userId);
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("User deleted successfully");
         })});
