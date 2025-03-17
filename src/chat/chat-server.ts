@@ -9,8 +9,6 @@ export function initChat(server: SocketIOServer): void {
   server.on("connection", (socket: Socket) => {
     socket.on("add_user", (userId: ObjectId) => {
       usersSocket[userId.toString()] = socket;
-
-      console.log('User Id - ' + userId + ' was added to the chat');
     });
 
     socket.on("remove_user", (userId: ObjectId) => {
