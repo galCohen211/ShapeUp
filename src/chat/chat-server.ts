@@ -30,15 +30,9 @@ export function initChat(server: SocketIOServer): void {
     
         await AddMessageToChat(userId1, userId2, gymName, newMessage as IMessage);
     
-        if (usersSocket[userId1.toString()]) {
-          usersSocket[userId1.toString()].emit("message", newMessage);
-        }
+        server.emit("message", newMessage);
     
-        if (usersSocket[userId2.toString()]) {
-          usersSocket[userId2.toString()].emit("message", newMessage);
-        }
-    
-        server.emit("update_messages", newMessage);
+        // server.emit("update_messages", newMessage);
     
       } catch (err) {
         console.error("Error sending message", err);
