@@ -12,7 +12,6 @@ import path from 'path';
 import { connectDb } from "./mongodb";
 import { initChat } from "./chat/chat-server";
 import "./controllers/auth-controller";
-import initRouter from "./routes/init-route";
 import GymRouter from "./routes/gym-route"
 import userRouter from "./routes/user-route";
 import reviewRouter from "./routes/review-route";
@@ -59,7 +58,6 @@ app.use(
   })
 );
 
-app.use("/init", initRouter);
 app.use("/gyms", GymRouter);
 app.use("/users", userRouter);
 app.use("/reviews", reviewRouter);
