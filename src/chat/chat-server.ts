@@ -9,8 +9,6 @@ export function initChat(server: SocketIOServer): void {
   server.on("connection", (socket: Socket) => {
     socket.on("add_user", (userId: ObjectId) => {
       usersSocket[userId.toString()] = socket;
-
-      console.log('User Id - ' + userId + ' was added to the chat');
     });
 
     socket.on("remove_user", (userId: ObjectId) => {
@@ -24,21 +22,16 @@ export function initChat(server: SocketIOServer): void {
     
         const newMessage = {
           sender: userId1,
-          text: text
+          text: text,
+          timestamp: new Date()
         };
-        
+    
         await AddMessageToChat(userId1, userId2, gymName, newMessage as IMessage);
     
-        if (usersSocket[userId1.toString()]) {
-          usersSocket[userId1.toString()].emit("message", newMessage);
-        }
-        
-        if (usersSocket[userId2.toString()]) {
-          usersSocket[userId2.toString()].emit("message", newMessage);
-        }
-    
-    
+        server.emit("message", newMessage);
+
       } catch (err) {
+        console.error("Error sending message", err);
       }
     });
 

@@ -16,10 +16,7 @@ export async function createChatBetweenUsers(userIds: ObjectId[], gymName: strin
     };
 
     await chatModel.create(usersChat);
-
-    console.log('Chat was created for user ids: ' + userIds[0] + "&" + userIds[1]);
-  } else {
-    console.log('Chat was already exists for user ids: ' + userIds[0] + "&" + userIds[1]);
+    console.log(`Chat was created for user ids ${userIds[0]} and ${userIds[1]}`);
   }
 }
 
