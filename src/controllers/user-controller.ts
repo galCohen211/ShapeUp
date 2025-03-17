@@ -259,13 +259,6 @@ class UserController {
       res.status(500).json({ message: "Internal server error", error: err });
     }
   }
-
-  static async getUserChats(req: Request, res: Response): Promise<void> {
-    const { userId1, userId2 } = req.query;
-    const chat = await getMessagesBetweenTwoUsers([(userId1 as unknown) as ObjectId, (userId2 as unknown) as ObjectId]);
-
-    res.status(200).send(chat);
-  }
 }
 
 export default UserController;
