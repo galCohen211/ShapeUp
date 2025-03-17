@@ -29,14 +29,11 @@ export function initChat(server: SocketIOServer): void {
         await AddMessageToChat(userId1, userId2, gymName, newMessage as IMessage);
     
         server.emit("message", newMessage);
-    
-        // server.emit("update_messages", newMessage);
-    
+
       } catch (err) {
         console.error("Error sending message", err);
       }
     });
-    
 
     socket.on("get_users_chat", async (userId1: ObjectId, userId2: ObjectId, gymName: string, callback) => {
       try {        
