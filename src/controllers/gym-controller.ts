@@ -27,8 +27,8 @@ class GymController {
 
             const pictures = (req.files as Express.Multer.File[]).map(
                 (file) =>
-                    `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
-            );
+		`${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+	    );
             const amountOfReviews = 0;
 
             const newGym = new Gym({

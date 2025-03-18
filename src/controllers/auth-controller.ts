@@ -100,14 +100,16 @@ export const signup = async (req: Request, res: Response) => {
   const gymOwnerLicenseImage = req.files && "gymOwnerLicenseImage" in req.files ? (req.files["gymOwnerLicenseImage"] as Express.Multer.File[])[0] : null;
   if (gymOwnerLicenseImage) {
     userRole = IUserType.GYM_OWNER;
-    gymOwnerLicenseImageUrl = `${req.protocol}://${req.get("host")}/src/uploads/${gymOwnerLicenseImage.filename}`;
+    gymOwnerLicenseImageUrl = `${req.protocol}://${req.get("host")}/uploads/${gymOwnerLicenseImage.filename}`;
+    console.log("Gym owner license image URL:", gymOwnerLicenseImageUrl);
   }
 
   const avatar = req.files && "avatar" in req.files ? (req.files["avatar"] as Express.Multer.File[])[0] : null;
   if (!avatar) {
     return res.status(400).json({ message: "Please upload an avatar", error: "avatar is not defined" });
   }
-  const avatarUrl = `${req.protocol}://${req.get("host")}/src/uploads/${avatar.filename}`;
+  const avatarUrl = `${req.protocol}://${req.get("host")}/uploads/${avatar.filename}`;
+  console.log("Avatar URL:", avatarUrl);
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
@@ -130,7 +132,9 @@ export const signup = async (req: Request, res: Response) => {
       userData.gymOwnerLicenseImage = gymOwnerLicenseImageUrl;
     }
 
+    console.log("User data being registered:", userData);
     const result = await registerGeneralUser(userData);
+    console.log("Registration result:", result);
 
     if (result.message) {
       const response: { message?: string; status?: number; error?: any } = { message: result.message };
@@ -164,7 +168,8 @@ export const signup = async (req: Request, res: Response) => {
       });
     }
   } catch (err) {
-    return res.status(500).json({ message: "Internal server error", error: err });
+  console.error("Error during signup:", err instanceof Error ? err.stack : err);
+  return res.status(500).json({ message: "Internal server error", error: err instanceof Error ? err.message : err });
   }
 };
 
@@ -250,7 +255,7 @@ export const logout = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Invalid refresh token" });
     }
 
-    // remove 'refreshToken' from refreshTokens list 
+    // remove 'refreshToken' from refreshTokens list
     user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
     await user.save();
 
