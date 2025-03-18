@@ -23,6 +23,10 @@ class chatAIController {
             const response = await hf.textGeneration({
                 model: "tiiuae/falcon-7b-instruct",
                 inputs: question,
+                parameters: {
+                    temperature: 0.7, 
+                    top_p: 0.9, 
+                }
             });
 
             if (!response || !response.generated_text) {
