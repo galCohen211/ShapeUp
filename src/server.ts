@@ -72,16 +72,7 @@ export default app;
 
 export async function startServer(port = PORT) {
   await connectDb();
-  if (process.env.NODE_ENV != "production") {
   return app.listen(port, () => console.log(`Server is up at ${port}`));
-  }
-  else {
-    const prop = {
-      key: fs.readFileSync("../../client-key.pem"),
-      cert: fs.readFileSync("../../client-cert.pem")
-    }
-    https.createServer(prop, app).listen(port)
-  }
 }
 
 if (require.main === module) {
