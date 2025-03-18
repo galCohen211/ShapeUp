@@ -8,12 +8,18 @@ const usersSocket: Record<string, Socket> = {};
 export function initChat(server: SocketIOServer): void {
   server.on("connection", (socket: Socket) => {
     socket.on("add_user", (userId: ObjectId) => {
-      usersSocket[userId.toString()] = socket;
+      if(userId != null)
+      {
+        usersSocket[userId.toString()] = socket;
+      }
     });
 
     socket.on("remove_user", (userId: ObjectId) => {
+      if(userId != null)
+        {
       delete usersSocket[userId.toString()];
       console.log('User Id - ' + userId + ' was disconnected from the chat');
+        }
     });
 
     socket.on("communicate", async (userId1: ObjectId, userId2: ObjectId, gymName: string, text: string) => {
