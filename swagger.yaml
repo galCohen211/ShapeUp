@@ -7,7 +7,7 @@ info:
 servers:
   - url: http://localhost:3000
     description: Local server
-  - url: http://node05.cs.colman.ac.il:3000  # consider using /api
+  - url: https://node05.cs.colman.ac.il/api  # consider using /api
     description: Remote server
 
 tags:
