@@ -16,6 +16,8 @@ import GymRouter from "./routes/gym-route"
 import userRouter from "./routes/user-route";
 import reviewRouter from "./routes/review-route";
 import chatAIRouter from "./routes/chat-ai-route";
+import https from 'https';
+import fs from "fs"
 
 const app: any = express();
 const swaggerDocument = yaml.load('./swagger.yaml');
@@ -40,16 +42,19 @@ const PORT = process.env.PORT || 3000;
 
 const server = http.createServer();
 export const socketIOServer = new Server(server, {
-  path: "/users-chat",
+  path: "/socket.io",
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
-initChat(socketIOServer)
-server.listen(process.env.HTTP_SERVER_PORT, () => {
-  console.log(`Chat server is running on port ${process.env.HTTP_SERVER_PORT}`);
+
+server.listen(3002, "0.0.0.0", () => {
+  console.log("Chat server is running on port 3002");
 });
+
+initChat(socketIOServer);
 
 app.use(
   cors({
@@ -67,7 +72,16 @@ export default app;
 
 export async function startServer(port = PORT) {
   await connectDb();
+  if (process.env.NODE_ENV != "production") {
   return app.listen(port, () => console.log(`Server is up at ${port}`));
+  }
+  else {
+    const prop = {
+      key: fs.readFileSync("../../client-key.pem"),
+      cert: fs.readFileSync("../../client-cert.pem")
+    }
+    https.createServer(prop, app).listen(port)
+  }
 }
 
 if (require.main === module) {
