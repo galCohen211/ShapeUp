@@ -6,7 +6,7 @@
   "scripts": {
     "start:dev": "cross-env NODE_ENV=development nodemon --exec ts-node src/server.ts",
     "start:prod": "cross-env NODE_ENV=production node dist/server.js",
-    "build": "tsc -p tsconfig_prod.json",
+    "build": "tsc -p tsconfig_prod.json && pm2 restart shapeup-back",
     "test:win": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform=\"^.+\\.(ts|tsx)$\":babel-jest --verbose --detectOpenHandles --testPathIgnorePatterns='tests/chat.test.ts'",
     "test:mac": "cross-env NODE_ENV=development jest --preset=ts-jest --testEnvironment=node --transform='^.+\\.(ts|tsx)$'=babel-jest --detectOpenHandles --testPathIgnorePatterns='tests/chat.test.ts'"
   },
