@@ -53,15 +53,15 @@ server.listen(process.env.HTTP_SERVER_PORT, () => {
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:4000"], // Allow both origins
+    origin: ["http://localhost:3000", "http://localhost:4000", "http://node05.cs.colman.ac.il"], // Allow both origins
     credentials: true, // Allow sending cookies
   })
 );
 
-app.use("/gyms", GymRouter);
-app.use("/users", userRouter);
-app.use("/reviews", reviewRouter);
-app.use("/askChatAi", chatAIRouter);
+app.use("/api/gyms", GymRouter);
+app.use("/api/users", userRouter);
+app.use("/api/reviews", reviewRouter);
+app.use("/api/askChatAi", chatAIRouter);
 
 export default app;
 

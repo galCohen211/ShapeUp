@@ -8,6 +8,9 @@ import { IUserType } from "../models/user-model";
 import { signup, login, logout, refresh } from "../controllers/auth-controller"
 import UserController from "../controllers/user-controller";
 
+import dotenv from "dotenv";
+dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
+
 const router = Router();
 
 function isLoggedIn(req: Request, res: Response, next: any): void {
@@ -27,7 +30,7 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/users/auth/google/failure" }),
   (req, res) => {
-    res.redirect("http://localhost:4000/gyms");
+    res.redirect(`${process.env.GOOGLE_REDIRECT}`);
   }
 );
 
