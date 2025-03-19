@@ -1,1 +1,22 @@
-#test
+name: GitHub Events Demo
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  issue-event:
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Issue Info
+        run: echo "Issue #${{ github.event.issue.number }} was ${{ github.event.action }}"
+
+  pr-event:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print PR Info
+        run: echo "Pull Request #${{ github.event.pull_request.number }} was ${{ github.event.action }}"
