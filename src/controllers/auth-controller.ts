@@ -30,7 +30,7 @@ passport.use(
       done: VerifyCallback
     ) {
       try {
-        const avatarUrl = `${SERVER_URL}/src/assets/default-avatar.png`;
+        const avatarUrl = `${SERVER_URL}/assets/default-avatar.png`;
 
         const res = await registerGeneralUser({
           email: profile.email,
