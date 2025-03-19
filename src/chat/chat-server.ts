@@ -73,7 +73,7 @@ export function initChat(server: SocketIOServer): void {
         if (updatedChats > 0) {
           callback({ success: true, updatedChats });
         } else {
-          callback({ success: false, message: "No chats found for this gym." });
+          callback({ success: true, message: "No chats found for this gym." });
         }
       } catch (error) {
         console.error("Error updating gym name:", error);
