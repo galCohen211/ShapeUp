@@ -27,7 +27,7 @@ class GymController {
 
             const pictures = (req.files as Express.Multer.File[]).map(
                 (file) =>
-		`${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+		    `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
 	    );
             const amountOfReviews = 0;
 
@@ -95,7 +95,7 @@ class GymController {
             if (files && files["pictures[]"]) {
                 const newPictures = files["pictures[]"].map(
                     (file) =>
-                        `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
+                    `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
                 );
                 updatedPictures = pictures.concat(newPictures);
             } else {
