@@ -83,6 +83,12 @@ router.get(
     GymController.filterGyms
 );
 
+router.get(
+    "/getAllGymsForAdmin",
+    verifyToken([IUserType.ADMIN]),
+    GymController.getAllGymsForAdmin
+)
+
 
 router.get("/:gymId",
     [

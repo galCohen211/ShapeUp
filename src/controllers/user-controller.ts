@@ -2,8 +2,6 @@ import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { ObjectId } from "mongoose";
-import { getMessagesBetweenTwoUsers } from "../chat/chat-logic";
 import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
 import { getFromCookie } from "./auth-controller";
@@ -250,7 +248,7 @@ class UserController {
       });
 
       if (users.length === 0) {
-        res.status(404).json({ message: "No users found matching the search criteria" });
+        res.status(200).json({ message: "No users found matching the search criteria" });
         return;
       }
 
@@ -259,6 +257,16 @@ class UserController {
       res.status(500).json({ message: "Internal server error", error: err });
     }
   }
+
+  static async getAllUsers(_req: Request, res: Response): Promise<void> {
+    try {
+      const users = await User.find({});
+      res.status(200).json({ users });
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  }
+  
 }
 
 export default UserController;

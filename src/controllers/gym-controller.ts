@@ -148,6 +148,19 @@ class GymController {
         }
     }
 
+    static async getAllGymsForAdmin(req: Request, res: Response): Promise<void> {
+        try {
+          const gyms = await Gym.find({})
+            .populate("owner", "firstName lastName email")
+            .lean();
+    
+          res.status(200).json({ gyms });
+        } catch (err) {
+          res.status(500).json({ message: "Internal server error", error: err });
+        }
+      }
+    
+
     static async getMyGyms(req: Request, res: Response): Promise<void> {
         try {
             const myUserId = await getFromCookie(req, res, "id");
@@ -243,7 +256,7 @@ class GymController {
             });
 
             if (gyms.length === 0) {
-                res.status(404).json({ message: "No gyms found matching the search criteria" });
+                res.status(200).json({ message: "No gyms found matching the search criteria" });
                 return;
             }
 
