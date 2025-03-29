@@ -67,7 +67,7 @@ router.get(
 
 router.delete(
     "/:gymId",
-    verifyToken([IUserType.GYM_OWNER]),
+    verifyToken([IUserType.GYM_OWNER, IUserType.ADMIN]),
     GymController.deleteGymById
 );
 
@@ -82,6 +82,12 @@ router.get(
     ],
     GymController.filterGyms
 );
+
+router.get(
+    "/getAllGymsForAdmin",
+    verifyToken([IUserType.ADMIN]),
+    GymController.getAllGymsForAdmin
+)
 
 
 router.get("/:gymId",
