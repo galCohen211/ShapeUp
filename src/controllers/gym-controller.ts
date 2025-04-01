@@ -11,6 +11,7 @@ import { IUserType } from "../models/user-model";
 class GymController {
     // Add a new gym
     static async addGym(req: Request, res: Response): Promise<void> {
+    
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -21,27 +22,27 @@ class GymController {
             let { name, city, description, prices } = req.body;
             const owner = req.query.owner as string;
 
-      if (!req.files || !(req.files as Express.Multer.File[]).length) {
-        res
-          .status(400)
-          .json({ message: "Please upload at least one picture." });
-        return;
-      }
+            if (!req.files || !(req.files as Express.Multer.File[]).length) {
+                res
+                .status(400)
+                .json({ message: "Please upload at least one picture." });
+                return;
+            }
 
-      if (typeof prices === 'string') {
-        prices = JSON.parse(prices);
-    }
+            if (typeof prices === 'string') {
+                prices = JSON.parse(prices);
+            }
 
-    if (!prices || !Array.isArray(prices) || prices.length !== 3) {
-        res.status(400).json({ message: "Prices array must contain exactly 3 numbers." });
-        return;
-    }
+            if (!prices || !Array.isArray(prices) || prices.length !== 3) {
+                res.status(400).json({ message: "Prices array must contain exactly 3 numbers." });
+                return;
+            }
 
-      const pictures = (req.files as Express.Multer.File[]).map(
-        (file) =>
-          `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
-      );
-      const amountOfReviews = 0;
+            const pictures = (req.files as Express.Multer.File[]).map(
+                (file) =>
+                `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
+            );
+            const amountOfReviews = 0;
 
             const newGym = new Gym({
                 name,
@@ -53,15 +54,15 @@ class GymController {
                 prices,
             });
 
-      await newGym.save();
+            await newGym.save();
 
-      res.status(201).json({
-        message: "Gym added successfully!",
-        gym: newGym,
-      });
-    } catch (err) {
-      res.status(500).json({ message: "Internal server error", error: err });
-    }
+            res.status(201).json({
+                message: "Gym added successfully!",
+                gym: newGym,
+            });
+        } catch (err) {
+            res.status(500).json({ message: "Internal server error", error: err });
+        }
   }
 
   // Update gym details
@@ -124,17 +125,18 @@ class GymController {
         updatedPictures = pictures;
       }
 
-            // Update gym details
-            const updateData: Partial<Record<string, any>> = {
-                name,
-                city,
-                description,
-                amountOfReviews,
-                pictures: updatedPictures,
-            };
-            if (prices && Array.isArray(prices) && prices.length === 3) {
-                updateData.prices = prices;
-            }
+        // Update gym details
+        const updateData: Partial<Record<string, any>> = {
+            name,
+            city,
+            description,
+            amountOfReviews,
+            pictures: updatedPictures,
+        };
+        if (prices && Array.isArray(prices) && prices.length === 3) {
+            updateData.prices = prices;
+        }
+        
       const updatedGym = await Gym.findByIdAndUpdate(gymId, updateData, {
         new: true,
       });
