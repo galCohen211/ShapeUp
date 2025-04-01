@@ -12,13 +12,23 @@ class GymController {
     static async addGym(req: Request, res: Response): Promise<void> {
         try {
             const errors = validationResult(req);
+            console.log(errors);
             if (!errors.isEmpty()) {
                 res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
                 return;
             }
-
-            const { name, city, description } = req.body;
+            
+            let { name, city, description, prices } = req.body;
             const owner = req.query.owner as string;
+
+            if (typeof prices === 'string') {
+                prices = JSON.parse(prices);
+            }
+
+            if (!prices || !Array.isArray(prices) || prices.length !== 3) {
+                res.status(400).json({ message: "Prices array must contain exactly 3 numbers." });
+                return;
+            }
 
             if (!req.files || !(req.files as Express.Multer.File[]).length) {
                 res.status(400).json({ message: "Please upload at least one picture." });
@@ -38,6 +48,7 @@ class GymController {
                 description,
                 amountOfReviews,
                 owner: new mongoose.Types.ObjectId(owner),
+                prices,
             });
 
             await newGym.save();
@@ -68,7 +79,11 @@ class GymController {
                 return;
             }
 
-            const { name, city, description, amountOfReviews } = req.body;
+            let { name, city, description, amountOfReviews, prices } = req.body;
+
+            if (typeof prices === 'string') {
+                prices = JSON.parse(prices);
+            }
 
             // Handle image deletion logic
             let updatedPictures = [...existingGym.pictures];
@@ -110,6 +125,10 @@ class GymController {
                 amountOfReviews,
                 pictures: updatedPictures,
             };
+
+            if (prices && Array.isArray(prices) && prices.length === 3) {
+                updateData.prices = prices;
+            }
 
             const updatedGym = await Gym.findByIdAndUpdate(gymId, updateData, {
                 new: true,
