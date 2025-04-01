@@ -16,6 +16,7 @@ import GymRouter from "./routes/gym-route"
 import userRouter from "./routes/user-route";
 import reviewRouter from "./routes/review-route";
 import chatAIRouter from "./routes/chat-ai-route";
+import adminRouter from "./routes/admin-route";
 
 const app: any = express();
 const swaggerDocument = yaml.load('./swagger.yaml');
@@ -62,6 +63,7 @@ app.use("/gyms", GymRouter);
 app.use("/users", userRouter);
 app.use("/reviews", reviewRouter);
 app.use("/askChatAi", chatAIRouter);
+app.use("/admin", adminRouter);
 
 export default app;
 

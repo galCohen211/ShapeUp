@@ -151,6 +151,12 @@ router.get(
   UserController.filterUsers
 );
 
+router.get(
+  "/getAllUsers",
+  verifyToken([IUserType.ADMIN]),
+  UserController.getAllUsers
+);
+
 router.delete("/:userId", UserController.deleteUserById,
   verifyToken([IUserType.USER, IUserType.ADMIN]),
   [
