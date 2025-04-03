@@ -15,6 +15,15 @@ router.post(
         body("name").notEmpty().withMessage("Name is required."),
         body("city").notEmpty().withMessage("city is required."),
         body("description").notEmpty().withMessage("Description is required."),
+        body("prices")
+        .custom((arr, { req }) => {
+            try {
+              const parsed = typeof arr === 'string' ? JSON.parse(arr) : arr;
+              return Array.isArray(parsed) && parsed.length === 3 && parsed.every((price) => typeof price === "number");
+            } catch {
+              return false;
+            }
+          }).withMessage("Each price must be a number and there should be 3 prices."),
         query("owner")
             .notEmpty()
             .withMessage("Owner is required.")
@@ -40,6 +49,15 @@ router.put(
             .optional()
             .isInt({ min: 0 })
             .withMessage("Reviews must be a non-negative integer."),
+        body("prices")
+            .custom((arr, { req }) => {
+                try {
+                  const parsed = typeof arr === 'string' ? JSON.parse(arr) : arr;
+                  return Array.isArray(parsed) && parsed.length === 3 && parsed.every((price) => typeof price === "number");
+                } catch {
+                  return false;
+                }
+              }).withMessage("Each price must be a number and there should be 3 prices."),
         body("pictures")
             .optional()
             .isArray({ min: 1 })

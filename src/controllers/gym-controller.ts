@@ -9,52 +9,60 @@ import { getFromCookie } from "./auth-controller";
 import { IUserType } from "../models/user-model";
 
 class GymController {
-  // Add a new gym
-  static async addGym(req: Request, res: Response): Promise<void> {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          message: "Validation array is not empty",
-          error: errors.array(),
-        });
-        return;
-      }
+    // Add a new gym
+    static async addGym(req: Request, res: Response): Promise<void> {
+    
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
+                return;
+            }
 
-      const { name, city, description } = req.body;
-      const owner = req.query.owner as string;
+            let { name, city, description, prices } = req.body;
+            const owner = req.query.owner as string;
 
-      if (!req.files || !(req.files as Express.Multer.File[]).length) {
-        res
-          .status(400)
-          .json({ message: "Please upload at least one picture." });
-        return;
-      }
+            if (!req.files || !(req.files as Express.Multer.File[]).length) {
+                res
+                .status(400)
+                .json({ message: "Please upload at least one picture." });
+                return;
+            }
 
-      const pictures = (req.files as Express.Multer.File[]).map(
-        (file) =>
-          `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
-      );
-      const amountOfReviews = 0;
+            if (typeof prices === 'string') {
+                prices = JSON.parse(prices);
+            }
 
-      const newGym = new Gym({
-        name,
-        pictures,
-        city,
-        description,
-        amountOfReviews,
-        owner: new mongoose.Types.ObjectId(owner),
-      });
+            if (!prices || !Array.isArray(prices) || prices.length !== 3) {
+                res.status(400).json({ message: "Prices array must contain exactly 3 numbers." });
+                return;
+            }
 
-      await newGym.save();
+            const pictures = (req.files as Express.Multer.File[]).map(
+                (file) =>
+                `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
+            );
+            const amountOfReviews = 0;
 
-      res.status(201).json({
-        message: "Gym added successfully!",
-        gym: newGym,
-      });
-    } catch (err) {
-      res.status(500).json({ message: "Internal server error", error: err });
-    }
+            const newGym = new Gym({
+                name,
+                pictures,
+                city,
+                description,
+                amountOfReviews,
+                owner: new mongoose.Types.ObjectId(owner),
+                prices,
+            });
+
+            await newGym.save();
+
+            res.status(201).json({
+                message: "Gym added successfully!",
+                gym: newGym,
+            });
+        } catch (err) {
+            res.status(500).json({ message: "Internal server error", error: err });
+        }
   }
 
   // Update gym details
@@ -77,7 +85,11 @@ class GymController {
         return;
       }
 
-      const { name, city, description, amountOfReviews } = req.body;
+      let { name, city, description, amountOfReviews, prices } = req.body;
+
+      if (typeof prices === 'string') {
+        prices = JSON.parse(prices);
+      }
 
       // Handle image deletion logic
       let updatedPictures = [...existingGym.pictures];
@@ -113,15 +125,18 @@ class GymController {
         updatedPictures = pictures;
       }
 
-      // Update gym details
-      const updateData: Partial<Record<string, any>> = {
-        name,
-        city,
-        description,
-        amountOfReviews,
-        pictures: updatedPictures,
-      };
-
+        // Update gym details
+        const updateData: Partial<Record<string, any>> = {
+            name,
+            city,
+            description,
+            amountOfReviews,
+            pictures: updatedPictures,
+        };
+        if (prices && Array.isArray(prices) && prices.length === 3) {
+            updateData.prices = prices;
+        }
+        
       const updatedGym = await Gym.findByIdAndUpdate(gymId, updateData, {
         new: true,
       });

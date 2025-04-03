@@ -35,6 +35,8 @@ describe("GymController Endpoints", () => {
   describe("POST /gyms", () => {
     it("should add a new gym successfully", async () => {
       const ownerId = new mongoose.Types.ObjectId();
+      const prices = [20, 50, 100];
+
       (Gym.prototype.save as jest.Mock).mockResolvedValue({
         _id: new mongoose.Types.ObjectId(),
         name: "Test Gym",
@@ -43,6 +45,7 @@ describe("GymController Endpoints", () => {
         pictures: ["http://localhost/uploads/test-image1.jpg"],
         amountOfReviews: 0,
         owner: ownerId,
+        prices,
       });
 
       const response = await request(app)
@@ -50,11 +53,13 @@ describe("GymController Endpoints", () => {
         .field("name", "Test Gym")
         .field("city", "Test city")
         .field("description", "Test Description")
+        .field("prices", JSON.stringify(prices))
         .query({ owner: ownerId.toString() })
         .attach("pictures", Buffer.from("image content"), "test-image1.jpg");
 
       expect(response.status).toBe(201);
       expect(response.body.message).toBe("Gym added successfully!");
+      expect(response.body.gym).toHaveProperty("prices", prices);
       testImages.push("test-image1.jpg");
     });
 
@@ -62,6 +67,21 @@ describe("GymController Endpoints", () => {
       const response = await request(app).post("/gyms").send({});
       expect(response.status).toBe(400);
       expect(response.body.error).toBeDefined();
+    });
+
+    it("should return 400 if prices array is missing or incorrect", async () => {
+      const ownerId = new mongoose.Types.ObjectId();
+  
+      const response = await request(app)
+          .post("/gyms")
+          .field("name", "Test Gym")
+          .field("city", "Test city")
+          .field("description", "Test Description")
+          .query({ owner: ownerId.toString() })
+          .attach("pictures", Buffer.from("image content"), "test-image1.jpg");
+  
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Prices array must contain exactly 3 numbers.");
     });
   });
 
@@ -74,23 +94,28 @@ describe("GymController Endpoints", () => {
         city: "City",
         description: "Description",
         pictures: ["http://localhost/uploads/test-image2.jpg"],
+        prices: [20, 50, 100],
       };
       (Gym.findById as jest.Mock).mockResolvedValue(existingGym);
       const response = await request(app).get(`/gyms/${gymId}`);
       expect(response.status).toBe(200);
       expect(response.body.message).toBe("Gym extracted successfully");
+      expect(response.body.gym).toHaveProperty("prices", [20, 50, 100]);
     });
   });
 
   describe("PUT /gyms/:gymId", () => {
     it("should update gym details successfully", async () => {
       const gymId = new mongoose.Types.ObjectId().toString();
+      const prices = [30, 60, 120];
+
       const existingGym = {
         _id: gymId,
         name: "Old Gym",
         city: "Old city",
         description: "Old Description",
         pictures: ["http://localhost/uploads/test-image2.jpg"],
+        prices: [20, 50, 100],
       };
 
       (Gym.findById as jest.Mock).mockResolvedValue(existingGym);
@@ -99,6 +124,7 @@ describe("GymController Endpoints", () => {
         name: "Updated Gym",
         city: "Updated city",
         description: "Updated Description",
+        prices,
       });
 
       const response = await request(app)
@@ -106,14 +132,27 @@ describe("GymController Endpoints", () => {
         .field("name", "Updated Gym")
         .field("city", "Updated city")
         .field("description", "Updated Description")
+        .field("prices", JSON.stringify(prices))
         .field("pictures[]", "http://localhost/uploads/test-image2.jpg");
 
       expect(response.status).toBe(200);
       expect(response.body.message).toBe("Gym updated successfully");
+      expect(response.body.gym).toHaveProperty("prices", prices);
       expect(response.body.gym).toHaveProperty("name", "Updated Gym");
 
       // Add the test image to the cleanup list
       testImages.push("test-image2.jpg");
+    });
+
+    it("should return 400 if prices array is invalid", async () => {
+      const gymId = new mongoose.Types.ObjectId().toString();
+  
+      const response = await request(app)
+          .put(`/gyms/${gymId}`)
+          .send({ prices: [30, 60] });
+  
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Prices must be an array of exactly 3 numbers.");
     });
 
     it("should return 404 if gym is not found", async () => {
@@ -297,6 +336,38 @@ describe("GET /gyms", () => {
     expect(response.body.gyms[0]).toHaveProperty("name", "Gym 1");
     expect(response.body.gyms[1]).toHaveProperty("name", "Gym 2");
   });
+
+  it("should return all gyms with prices", async () => {
+    const gyms = [
+        {
+            _id: new mongoose.Types.ObjectId(),
+            name: "Gym 1",
+            city: "city 1",
+            description: "Description 1",
+            pictures: ["http://localhost/uploads/gym1.jpg"],
+            prices: [15, 45, 90],
+            owner: new mongoose.Types.ObjectId(),
+        },
+        {
+            _id: new mongoose.Types.ObjectId(),
+            name: "Gym 2",
+            city: "city 2",
+            description: "Description 2",
+            pictures: ["http://localhost/uploads/gym2.jpg"],
+            prices: [10, 40, 80],
+            owner: new mongoose.Types.ObjectId(),
+        },
+    ];
+
+    (Gym.find as jest.Mock).mockResolvedValue(gyms);
+    const response = await request(app).get("/gyms");
+
+    expect(response.status).toBe(200);
+    expect(response.body.gyms).toHaveLength(gyms.length);
+    expect(response.body.gyms[0]).toHaveProperty("prices", [15, 45, 90]);
+    expect(response.body.gyms[1]).toHaveProperty("prices", [10, 40, 80]);
+  });
+
 
   it("should return gyms owned by a specific owner when a valid owner ID is provided", async () => {
     const ownerId = new mongoose.Types.ObjectId();
