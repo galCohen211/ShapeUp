@@ -1,6 +1,7 @@
 import { HfInference } from "@huggingface/inference";
 import { Request, Response } from "express";
 import User, { IUserType } from "../models/user-model";
+import Gym from "../models/gym-model";
 
 class chatAIController {
     static async ask_question(req: Request, res: Response): Promise<void> {
@@ -14,8 +15,10 @@ class chatAIController {
             }
 
             const user = await User.findById(userId);
-            if (!user) {
-                res.status(404).json({ message: "User not found" });
+            const owner = await Gym.findById(userId);
+
+            if (!user && !owner) {
+                res.status(404).json({ message: "User Or Gym Owner not found" });
                 return;
             }
 
@@ -35,9 +38,8 @@ class chatAIController {
             }
 
             let filtered_response_text = response.generated_text.substring(question.length);
-            user.chatGptAccess = new Date();
 
-            res.status(200).json({ message: filtered_response_text, date: user.chatGptAccess });
+            res.status(200).json({ message: filtered_response_text});
 
         } catch (err) {
             console.error("Error in ask_question:", err);

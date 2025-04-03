@@ -44,15 +44,15 @@ class GymController {
             );
             const amountOfReviews = 0;
 
-            const newGym = new Gym({
-                name,
-                pictures,
-                city,
-                description,
-                amountOfReviews,
-                owner: new mongoose.Types.ObjectId(owner),
-                prices,
-            });
+    const newGym = new Gym({
+        name,
+        pictures,
+        city,
+        description,
+        amountOfReviews,
+        owner: new mongoose.Types.ObjectId(owner),
+        prices,
+    });
 
             await newGym.save();
 

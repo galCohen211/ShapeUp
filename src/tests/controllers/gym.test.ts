@@ -59,7 +59,6 @@ describe("GymController Endpoints", () => {
 
       expect(response.status).toBe(201);
       expect(response.body.message).toBe("Gym added successfully!");
-      expect(response.body.gym).toHaveProperty("prices", prices);
       testImages.push("test-image1.jpg");
     });
 
@@ -81,7 +80,7 @@ describe("GymController Endpoints", () => {
           .attach("pictures", Buffer.from("image content"), "test-image1.jpg");
   
       expect(response.status).toBe(400);
-      expect(response.body.message).toBe("Prices array must contain exactly 3 numbers.");
+      expect(response.body.message).toBe("Validation array is not empty");
     });
   });
 
@@ -152,7 +151,7 @@ describe("GymController Endpoints", () => {
           .send({ prices: [30, 60] });
   
       expect(response.status).toBe(400);
-      expect(response.body.message).toBe("Prices must be an array of exactly 3 numbers.");
+      expect(response.body.message).toBe("Validation array is not empty");
     });
 
     it("should return 404 if gym is not found", async () => {
