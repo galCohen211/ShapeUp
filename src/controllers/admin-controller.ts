@@ -72,18 +72,32 @@ class AdminController {
     }
   }
 
-  static async getGymOwnersStatus(_req: Request, res: Response): Promise<void> {
+  static async getGymOwnersStatus(req: Request, res: Response): Promise<void> {
     try {
-      // Find all gym owners and select the required fields
+      const { search } = req.query;
+      // Base query to ensure only gym owners are returned
+      let query: any = { role: IUserType.GYM_OWNER };
+
+      // If a valid search query is provided, add regex filtering on firstName, lastName, and email
+      if (search && typeof search === "string") {
+        const searchRegex = new RegExp(search, "i");
+        query.$or = [
+          { firstName: { $regex: searchRegex } },
+          { lastName: { $regex: searchRegex } },
+          { email: { $regex: searchRegex } },
+        ];
+      }
+
+      // Execute the query with the selected fields
       const gymOwners = await User.find(
-        { role: IUserType.GYM_OWNER },
+        query,
         "firstName lastName email city gymOwnerLicenseImage gymOwnerStatus"
       );
 
-      // Return the list of gym owners with statuses
       res.status(200).json(gymOwners);
     } catch (error) {
       console.error("Error fetching gym owners:", error);
+      res.status(500).json({ message: "Internal server error", error });
     }
   }
 }
