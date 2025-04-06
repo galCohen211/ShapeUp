@@ -6,63 +6,83 @@ import path from "path";
 import fs from "fs";
 
 import { getFromCookie } from "./auth-controller";
-import { IUserType } from "../models/user-model";
+import User, { IGymOwnerStatus, IUserType } from "../models/user-model";
 
 class GymController {
-    // Add a new gym
-    static async addGym(req: Request, res: Response): Promise<void> {
-    
-        try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                res.status(400).json({ message: "Validation array is not empty", error: errors.array() });
-                return;
-            }
+  // Add a new gym
+  static async addGym(req: Request, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          message: "Validation array is not empty",
+          error: errors.array(),
+        });
+        return;
+      }
 
-            let { name, city, description, prices } = req.body;
-            const owner = req.query.owner as string;
+      let { name, city, description, prices } = req.body;
+      const ownerQueryString = req.query.owner as string;
 
-            if (!req.files || !(req.files as Express.Multer.File[]).length) {
-                res
-                .status(400)
-                .json({ message: "Please upload at least one picture." });
-                return;
-            }
+      if (!req.files || !(req.files as Express.Multer.File[]).length) {
+        res
+          .status(400)
+          .json({ message: "Please upload at least one picture." });
+        return;
+      }
 
-            if (typeof prices === 'string') {
-                prices = JSON.parse(prices);
-            }
+      if (typeof prices === "string") {
+        prices = JSON.parse(prices);
+      }
 
-            if (!prices || !Array.isArray(prices) || prices.length !== 3) {
-                res.status(400).json({ message: "Prices array must contain exactly 3 numbers." });
-                return;
-            }
+      if (!prices || !Array.isArray(prices) || prices.length !== 3) {
+        res
+          .status(400)
+          .json({ message: "Prices array must contain exactly 3 numbers." });
+        return;
+      }
 
-            const pictures = (req.files as Express.Multer.File[]).map(
-                (file) =>
-                `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
-            );
-            const amountOfReviews = 0;
+      const ownerIdObject = new mongoose.Types.ObjectId(ownerQueryString);
+      const gymOwner = await User.findById(ownerIdObject);
 
-    const newGym = new Gym({
+      if (!gymOwner) {
+        res.status(400).json({ message: "Gym owner not found" });
+        return;
+      }
+
+      if (gymOwner.gymOwnerStatus !== IGymOwnerStatus.APPROVED) {
+        res
+          .status(400)
+          .json({ message: "Gym owner status must be approved" });
+        return;
+      }
+
+      const pictures = (req.files as Express.Multer.File[]).map(
+        (file) =>
+          `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
+      );
+      const amountOfReviews = 0;
+
+      const newGym = new Gym({
         name,
         pictures,
         city,
         description,
         amountOfReviews,
-        owner: new mongoose.Types.ObjectId(owner),
+        owner: ownerIdObject,
         prices,
-    });
+      });
 
-            await newGym.save();
+      await newGym.save();
 
-            res.status(201).json({
-                message: "Gym added successfully!",
-                gym: newGym,
-            });
-        } catch (err) {
-            res.status(500).json({ message: "Internal server error", error: err });
-        }
+      res.status(201).json({
+        message: "Gym added successfully!",
+        gym: newGym,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
   }
 
   // Update gym details
@@ -87,7 +107,7 @@ class GymController {
 
       let { name, city, description, amountOfReviews, prices } = req.body;
 
-      if (typeof prices === 'string') {
+      if (typeof prices === "string") {
         prices = JSON.parse(prices);
       }
 
@@ -125,18 +145,18 @@ class GymController {
         updatedPictures = pictures;
       }
 
-        // Update gym details
-        const updateData: Partial<Record<string, any>> = {
-            name,
-            city,
-            description,
-            amountOfReviews,
-            pictures: updatedPictures,
-        };
-        if (prices && Array.isArray(prices) && prices.length === 3) {
-            updateData.prices = prices;
-        }
-        
+      // Update gym details
+      const updateData: Partial<Record<string, any>> = {
+        name,
+        city,
+        description,
+        amountOfReviews,
+        pictures: updatedPictures,
+      };
+      if (prices && Array.isArray(prices) && prices.length === 3) {
+        updateData.prices = prices;
+      }
+
       const updatedGym = await Gym.findByIdAndUpdate(gymId, updateData, {
         new: true,
       });
