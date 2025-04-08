@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 
-import { IUserType, IGender } from "../models/user-model";
+import { IUserType, IGender, IGymOwnerStatus } from "../models/user-model";
 
 export interface RegisterUserParams {
     email: string;
@@ -14,6 +14,7 @@ export interface RegisterUserParams {
     gender?: IGender;
     avatarUrl?: string;
     gymOwnerLicenseImage?: string;
+    gymOwnerStatus?: IGymOwnerStatus;
 }
 
 export interface TokenPayload extends JwtPayload {

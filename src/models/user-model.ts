@@ -8,7 +8,13 @@ export enum IUserType {
 
 export enum IGender {
   MALE = "male",
-  FEMALE = "female"
+  FEMALE = "female",
+}
+
+export enum IGymOwnerStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  DECLINED = "declined",
 }
 
 interface IUser extends Document {
@@ -27,6 +33,7 @@ interface IUser extends Document {
   refreshTokens?: string[];
   gymOwnerLicenseImage?: string;
   favoriteGyms: Types.ObjectId[];
+  gymOwnerStatus?: IGymOwnerStatus;
 }
 
 const UserSchema = new mongoose.Schema({
@@ -44,8 +51,12 @@ const UserSchema = new mongoose.Schema({
   refreshTokens: { type: [String], required: false, default: [] },
   gymOwnerLicenseImage: { type: String, required: false },
   favoriteGyms: [{ type: Schema.Types.ObjectId, ref: "Gym" }],
+  gymOwnerStatus: {
+    type: String,
+    enum: Object.values(IGymOwnerStatus),
+    required: false,
+  },
 });
-
 
 const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
 export default User;

@@ -6,7 +6,7 @@ import { Types } from "mongoose";
 import { validationResult } from "express-validator";
 import { Strategy as GoogleStrategy, VerifyCallback } from "passport-google-oauth2";
 
-import User, { IUserType } from "../models/user-model";
+import User, { IGymOwnerStatus, IUserType } from "../models/user-model";
 import { RegisterUserParams, TokenPayload } from "../types/auth.types";
 
 
@@ -128,6 +128,7 @@ export const signup = async (req: Request, res: Response) => {
 
     if (gymOwnerLicenseImageUrl) {
       userData.gymOwnerLicenseImage = gymOwnerLicenseImageUrl;
+      userData.gymOwnerStatus = IGymOwnerStatus.PENDING
     }
 
     const result = await registerGeneralUser(userData);
@@ -322,7 +323,7 @@ export const refresh = async (req: Request, res: Response) => {
 }
 
 const registerGeneralUser = async (params: RegisterUserParams) => {
-  const { email, password, firstName, lastName, street, city, userRole, birthdate, gender, avatarUrl, gymOwnerLicenseImage } = params;
+  const { email, password, firstName, lastName, street, city, userRole, birthdate, gender, avatarUrl, gymOwnerLicenseImage, gymOwnerStatus } = params;
   const user = await User.findOne({ email });
 
   // "regular" user
@@ -355,6 +356,7 @@ const registerGeneralUser = async (params: RegisterUserParams) => {
       avatarUrl: avatarUrl,
       refreshTokens: [],
       gymOwnerLicenseImage: gymOwnerLicenseImage,
+      gymOwnerStatus: gymOwnerStatus,
       favoriteGyms: [],
       isChatGptAllowed: true
     }).save();
