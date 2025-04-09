@@ -519,10 +519,6 @@ paths:
                   type: string
                   description: The gym description
                   example: The best gym in the world
-                amountOfReviews:
-                  type: number
-                  description: The amount of reviews for the gym
-                  example: 0
                 pictures[]: 
                   type: array
                   items:

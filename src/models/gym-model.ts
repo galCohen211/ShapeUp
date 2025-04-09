@@ -6,7 +6,6 @@ interface IGym extends Document {
   pictures: string[];
   city: string;
   description: string;
-  amountOfReviews: number;
   owner: Types.ObjectId;
   prices: number[];
   purchasesCount: number;
@@ -17,7 +16,6 @@ const GymSchema: Schema<IGym> = new mongoose.Schema({
   pictures: { type: [String], required: true },
   city: { type: String, required: true },
   description: { type: String, required: true },
-  amountOfReviews: { type: Number, required: true },
   owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
   prices: { 
     type: [Number], 
