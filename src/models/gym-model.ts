@@ -9,6 +9,7 @@ interface IGym extends Document {
   amountOfReviews: number;
   owner: Types.ObjectId;
   prices: number[];
+  purchasesCount: number;
 }
 
 const GymSchema: Schema<IGym> = new mongoose.Schema({
@@ -28,6 +29,7 @@ const GymSchema: Schema<IGym> = new mongoose.Schema({
     },
     required: true
   },
+  purchasesCount: { type: Number, required: true, default: 0 }, 
 });
 
 const Gym: Model<IGym> = mongoose.model<IGym>("Gym", GymSchema);
