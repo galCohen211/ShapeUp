@@ -9,7 +9,7 @@ const router = express.Router();
 // Add a new creditcard
 router.post(
   "/",
-  // verifyToken([IUserType.USER]),
+  verifyToken([IUserType.USER]),
   creditcardController.addCreditCard
 );
 
