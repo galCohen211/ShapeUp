@@ -43,7 +43,6 @@ describe("GymController Endpoints", () => {
         city: "Test city",
         description: "Test Description",
         pictures: ["http://localhost/uploads/test-image1.jpg"],
-        amountOfReviews: 0,
         owner: ownerId,
         prices,
       });

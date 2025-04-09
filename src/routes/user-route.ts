@@ -94,7 +94,6 @@ router.get("/getMyProfile",
 
 router.put("/updateUserById/:userId",
   upload.fields([{ name: "avatar", maxCount: 1 }]),
-  verifyToken([IUserType.GYM_OWNER, IUserType.USER]),
   [
     param("userId")
       .notEmpty().withMessage("User ID is required.")
