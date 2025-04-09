@@ -133,6 +133,11 @@ class CreditCardController {
         return;
       }
 
+      await User.updateMany(
+        { creditCard: cardId },
+        { $unset: { creditCard: "" } }
+      );
+
       res.status(200).json({ message: "Credit card deleted successfully." });
     } catch (err) {
       console.error(err);
