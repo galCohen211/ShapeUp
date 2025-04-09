@@ -110,7 +110,7 @@ class PurchaseController {
         gym: gymId,
         personalCode,
         plan,
-        creditCardId,
+        creditCard: creditCardId,
       });
 
       await newPurchase.save();

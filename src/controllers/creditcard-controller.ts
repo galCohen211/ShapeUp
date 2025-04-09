@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import CreditCard from "../models/creditcard-model";
+import { getFromCookie } from "./auth-controller";
+import User from "../models/user-model";
 
 function isValidString(string: any): boolean {
   return string && typeof string === "string" && string.trim() !== "";
@@ -9,16 +11,22 @@ class CreditCardController {
   static async addCreditCard(req: Request, res: Response): Promise<void> {
     try {
       const { creditCardNumber, expirationDate, civ, cardOwnerName } = req.body;
+      const userId = await getFromCookie(req, res, "id");
+
+      if (!userId) {
+        res.status(400).json({ error: "User id is required." });
+        return;
+      }
 
       // Basic validations for inputs.
-      if (isValidString(creditCardNumber)) {
+      if (!isValidString(creditCardNumber)) {
         res.status(400).json({
           error:
             "Credit card number is required and must be a non-empty string.",
         });
         return;
       }
-      if (isValidString(expirationDate)) {
+      if (!isValidString(expirationDate)) {
         res.status(400).json({
           error: "Expiration date is required and must be a non-empty string.",
         });
@@ -30,7 +38,7 @@ class CreditCardController {
           .json({ error: "CIV is required and must be exactly 3 digits." });
         return;
       }
-      if (isValidString(cardOwnerName)) {
+      if (!isValidString(cardOwnerName)) {
         res.status(400).json({
           error: "Card owner name is required and must be a non-empty string.",
         });
@@ -45,6 +53,7 @@ class CreditCardController {
       });
 
       await creditCard.save();
+      await User.findByIdAndUpdate(userId, { creditCard: creditCard._id });
 
       res
         .status(201)
