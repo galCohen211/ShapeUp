@@ -34,6 +34,7 @@ interface IUser extends Document {
   gymOwnerLicenseImage?: string;
   favoriteGyms: Types.ObjectId[];
   gymOwnerStatus?: IGymOwnerStatus;
+  creditCard?: Types.ObjectId;
 }
 
 const UserSchema = new mongoose.Schema({
@@ -54,6 +55,11 @@ const UserSchema = new mongoose.Schema({
   gymOwnerStatus: {
     type: String,
     enum: Object.values(IGymOwnerStatus),
+    required: false,
+  },
+  creditCard: {
+    type: Schema.Types.ObjectId,
+    ref: "CreditCard",
     required: false,
   },
 });
