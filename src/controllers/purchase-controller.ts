@@ -4,6 +4,7 @@ import { getFromCookie } from "./auth-controller";
 import { addDays } from "date-fns";
 import CreditCard from "../models/creditcard-model";
 import User from "../models/user-model";
+import Gym from "../models/gym-model";
 
 // Generates a unique 6-digit code, checking for collisions in the Purchase collection.
 async function generateUniquePersonalCode(): Promise<string> {
@@ -97,6 +98,14 @@ class PurchaseController {
           return;
       }
 
+      daysToAdd = daysToAdd - 1; // Adjust for inclusive end date.
+
+      const gym = await Gym.findById(gymId);
+      if (!gym) {
+        res.status(400).json({ error: "Gym not found." });
+        return;
+      }
+
       // Calculate end date using date-fns addDays.
       const endDate = addDays(parsedStartDate, daysToAdd);
 
@@ -115,9 +124,23 @@ class PurchaseController {
 
       await newPurchase.save();
 
+      if (gym) {
+        let date = parsedStartDate;
+        while (date <= endDate) {
+          const key = date.toISOString().split("T")[0];
+          gym.trainerCounts[key] = (gym.trainerCounts[key] || 0) + 1;
+          date = addDays(date, 1);
+        }
+
+        console.log("Gym trainer counts updated:", gym.trainerCounts);
+        gym.markModified("trainerCounts");
+        await gym.save();
+      }
+
       res.status(200).json({
         message: "Transaction created successfully.",
         personalCode,
+        purchaseId: newPurchase._id
       });
     } catch (error) {
       console.error(error);

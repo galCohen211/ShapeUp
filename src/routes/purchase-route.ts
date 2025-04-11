@@ -15,7 +15,7 @@ router.post(
 
 // Get a purchase personal code
 router.get(
-  "/:purchaseId",
+  "/personalCode/:purchaseId",
   verifyToken([IUserType.USER]),
   [
     param("purchaseId")
