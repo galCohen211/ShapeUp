@@ -8,6 +8,7 @@ interface IGym extends Document {
   description: string;
   owner: Types.ObjectId;
   prices: number[];
+  trainerCounts: Record<string, number>;
 }
 
 const GymSchema: Schema<IGym> = new mongoose.Schema({
@@ -16,15 +17,19 @@ const GymSchema: Schema<IGym> = new mongoose.Schema({
   city: { type: String, required: true },
   description: { type: String, required: true },
   owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  prices: { 
-    type: [Number], 
+  prices: {
+    type: [Number],
     validate: {
       validator: function (value: number[]) {
         return value.length === 3;
       },
-      message: "Prices array must have exactly 3 elements."
+      message: "Prices array must have exactly 3 elements.",
     },
-    required: true
+    required: true,
+  },
+  trainerCounts: {
+    type: Object,
+    default: {},
   },
 });
 

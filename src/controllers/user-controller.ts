@@ -5,6 +5,7 @@ import { validationResult } from "express-validator";
 import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
 import { getFromCookie } from "./auth-controller";
+import CreditCard from "../models/creditcard-model";
 
 class UserController {
   static async updateUserById(req: Request, res: Response): Promise<void> {
@@ -162,6 +163,11 @@ class UserController {
       }
 
       UserController.deleteFile(user.avatarUrl);
+
+      if (user.creditCard) {
+        await CreditCard.findByIdAndDelete(user.creditCard);
+      }
+
       await User.findByIdAndDelete(userId);
       res.status(200).json({ message: "User deleted successfully" });
     } catch (err) {

@@ -17,6 +17,8 @@ import userRouter from "./routes/user-route";
 import reviewRouter from "./routes/review-route";
 import chatAIRouter from "./routes/chat-ai-route";
 import adminRouter from "./routes/admin-route";
+import creditcardRouter from "./routes/creditcard-route";
+import purchaseRouter from "./routes/purchase-route";
 
 const app: any = express();
 const swaggerDocument = yaml.load('./swagger.yaml');
@@ -64,6 +66,8 @@ app.use("/users", userRouter);
 app.use("/reviews", reviewRouter);
 app.use("/askChatAi", chatAIRouter);
 app.use("/admin", adminRouter);
+app.use("/creditcard", creditcardRouter);
+app.use("/purchase", purchaseRouter);
 
 export default app;
 
