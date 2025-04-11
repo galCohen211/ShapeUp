@@ -106,7 +106,7 @@ class GymController {
       };
   
       if (city && typeof city === "string") {
-        query.city = new RegExp(`^${city}$`, "i"); // Case-insensitive exact match
+        query.city = new RegExp(`^${city}$`, "i");
       }
   
       const gyms = await Gym.find(query);

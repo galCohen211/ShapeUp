@@ -93,7 +93,7 @@ describe("GymController Endpoints", () => {
           prices: [10, 30, 70],
       };
   
-      (Gym.find as jest.Mock).mockResolvedValue([gym]); // Only the first one matches price filter
+      (Gym.find as jest.Mock).mockResolvedValue([gym]);
   
       const response = await request(app).get("/gyms/filter_by_price?minPrice=20&maxPrice=50&city=Tel%20Aviv");
   
