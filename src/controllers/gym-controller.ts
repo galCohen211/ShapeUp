@@ -85,6 +85,40 @@ class GymController {
     }
   }
 
+  static async filterGymsByPriceAndCity(req: Request, res: Response): Promise<void> {
+    try {
+      const minPrice = parseFloat(req.query.minPrice as string);
+      const maxPrice = parseFloat(req.query.maxPrice as string);
+      const city = req.query.city as string | undefined;
+  
+      if (isNaN(minPrice) || isNaN(maxPrice)) {
+        res.status(400).json({ message: "minPrice and maxPrice must be numbers" });
+        return;
+      }
+  
+      const query: any = {
+        prices: {
+          $elemMatch: {
+            $gte: minPrice,
+            $lte: maxPrice
+          }
+        }
+      };
+  
+      if (city && typeof city === "string") {
+        query.city = new RegExp(`^${city}$`, "i"); // Case-insensitive exact match
+      }
+  
+      const gyms = await Gym.find(query);
+      res.status(200).json({ gyms });
+  
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  }
+  
+
   // Update gym details
   static async updateGymById(req: Request, res: Response): Promise<void> {
     try {

@@ -84,6 +84,59 @@ describe("GymController Endpoints", () => {
     });
   });
 
+  describe("GET /gyms/filter_by_price", () => {
+    it("should return gyms with at least one price in the range", async () => {
+      const gym = {
+          _id: new mongoose.Types.ObjectId(),
+          name: "Affordable Gym",
+          city: "Tel Aviv",
+          prices: [10, 30, 70],
+      };
+  
+      (Gym.find as jest.Mock).mockResolvedValue([gym]); // Only the first one matches price filter
+  
+      const response = await request(app).get("/gyms/filter_by_price?minPrice=20&maxPrice=50&city=Tel%20Aviv");
+  
+      expect(response.status).toBe(200);
+      expect(response.body.gyms).toHaveLength(1);
+      expect(response.body.gyms[0].name).toBe("Affordable Gym");
+    });
+  
+    it("should return all gyms matching price filter when city is not provided", async () => {
+      const gyms = [
+        {
+          _id: new mongoose.Types.ObjectId(),
+          name: "No City Gym",
+          city: "Random City",
+          prices: [15, 30, 45],
+        },
+      ];
+  
+      (Gym.find as jest.Mock).mockResolvedValue(gyms);
+  
+      const response = await request(app).get("/gyms/filter_by_price?minPrice=10&maxPrice=50");
+  
+      expect(response.status).toBe(200);
+      expect(response.body.gyms[0]).toHaveProperty("name", "No City Gym");
+    });
+  
+    it("should return 400 for invalid price inputs", async () => {
+      const response = await request(app).get("/gyms/filter_by_price?minPrice=abc&maxPrice=100");
+  
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("minPrice and maxPrice must be numbers");
+    });
+  
+    it("should handle internal server error gracefully", async () => {
+      (Gym.find as jest.Mock).mockRejectedValue(new Error("Database failed"));
+  
+      const response = await request(app).get("/gyms/filter_by_price?minPrice=10&maxPrice=100");
+  
+      expect(response.status).toBe(500);
+      expect(response.body.message).toBe("Internal server error");
+    });
+  });
+
   describe("GET /gyms/:gymId", () => {
     it("should get gym details by id successfully", async () => {
       const gymId = new mongoose.Types.ObjectId().toString();
