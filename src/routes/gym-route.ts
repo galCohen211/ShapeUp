@@ -67,7 +67,7 @@ router.delete(
     GymController.deleteGymById
 );
 
-router.get("/filter_by_price", GymController.filterGymsByPriceAndCity);
+router.get("/filter-by-price", verifyToken([IUserType.USER]), GymController.filterGymsByPriceAndCity);
 
 router.get(
     "/filter",
