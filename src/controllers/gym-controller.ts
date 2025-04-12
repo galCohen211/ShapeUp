@@ -61,14 +61,12 @@ class GymController {
         (file) =>
           `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
       );
-      const amountOfReviews = 0;
 
       const newGym = new Gym({
         name,
         pictures,
         city,
         description,
-        amountOfReviews,
         owner: ownerIdObject,
         prices,
       });
@@ -139,7 +137,7 @@ class GymController {
         return;
       }
 
-      let { name, city, description, amountOfReviews, prices } = req.body;
+      let { name, city, description, prices } = req.body;
 
       if (typeof prices === "string") {
         prices = JSON.parse(prices);
@@ -184,7 +182,6 @@ class GymController {
         name,
         city,
         description,
-        amountOfReviews,
         pictures: updatedPictures,
       };
       if (prices && Array.isArray(prices) && prices.length === 3) {

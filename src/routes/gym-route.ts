@@ -45,10 +45,6 @@ router.put(
         body("name").optional(),
         body("city").optional(),
         body("description").optional(),
-        body("amountOfReviews")
-            .optional()
-            .isInt({ min: 0 })
-            .withMessage("Reviews must be a non-negative integer."),
         body("prices")
             .custom((arr, { req }) => {
                 try {
