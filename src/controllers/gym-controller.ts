@@ -31,17 +31,6 @@ class GymController {
         return;
       }
 
-      if (typeof prices === "string") {
-        prices = JSON.parse(prices);
-      }
-
-      if (!prices || !Array.isArray(prices) || prices.length !== 3) {
-        res
-          .status(400)
-          .json({ message: "Prices array must contain exactly 3 numbers." });
-        return;
-      }
-
       const ownerIdObject = new mongoose.Types.ObjectId(ownerQueryString);
       const gymOwner = await User.findById(ownerIdObject);
 
@@ -68,7 +57,6 @@ class GymController {
         city,
         description,
         owner: ownerIdObject,
-        prices,
       });
 
       await newGym.save();
