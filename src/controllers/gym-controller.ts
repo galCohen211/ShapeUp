@@ -21,7 +21,7 @@ class GymController {
         return;
       }
 
-      let { name, city, description, prices } = req.body;
+      let { name, city, description } = req.body;
       const ownerQueryString = req.query.owner as string;
 
       if (!req.files || !(req.files as Express.Multer.File[]).length) {
@@ -50,13 +50,14 @@ class GymController {
         (file) =>
           `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
       );
-
+      console.log("-------------------------------------1")
       const newGym = new Gym({
         name,
         pictures,
         city,
         description,
         owner: ownerIdObject,
+        price: [0, 0, 0],
       });
 
       await newGym.save();
