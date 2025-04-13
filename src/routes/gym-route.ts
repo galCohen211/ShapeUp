@@ -54,6 +54,8 @@ router.put(
                   return false;
                 }
               }).withMessage("Each price must be a number and there should be 3 prices."),
+        body("openingHours")
+            .optional(),
         body("pictures")
             .optional()
             .isArray({ min: 1 })

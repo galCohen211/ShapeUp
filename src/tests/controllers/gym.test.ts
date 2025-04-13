@@ -36,6 +36,11 @@ describe("GymController Endpoints", () => {
     it("should add a new gym successfully", async () => {
       const ownerId = new mongoose.Types.ObjectId();
       const prices = [20, 50, 100];
+      const openingHours = {
+        sundayToThursday: { from: "06:00", to: "23:00" },
+        friday: { from: "06:00", to: "17:00" },
+        saturday: { from: "09:00", to: "23:00" },
+      };
 
       (Gym.prototype.save as jest.Mock).mockResolvedValue({
         _id: new mongoose.Types.ObjectId(),
@@ -45,6 +50,7 @@ describe("GymController Endpoints", () => {
         pictures: ["http://localhost/uploads/test-image1.jpg"],
         owner: ownerId,
         prices,
+        openingHours: openingHours,
       });
 
       const response = await request(app)
@@ -85,6 +91,11 @@ describe("GymController Endpoints", () => {
 
   describe("GET /gyms/:gymId", () => {
     it("should get gym details by id successfully", async () => {
+      const openingHours = {
+        sundayToThursday: { from: "06:00", to: "23:00" },
+        friday: { from: "06:00", to: "17:00" },
+        saturday: { from: "09:00", to: "23:00" },
+      };
       const gymId = new mongoose.Types.ObjectId().toString();
       const existingGym = {
         _id: gymId,
@@ -93,6 +104,7 @@ describe("GymController Endpoints", () => {
         description: "Description",
         pictures: ["http://localhost/uploads/test-image2.jpg"],
         prices: [20, 50, 100],
+        openingHours: openingHours,
       };
       (Gym.findById as jest.Mock).mockResolvedValue(existingGym);
       const response = await request(app).get(`/gyms/${gymId}`);
@@ -106,6 +118,18 @@ describe("GymController Endpoints", () => {
     it("should update gym details successfully", async () => {
       const gymId = new mongoose.Types.ObjectId().toString();
       const prices = [30, 60, 120];
+      
+      const defaultOpeningHours = {
+        sundayToThursday: { from: "06:00", to: "23:00" },
+        friday: { from: "06:00", to: "17:00" },
+        saturday: { from: "09:00", to: "23:00" },
+      };
+
+      const openingHours = {
+        sundayToThursday: { from: "07:00", to: "22:00" },
+        friday: { from: "05:45", to: "16:00" },
+        saturday: { from: "08:00", to: "22:00" },
+      };
 
       const existingGym = {
         _id: gymId,
@@ -114,6 +138,7 @@ describe("GymController Endpoints", () => {
         description: "Old Description",
         pictures: ["http://localhost/uploads/test-image2.jpg"],
         prices: [20, 50, 100],
+        openingHours: defaultOpeningHours,
       };
 
       (Gym.findById as jest.Mock).mockResolvedValue(existingGym);
@@ -123,6 +148,7 @@ describe("GymController Endpoints", () => {
         city: "Updated city",
         description: "Updated Description",
         prices,
+        openingHours,
       });
 
       const response = await request(app)
@@ -136,6 +162,7 @@ describe("GymController Endpoints", () => {
       expect(response.status).toBe(200);
       expect(response.body.message).toBe("Gym updated successfully");
       expect(response.body.gym).toHaveProperty("prices", prices);
+      expect(response.body.gym).toHaveProperty("openingHours", openingHours);
       expect(response.body.gym).toHaveProperty("name", "Updated Gym");
 
       // Add the test image to the cleanup list
