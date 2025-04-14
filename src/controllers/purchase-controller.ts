@@ -173,6 +173,33 @@ class PurchaseController {
       });
     }
   }
+
+  static async getMyPurchase(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = await getFromCookie(req, res, "id");
+  
+      if (!userId) {
+        res.status(400).json({ error: "User ID is required." });
+        return;
+      }
+  
+      const purchases = await Purchase.find({ user: userId })
+        .populate("gym", "name")     
+        .select("startDate endDate personalCode gym");
+  
+      const formatted = purchases.map(purchase => ({
+        startDate: purchase.startDate,
+        endDate: purchase.endDate,
+        personalCode: purchase.personalCode,
+        gymName: (purchase.gym as any)?.name || "Unknown Gym"
+      }));
+  
+      res.status(200).json({ purchases: formatted });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error", error });
+    }
+  }
 }
 
 export default PurchaseController;
