@@ -31,17 +31,6 @@ class GymController {
         return;
       }
 
-      if (typeof prices === "string") {
-        prices = JSON.parse(prices);
-      }
-
-      if (!prices || !Array.isArray(prices) || prices.length !== 3) {
-        res
-          .status(400)
-          .json({ message: "Prices array must contain exactly 3 numbers." });
-        return;
-      }
-
       const ownerIdObject = new mongoose.Types.ObjectId(ownerQueryString);
       const gymOwner = await User.findById(ownerIdObject);
 
@@ -74,7 +63,6 @@ class GymController {
         city,
         description,
         owner: ownerIdObject,
-        prices,
         openingHours: defaultOpeningHours,
       });
 
@@ -90,6 +78,41 @@ class GymController {
     }
   }
 
+  static async filterGymsByPriceAndCity(req: Request, res: Response): Promise<void> {
+    try {
+      const minPrice = parseFloat(req.query.minPrice as string);
+      const maxPrice = parseFloat(req.query.maxPrice as string);
+      const city = req.query.city as string | undefined;
+  
+      const query: any = {};
+  
+      if (!isNaN(minPrice) && !isNaN(maxPrice)) {
+        query.prices = {
+          $elemMatch: {
+            $gte: minPrice,
+            $lte: maxPrice
+          }
+        };
+      }
+  
+      if (city && typeof city === "string") {
+        query.city = new RegExp(`^${city}$`, "i");
+      }
+  
+      if (Object.keys(query).length === 0) {
+        res.status(400).json({ message: "At least one filter (min/max price or city) must be provided" });
+        return;
+      }
+  
+      const gyms = await Gym.find(query);
+      res.status(200).json({ gyms });
+  
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  }  
+  
   // Update gym details
   static async updateGymById(req: Request, res: Response): Promise<void> {
     try {
