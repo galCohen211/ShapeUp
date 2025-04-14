@@ -50,7 +50,7 @@ class GymController {
         (file) =>
           `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
       );
-      console.log("-------------------------------------1")
+
       const newGym = new Gym({
         name,
         pictures,
