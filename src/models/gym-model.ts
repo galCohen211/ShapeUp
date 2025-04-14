@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
 interface DailyHours {
-  from: string; // "HH:mm"
-  to: string;   // "HH:mm"
+  from: string;
+  to: string;
 }
 
 interface IGym extends Document {
