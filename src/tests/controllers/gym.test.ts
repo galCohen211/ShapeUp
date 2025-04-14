@@ -35,7 +35,6 @@ describe("GymController Endpoints", () => {
   describe("POST /gyms", () => {
     it("should add a new gym successfully", async () => {
       const ownerId = new mongoose.Types.ObjectId();
-      const prices = [20, 50, 100];
 
       (Gym.prototype.save as jest.Mock).mockResolvedValue({
         _id: new mongoose.Types.ObjectId(),
@@ -44,7 +43,6 @@ describe("GymController Endpoints", () => {
         description: "Test Description",
         pictures: ["http://localhost/uploads/test-image1.jpg"],
         owner: ownerId,
-        prices,
       });
 
       const response = await request(app)
@@ -52,7 +50,6 @@ describe("GymController Endpoints", () => {
         .field("name", "Test Gym")
         .field("city", "Test city")
         .field("description", "Test Description")
-        .field("prices", JSON.stringify(prices))
         .query({ owner: ownerId.toString() })
         .attach("pictures", Buffer.from("image content"), "test-image1.jpg");
 
@@ -66,20 +63,76 @@ describe("GymController Endpoints", () => {
       expect(response.status).toBe(400);
       expect(response.body.error).toBeDefined();
     });
+  });
 
-    it("should return 400 if prices array is missing or incorrect", async () => {
-      const ownerId = new mongoose.Types.ObjectId();
+  describe("GET /gyms/filter-by-price", () => {
+    it("should return gyms with at least one price in the range", async () => {
+      const gym = {
+          _id: new mongoose.Types.ObjectId(),
+          name: "Affordable Gym",
+          city: "Tel Aviv",
+          prices: [10, 30, 70],
+      };
   
-      const response = await request(app)
-          .post("/gyms")
-          .field("name", "Test Gym")
-          .field("city", "Test city")
-          .field("description", "Test Description")
-          .query({ owner: ownerId.toString() })
-          .attach("pictures", Buffer.from("image content"), "test-image1.jpg");
+      (Gym.find as jest.Mock).mockResolvedValue([gym]);
   
+      const response = await request(app).get("/gyms/filter-by-price?minPrice=20&maxPrice=50&city=Tel%20Aviv");
+  
+      expect(response.status).toBe(200);
+      expect(response.body.gyms).toHaveLength(1);
+      expect(response.body.gyms[0].name).toBe("Affordable Gym");
+    });
+
+    it("should return gyms filtered by city only", async () => {
+      const gym = {
+        _id: new mongoose.Types.ObjectId(),
+        name: "City Only Gym",
+        city: "Haifa",
+        prices: [10, 40, 90],
+      };
+    
+      (Gym.find as jest.Mock).mockResolvedValue([gym]);
+    
+      const response = await request(app).get("/gyms/filter-by-price?city=Haifa");
+    
+      expect(response.status).toBe(200);
+      expect(response.body.gyms).toHaveLength(1);
+      expect(response.body.gyms[0].name).toBe("City Only Gym");
+    });
+    
+    it("should return 400 if no valid filters are provided", async () => {
+      const response = await request(app).get("/gyms/filter-by-price");
+    
       expect(response.status).toBe(400);
-      expect(response.body.message).toBe("Validation array is not empty");
+      expect(response.body.message).toBe("At least one filter (min/max price or city) must be provided");
+    });
+    
+  
+    it("should return all gyms matching price filter when city is not provided", async () => {
+      const gyms = [
+        {
+          _id: new mongoose.Types.ObjectId(),
+          name: "No City Gym",
+          city: "Random City",
+          prices: [15, 30, 45],
+        },
+      ];
+  
+      (Gym.find as jest.Mock).mockResolvedValue(gyms);
+  
+      const response = await request(app).get("/gyms/filter-by-price?minPrice=10&maxPrice=50");
+  
+      expect(response.status).toBe(200);
+      expect(response.body.gyms[0]).toHaveProperty("name", "No City Gym");
+    });
+  
+    it("should handle internal server error gracefully", async () => {
+      (Gym.find as jest.Mock).mockRejectedValue(new Error("Database failed"));
+  
+      const response = await request(app).get("/gyms/filter-by-price?minPrice=10&maxPrice=100");
+  
+      expect(response.status).toBe(500);
+      expect(response.body.message).toBe("Internal server error");
     });
   });
 
@@ -140,17 +193,6 @@ describe("GymController Endpoints", () => {
 
       // Add the test image to the cleanup list
       testImages.push("test-image2.jpg");
-    });
-
-    it("should return 400 if prices array is invalid", async () => {
-      const gymId = new mongoose.Types.ObjectId().toString();
-  
-      const response = await request(app)
-          .put(`/gyms/${gymId}`)
-          .send({ prices: [30, 60] });
-  
-      expect(response.status).toBe(400);
-      expect(response.body.message).toBe("Validation array is not empty");
     });
 
     it("should return 404 if gym is not found", async () => {
