@@ -36,6 +36,8 @@ router.put(
         body("name").optional(),
         body("city").optional(),
         body("description").optional(),
+        body("openingHours")
+            .optional(),
         body("pictures")
             .optional()
             .isArray({ min: 1 })

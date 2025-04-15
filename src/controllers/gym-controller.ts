@@ -51,12 +51,19 @@ class GymController {
           `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
       );
 
+      const defaultOpeningHours = {
+        sundayToThursday: { from: "06:00", to: "23:00" },
+        friday: { from: "06:00", to: "17:00" },
+        saturday: { from: "09:00", to: "23:00" },
+      };
+
       const newGym = new Gym({
         name,
         pictures,
         city,
         description,
         owner: ownerIdObject,
+        openingHours: defaultOpeningHours,
       });
 
       await newGym.save();
@@ -126,10 +133,14 @@ class GymController {
         return;
       }
 
-      let { name, city, description, prices } = req.body;
+      let { name, city, description, prices, openingHours } = req.body;
 
       if (typeof prices === "string") {
         prices = JSON.parse(prices);
+      }
+
+      if (typeof openingHours === "string") {
+        openingHours = JSON.parse(openingHours);
       }
 
       // Handle image deletion logic
@@ -175,6 +186,15 @@ class GymController {
       };
       if (prices && Array.isArray(prices) && prices.length === 3) {
         updateData.prices = prices;
+      }
+
+      if (
+        openingHours &&
+        openingHours.sundayToThursday &&
+        openingHours.friday &&
+        openingHours.saturday
+      ) {
+        updateData.openingHours = openingHours;
       }
 
       const updatedGym = await Gym.findByIdAndUpdate(gymId, updateData, {
