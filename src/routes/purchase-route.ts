@@ -27,4 +27,10 @@ router.get(
   purchaseController.getPersonalCode
 );
 
+router.get(
+  "/myPurchases",
+  verifyToken([IUserType.USER]),
+  purchaseController.getMyPurchases
+);
+
 export default router;
