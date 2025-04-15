@@ -28,7 +28,7 @@ router.get(
 );
 
 router.get(
-  "/myPurchase",
+  "/myPurchases",
   verifyToken([IUserType.USER]),
   purchaseController.getMyPurchases
 );
