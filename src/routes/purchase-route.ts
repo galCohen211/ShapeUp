@@ -30,7 +30,7 @@ router.get(
 router.get(
   "/myPurchase",
   verifyToken([IUserType.USER]),
-  purchaseController.getMyPurchase
+  purchaseController.getMyPurchases
 );
 
 export default router;

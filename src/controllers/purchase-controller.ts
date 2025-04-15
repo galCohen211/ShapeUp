@@ -174,7 +174,7 @@ class PurchaseController {
     }
   }
 
-  static async getMyPurchase(req: Request, res: Response): Promise<void> {
+  static async getMyPurchases(req: Request, res: Response): Promise<void> {
     try {
       const userId = await getFromCookie(req, res, "id");
   
