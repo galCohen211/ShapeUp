@@ -44,13 +44,7 @@ const GymSchema: Schema<IGym> = new mongoose.Schema({
   owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
   prices: {
     type: [Number],
-    validate: {
-      validator: function (value: number[]) {
-        return value.length === 3;
-      },
-      message: "Prices array must have exactly 3 elements.",
-    },
-    required: true,
+    required: true
   },
   trainerCounts: {
     type: Object,

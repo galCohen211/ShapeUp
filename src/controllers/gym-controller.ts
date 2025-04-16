@@ -21,7 +21,7 @@ class GymController {
         return;
       }
 
-      let { name, city, description, prices } = req.body;
+      let { name, city, description } = req.body;
       const ownerQueryString = req.query.owner as string;
 
       if (!req.files || !(req.files as Express.Multer.File[]).length) {
