@@ -36,6 +36,8 @@ router.put(
         body("name").optional(),
         body("city").optional(),
         body("description").optional(),
+        body("openingHours")
+            .optional(),
         body("pictures")
             .optional()
             .isArray({ min: 1 })
@@ -67,7 +69,7 @@ router.delete(
     GymController.deleteGymById
 );
 
-router.get("/filter_by_price", GymController.filterGymsByPriceAndCity);
+router.get("/filter-by-price", verifyToken([IUserType.USER]), GymController.filterGymsByPriceAndCity);
 
 router.get(
     "/filter",
