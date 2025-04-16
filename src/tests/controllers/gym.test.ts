@@ -71,7 +71,7 @@ describe("GymController Endpoints", () => {
     });
   });
 
-  describe("GET /gyms/filter-by-price", () => {
+  describe("GET /gyms/filterGymsByPriceAndCity", () => {
     it("should return gyms with at least one price in the range", async () => {
       const gym = {
           _id: new mongoose.Types.ObjectId(),
@@ -82,7 +82,7 @@ describe("GymController Endpoints", () => {
   
       (Gym.find as jest.Mock).mockResolvedValue([gym]);
   
-      const response = await request(app).get("/gyms/filter-by-price?minPrice=20&maxPrice=50&city=Tel%20Aviv");
+      const response = await request(app).get("/gyms/filterGymsByPriceAndCity?minPrice=20&maxPrice=50&city=Tel%20Aviv");
   
       expect(response.status).toBe(200);
       expect(response.body.gyms).toHaveLength(1);
@@ -99,7 +99,7 @@ describe("GymController Endpoints", () => {
     
       (Gym.find as jest.Mock).mockResolvedValue([gym]);
     
-      const response = await request(app).get("/gyms/filter-by-price?city=Haifa");
+      const response = await request(app).get("/gyms/filterGymsByPriceAndCity?city=Haifa");
     
       expect(response.status).toBe(200);
       expect(response.body.gyms).toHaveLength(1);
@@ -107,7 +107,7 @@ describe("GymController Endpoints", () => {
     });
     
     it("should return 400 if no valid filters are provided", async () => {
-      const response = await request(app).get("/gyms/filter-by-price");
+      const response = await request(app).get("/gyms/filterGymsByPriceAndCity");
     
       expect(response.status).toBe(400);
       expect(response.body.message).toBe("At least one filter (min/max price or city) must be provided");
@@ -126,7 +126,7 @@ describe("GymController Endpoints", () => {
   
       (Gym.find as jest.Mock).mockResolvedValue(gyms);
   
-      const response = await request(app).get("/gyms/filter-by-price?minPrice=10&maxPrice=50");
+      const response = await request(app).get("/gyms/filterGymsByPriceAndCity?minPrice=10&maxPrice=50");
   
       expect(response.status).toBe(200);
       expect(response.body.gyms[0]).toHaveProperty("name", "No City Gym");
@@ -135,7 +135,7 @@ describe("GymController Endpoints", () => {
     it("should handle internal server error gracefully", async () => {
       (Gym.find as jest.Mock).mockRejectedValue(new Error("Database failed"));
   
-      const response = await request(app).get("/gyms/filter-by-price?minPrice=10&maxPrice=100");
+      const response = await request(app).get("/gyms/filterGymsByPriceAndCity?minPrice=10&maxPrice=100");
   
       expect(response.status).toBe(500);
       expect(response.body.message).toBe("Internal server error");
