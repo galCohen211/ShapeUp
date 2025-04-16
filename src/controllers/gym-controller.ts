@@ -63,7 +63,6 @@ class GymController {
         city,
         description,
         owner: ownerIdObject,
-        price: [0, 0, 0],
         openingHours: defaultOpeningHours,
       });
 
