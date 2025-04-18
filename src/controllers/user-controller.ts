@@ -230,7 +230,7 @@ class UserController {
     }
 
     try {
-      const myUserId = await getFromCookie(req, res, "id");
+      const myUserId = (req as any).userId;
       const { gymId } = req.body;
       const gym = await Gym.findById(gymId);
       if (!gym) {

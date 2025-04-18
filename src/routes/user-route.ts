@@ -137,6 +137,19 @@ router.delete(
   UserController.deleteFavoriteGymById
 );
 
+router.post(
+  "/deleteFavoriteGymById",
+  verifyToken([IUserType.USER]),
+  [
+    body("gymId")
+      .notEmpty()
+      .withMessage("Gym ID is required.")
+      .isMongoId()
+      .withMessage("Gym ID must be a valid MongoDB ObjectId."),
+  ],
+  UserController.deleteFavoriteGymById
+);
+
 router.get(
   "/filter",
   verifyToken([IUserType.GYM_OWNER, IUserType.ADMIN]),
