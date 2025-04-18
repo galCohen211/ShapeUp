@@ -222,6 +222,7 @@ export const login = async (req: Request, res: Response) => {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      creditCard: user.creditCard || null,
       avatarUrl: user.avatarUrl,
       accessToken: accessToken,
       refreshToken: refreshToken,
