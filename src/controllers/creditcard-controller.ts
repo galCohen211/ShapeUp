@@ -11,7 +11,7 @@ class CreditCardController {
   static async addCreditCard(req: Request, res: Response): Promise<void> {
     try {
       const { creditCardNumber, expirationDate, civ, cardOwnerName } = req.body;
-      const userId = await getFromCookie(req, res, "id");
+      const userId = (req as any).userId;
 
       if (!userId) {
         res.status(400).json({ error: "User id is required." });

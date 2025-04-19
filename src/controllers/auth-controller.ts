@@ -218,7 +218,12 @@ export const login = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       message: "Logged in successfully",
+      _id: user._id,
       email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      creditCard: user.creditCard || null,
+      avatarUrl: user.avatarUrl,
       accessToken: accessToken,
       refreshToken: refreshToken,
     });
