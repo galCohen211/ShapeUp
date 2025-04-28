@@ -124,11 +124,16 @@ router.post(
   UserController.addFavoriteGym
 );
 
-router.post(
-  "/deleteFavoriteGymById/",
+router.delete(
+  "/deleteFavoriteGymById/:userId/:gymId",
   verifyToken([IUserType.USER]),
   [
-    body("gymId")
+    param("userId")
+      .notEmpty()
+      .withMessage("User ID is required.")
+      .isMongoId()
+      .withMessage("User ID must be a valid MongoDB ObjectId."),
+    param("gymId")
       .notEmpty()
       .withMessage("Gym ID is required.")
       .isMongoId()

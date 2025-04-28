@@ -6,6 +6,7 @@ import User, { IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
 import { getFromCookie } from "./auth-controller";
 import CreditCard from "../models/creditcard-model";
+import mongoose from 'mongoose';
 
 class UserController {
   static async updateUserById(req: Request, res: Response): Promise<void> {
@@ -230,28 +231,32 @@ class UserController {
     }
 
     try {
-      const myUserId = (req as any).userId;
-      const { gymId } = req.body;
-      const gym = await Gym.findById(gymId);
+      const { userId, gymId } = req.params;
+
+      const objectId = new mongoose.Types.ObjectId(gymId);
+
+      const gym = await Gym.findById(objectId);
       if (!gym) {
         res.status(404).json({ message: "Gym not found" });
         return;
       }
-      const user = await User.findById(myUserId);
+  
+      const user = await User.findById(userId);
       if (!user) {
         res.status(404).json({ message: "User not found" });
         return;
       }
-      if (!user.favoriteGyms.includes(gymId)) {
+  
+      if (!user.favoriteGyms.includes(objectId)) {
         res.status(400).json({ message: "Gym is not in user's favorites" });
         return;
       }
-
+  
       user.favoriteGyms = user.favoriteGyms.filter(
         (id) => id.toString() !== gymId
       );
       await user.save();
-
+  
       res.status(200).json({
         message: "Gym removed from favorites successfully",
         favoriteGyms: user.favoriteGyms,
