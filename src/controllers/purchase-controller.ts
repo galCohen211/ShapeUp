@@ -160,23 +160,26 @@ class PurchaseController {
   static async getMyPurchases(req: Request, res: Response): Promise<void> {
     try {
       const userId = await getFromCookie(req, res, "id");
-  
+
       if (!userId) {
         res.status(400).json({ error: "User ID is required." });
         return;
       }
-  
+
       const purchases = await Purchase.find({ user: userId })
-        .populate("gym", "name")     
+        .populate("gym", "name _id")
         .select("startDate endDate personalCode gym");
-  
+
       const formatted = purchases.map(purchase => ({
         startDate: purchase.startDate,
         endDate: purchase.endDate,
         personalCode: purchase.personalCode,
-        gymName: (purchase.gym as any)?.name || "Unknown Gym"
+        gym: {
+          _id: (purchase.gym as any)?._id,
+          name: (purchase.gym as any)?.name || "Unknown Gym",
+        }
       }));
-  
+      
       res.status(200).json({ purchases: formatted });
     } catch (error) {
       console.error(error);
