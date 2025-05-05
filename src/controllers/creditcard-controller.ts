@@ -10,54 +10,41 @@ function isValidString(string: any): boolean {
 class CreditCardController {
   static async addCreditCard(req: Request, res: Response): Promise<void> {
     try {
-      const { creditCardNumber, expirationDate, civ, cardOwnerName } = req.body;
+      const { creditCardNumber, expirationDate, civ } = req.body;
       const userId = (req as any).userId;
 
       if (!userId) {
-        res.status(400).json({ error: "User id is required." });
+        res.status(400).json({ error: "User ID is required." });
         return;
       }
 
-      // Basic validations for inputs.
       if (!isValidString(creditCardNumber)) {
-        res.status(400).json({
-          error:
-            "Credit card number is required and must be a non-empty string.",
-        });
-        return;
-      }
-      if (!isValidString(expirationDate)) {
-        res.status(400).json({
-          error: "Expiration date is required and must be a non-empty string.",
-        });
-        return;
-      }
-      if (!civ || !/^\d{3}$/.test(civ)) {
-        res
-          .status(400)
-          .json({ error: "CIV is required and must be exactly 3 digits." });
-        return;
-      }
-      if (!isValidString(cardOwnerName)) {
-        res.status(400).json({
-          error: "Card owner name is required and must be a non-empty string.",
-        });
+        res.status(400).json({ error: "Credit card number is required." });
         return;
       }
 
-      const creditCard = new CreditCard({
+      if (!isValidString(expirationDate)) {
+        res.status(400).json({ error: "Expiration date is required." });
+        return;
+      }
+
+      if (!civ || !/^\d{3}$/.test(civ)) {
+        res.status(400).json({ error: "CIV must be exactly 3 digits." });
+        return;
+      }
+
+      const card = new CreditCard({
+        user: userId,
         creditCardNumber,
         expirationDate,
         civ,
-        cardOwnerName,
       });
 
-      await creditCard.save();
-      await User.findByIdAndUpdate(userId, { creditCard: creditCard._id });
+      await card.save();
 
-      res
-        .status(201)
-        .json({ message: "Credit card added successfully.", creditCard });
+      await User.findByIdAndUpdate(userId, { creditCard: card._id });
+
+      res.status(201).json({ message: "Card added successfully", creditCard: card });
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Internal server error", error: err });
@@ -67,58 +54,38 @@ class CreditCardController {
   static async updateCreditCard(req: Request, res: Response): Promise<void> {
     try {
       const { cardId } = req.params;
-      const { creditCardNumber, expirationDate, civ, cardOwnerName } = req.body;
+      const { creditCardNumber, expirationDate, civ } = req.body;
 
-      // Basic validations for inputs.
       if (!isValidString(creditCardNumber)) {
-        res.status(400).json({
-          error:
-            "Credit card number is required and must be a non-empty string.",
-        });
+        res.status(400).json({ error: "Credit card number is required." });
         return;
       }
       if (!isValidString(expirationDate)) {
-        res.status(400).json({
-          error: "Expiration date is required and must be a non-empty string.",
-        });
+        res.status(400).json({ error: "Expiration date is required." });
         return;
       }
       if (!civ || !/^\d{3}$/.test(civ)) {
-        res
-          .status(400)
-          .json({ error: "CIV is required and must be exactly 3 digits." });
-        return;
-      }
-      if (!isValidString(cardOwnerName)) {
-        res.status(400).json({
-          error: "Card owner name is required and must be a non-empty string.",
-        });
+        res.status(400).json({ error: "CIV must be exactly 3 digits." });
         return;
       }
 
-      // Use { new: true, runValidators: true } to return the updated object and check validations.
-      const updatedCreditCard = await CreditCard.findByIdAndUpdate(
+      const updatedCard = await CreditCard.findByIdAndUpdate(
         cardId,
         {
           creditCardNumber,
           expirationDate,
           civ,
-          cardOwnerName,
         },
         { new: true, runValidators: true }
       );
 
-      if (!updatedCreditCard) {
-        res.status(404).json({ message: "Credit card not found." });
+      if (!updatedCard) {
+        res.status(404).json({ message: "Card not found." });
         return;
       }
 
-      res.status(200).json({
-        message: "Credit card updated successfully.",
-        creditCard: updatedCreditCard,
-      });
+      res.status(200).json({ message: "Updated successfully", creditCard: updatedCard });
     } catch (err) {
-      console.error(err);
       res.status(500).json({ message: "Internal server error", error: err });
     }
   }
@@ -129,21 +96,16 @@ class CreditCardController {
       const deletedCard = await CreditCard.findByIdAndDelete(cardId);
 
       if (!deletedCard) {
-        res.status(404).json({ message: "Credit card not found." });
+        res.status(404).json({ message: "Card not found." });
         return;
       }
 
-      await User.updateMany(
-        { creditCard: cardId },
-        { $unset: { creditCard: "" } }
-      );
+      await User.updateMany({ creditCard: cardId }, { $unset: { creditCard: "" } });
 
-      res.status(200).json({ message: "Credit card deleted successfully." });
+      res.status(200).json({ message: "Deleted successfully" });
     } catch (err) {
-      console.error(err);
       res.status(500).json({ message: "Internal server error", error: err });
     }
   }
 }
-
 export default CreditCardController;

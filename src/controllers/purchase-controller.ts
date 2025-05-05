@@ -26,7 +26,7 @@ async function generateUniquePersonalCode(): Promise<string> {
 class PurchaseController {
   static async createTransaction(req: Request, res: Response): Promise<void> {
     try {
-      const { startDate, gymId, plan, creditCardId } = req.body;
+      const { startDate, gymId, plan } = req.body;
       // Obtain the user from cookies.
       const userId = await getFromCookie(req, res, "id");
 
@@ -51,27 +51,10 @@ class PurchaseController {
         });
         return;
       }
-      if (creditCardId) {
-        const creditcard = await CreditCard.findById(creditCardId);
-        if (!creditcard) {
-          res
-            .status(400)
-            .json({ error: "Provided credit card does not exist." });
-          return;
-        }
-
-        // Fetch the user record and verify the provided credit card belongs to the user.
-        const userRecord = await User.findById(userId);
-        if (
-          !userRecord ||
-          !userRecord.creditCard ||
-          userRecord.creditCard.toString() !== creditCardId
-        ) {
-          res.status(400).json({
-            error: "Provided credit card does not belong to the user.",
-          });
-          return;
-        }
+      const creditCard = await CreditCard.findOne({ user: userId });
+      if (!creditCard) {
+        res.status(400).json({ error: "No credit card found for this user." });
+        return;
       }
 
       // Parse the start date.
@@ -119,7 +102,7 @@ class PurchaseController {
         gym: gymId,
         personalCode,
         plan,
-        creditCard: creditCardId,
+        creditCard: creditCard._id,
       });
 
       await newPurchase.save();
@@ -177,23 +160,26 @@ class PurchaseController {
   static async getMyPurchases(req: Request, res: Response): Promise<void> {
     try {
       const userId = await getFromCookie(req, res, "id");
-  
+
       if (!userId) {
         res.status(400).json({ error: "User ID is required." });
         return;
       }
-  
+
       const purchases = await Purchase.find({ user: userId })
-        .populate("gym", "name")     
+        .populate("gym", "name _id")
         .select("startDate endDate personalCode gym");
-  
+
       const formatted = purchases.map(purchase => ({
         startDate: purchase.startDate,
         endDate: purchase.endDate,
         personalCode: purchase.personalCode,
-        gymName: (purchase.gym as any)?.name || "Unknown Gym"
+        gym: {
+          _id: (purchase.gym as any)?._id,
+          name: (purchase.gym as any)?.name || "Unknown Gym",
+        }
       }));
-  
+      
       res.status(200).json({ purchases: formatted });
     } catch (error) {
       console.error(error);
