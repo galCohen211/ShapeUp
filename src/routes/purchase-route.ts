@@ -35,7 +35,7 @@ router.get(
 
 router.get(
   "/getGymOwnerPurchases",
-  verifyToken([IUserType.GYM_OWNER, IUserType.ADMIN]),
+  verifyToken([IUserType.GYM_OWNER]),
   purchaseController.getGymOwnerPurchases
 );
 
