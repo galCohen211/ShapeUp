@@ -33,4 +33,10 @@ router.get(
   purchaseController.getMyPurchases
 );
 
+router.get(
+  "/getGymOwnerPurchases",
+  verifyToken([IUserType.GYM_OWNER, IUserType.ADMIN]),
+  purchaseController.getGymOwnerPurchases
+);
+
 export default router;
