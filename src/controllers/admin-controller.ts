@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User, { IGymOwnerStatus, IUserType } from "../models/user-model";
 import Gym from "../models/gym-model";
+import Purchase from "../models/purchase-model";
 
 class AdminController {
   static async getDashboardCounts(_req: Request, res: Response): Promise<void> {
@@ -131,6 +132,33 @@ class AdminController {
       res.status(200).json(result);
     } catch (error) {
       console.error("Error fetching revenue by city:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+  static async getRevenueByDate(_req: Request, res: Response): Promise<void> {
+    try {
+      const result = await Purchase.aggregate([
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: "%Y-%m-%d", date: "$startDate" }
+            },
+            revenue: { $sum: "$price" }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            date: "$_id",
+            revenue: 1,
+          }
+        },
+        { $sort: { date: 1 } }
+      ]);
+
+      res.status(200).json(result);
+    } catch (error) {
+      console.error("Error fetching revenue by start date:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   }

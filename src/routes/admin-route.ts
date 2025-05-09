@@ -29,4 +29,10 @@ router.get(
   adminController.getRevenueByCity
 );
 
+router.get(
+  "/revenue-by-date",
+  verifyToken([IUserType.ADMIN]),
+  adminController.getRevenueByDate
+);
+
 export default router;
