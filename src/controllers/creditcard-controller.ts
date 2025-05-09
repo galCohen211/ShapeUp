@@ -10,7 +10,7 @@ function isValidString(string: any): boolean {
 class CreditCardController {
   static async addCreditCard(req: Request, res: Response): Promise<void> {
     try {
-      const { creditCardNumber, expirationDate, civ } = req.body;
+      const { creditCardNumber, expirationDate, civ, cardOwnerName } = req.body;
       const userId = (req as any).userId;
 
       if (!userId) {
@@ -33,11 +33,18 @@ class CreditCardController {
         return;
       }
 
+      if (!isValidString(cardOwnerName)) {
+        res.status(400).json({ error: "Card owner name is required." });
+        return;
+      }
+
+
       const card = new CreditCard({
         user: userId,
         creditCardNumber,
         expirationDate,
         civ,
+        cardOwnerName
       });
 
       await card.save();
@@ -54,7 +61,7 @@ class CreditCardController {
   static async updateCreditCard(req: Request, res: Response): Promise<void> {
     try {
       const { cardId } = req.params;
-      const { creditCardNumber, expirationDate, civ } = req.body;
+      const { creditCardNumber, expirationDate, civ, cardOwnerName } = req.body;
 
       if (!isValidString(creditCardNumber)) {
         res.status(400).json({ error: "Credit card number is required." });
@@ -68,6 +75,10 @@ class CreditCardController {
         res.status(400).json({ error: "CIV must be exactly 3 digits." });
         return;
       }
+      if (!isValidString(cardOwnerName)) {
+        res.status(400).json({ error: "Card owner name is required." });
+        return;
+      }
 
       const updatedCard = await CreditCard.findByIdAndUpdate(
         cardId,
@@ -75,6 +86,7 @@ class CreditCardController {
           creditCardNumber,
           expirationDate,
           civ,
+          cardOwnerName
         },
         { new: true, runValidators: true }
       );
