@@ -83,9 +83,32 @@ class PurchaseController {
 
       daysToAdd = daysToAdd - 1; // Adjust for inclusive end date.
 
+
+
       const gym = await Gym.findById(gymId);
       if (!gym) {
         res.status(400).json({ error: "Gym not found." });
+        return;
+      }
+
+      let price: number;
+      switch (plan) {
+        case PurchasePlan.ONE_DAY:
+          price = gym.prices[0];
+          break;
+        case PurchasePlan.THREE_DAY:
+          price = gym.prices[1];
+          break;
+        case PurchasePlan.FIVE_DAY:
+          price = gym.prices[2];
+          break;
+        default:
+          res.status(400).json({ error: "Could not determine price for selected plan." });
+          return;
+      }
+
+      if (typeof price !== "number") {
+        res.status(400).json({ error: "Price not set for this plan in gym." });
         return;
       }
 
@@ -102,6 +125,7 @@ class PurchaseController {
         gym: gymId,
         personalCode,
         plan,
+        price,
         creditCard: creditCard._id,
       });
 
@@ -179,7 +203,7 @@ class PurchaseController {
           name: (purchase.gym as any)?.name || "Unknown Gym",
         }
       }));
-      
+
       res.status(200).json({ purchases: formatted });
     } catch (error) {
       console.error(error);

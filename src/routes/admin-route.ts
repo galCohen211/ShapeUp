@@ -23,4 +23,10 @@ router.get(
   adminController.getGymOwnersStatus
 );
 
+router.get(
+  "/revenue-by-city",
+  verifyToken([IUserType.ADMIN]),
+  adminController.getRevenueByCity
+);
+
 export default router;

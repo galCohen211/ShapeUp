@@ -15,6 +15,7 @@ export interface IPurchase extends Document {
   gym: Types.ObjectId;
   personalCode: string;
   plan: PurchasePlan;
+  price: number;
   creditCard: Types.ObjectId;
 }
 
@@ -26,6 +27,7 @@ const PurchaseSchema: Schema<IPurchase> = new Schema({
   gym: { type: Schema.Types.ObjectId, ref: "Gym", required: true },
   personalCode: { type: String, required: true, unique: true },
   plan: { type: String, required: true, enum: Object.values(PurchasePlan) },
+  price: { type: Number, required: true },
   creditCard: {
     type: Schema.Types.ObjectId,
     ref: "CreditCard",
