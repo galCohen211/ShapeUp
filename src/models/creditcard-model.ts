@@ -43,6 +43,7 @@ export interface ICreditCard extends Document {
   creditCardNumber: string;
   expirationDate: string;
   civ: string;
+  cardOwnerName: string;
 }
 
 const CreditCardSchema = new Schema<ICreditCard>(
@@ -69,6 +70,10 @@ const CreditCardSchema = new Schema<ICreditCard>(
         validator: (v: string) => /^\d{3}$/.test(v),
         message: (props) => `${props.value} is not a valid CIV; it should be exactly 3 digits.`,
       },
+    },
+    cardOwnerName: {
+      type: String,
+      required: true,
     },
   },
   {

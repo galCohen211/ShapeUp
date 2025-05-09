@@ -96,4 +96,10 @@ router.get("/:gymId",
     ],
     GymController.getGymById);
 
+router.get(
+    "/:gymId/purchased-users",
+    verifyToken([IUserType.GYM_OWNER, IUserType.ADMIN]),
+    GymController.getPurchasedUsersByGymId
+);
+
 export default router;
