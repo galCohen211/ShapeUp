@@ -7,6 +7,7 @@ import fs from "fs";
 
 import { getFromCookie } from "./auth-controller";
 import User, { IGymOwnerStatus, IUserType } from "../models/user-model";
+import Purchase from "../models/purchase-model";
 
 class GymController {
   // Add a new gym
@@ -373,6 +374,44 @@ class GymController {
       res.status(500).json({ message: "Internal server error", error: err });
     }
   }
+
+  static async getPurchasedUsersByGymId(req: Request, res: Response): Promise<void> {
+    try {
+      const { gymId } = req.params;
+  
+      if (!mongoose.Types.ObjectId.isValid(gymId)) {
+        res.status(400).json({ message: "Invalid gym ID format" });
+        return;
+      }
+  
+      const purchases = await Purchase.find({ gym: gymId })
+        .populate<{ user: { _id: string; firstName: string; lastName: string; email: string; avatarUrl: string } }>("user", "_id firstName lastName email avatarUrl")
+        .lean();
+  
+      const uniqueUsersMap = new Map();
+  
+      purchases.forEach((purchase) => {
+        const user = purchase.user;
+        if (!uniqueUsersMap.has(user._id.toString())) {
+          uniqueUsersMap.set(user._id.toString(), {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            avatarUrl: user.avatarUrl,
+            validUntil: purchase.endDate,
+            code: purchase.personalCode
+          });
+        }
+      });
+  
+      res.status(200).json({ users: Array.from(uniqueUsersMap.values()) });
+  
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  }
+
 }
 
 export default GymController;
