@@ -84,9 +84,9 @@ class GymController {
       const minPrice = parseFloat(req.query.minPrice as string);
       const maxPrice = parseFloat(req.query.maxPrice as string);
       const city = req.query.city as string | undefined;
-  
+
       const query: any = {};
-  
+
       if (!isNaN(minPrice) && !isNaN(maxPrice)) {
         query.prices = {
           $elemMatch: {
@@ -95,121 +95,96 @@ class GymController {
           }
         };
       }
-  
+
       if (city && typeof city === "string") {
         query.city = new RegExp(`^${city}$`, "i");
       }
-  
+
       if (Object.keys(query).length === 0) {
         res.status(400).json({ message: "At least one filter (min/max price or city) must be provided" });
         return;
       }
-  
+
       const gyms = await Gym.find(query);
       res.status(200).json({ gyms });
-  
+
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Internal server error", error: err });
     }
-  }  
-  
+  }
+
   // Update gym details
   static async updateGymById(req: Request, res: Response): Promise<void> {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        res.status(400).json({
-          message: "Validation array is not empty",
-          error: errors.array(),
-        });
+        res.status(400).json({ message: "Validation error", error: errors.array() });
         return;
       }
-
+  
       const { gymId } = req.params;
-
       const existingGym = await Gym.findById(gymId);
       if (!existingGym) {
         res.status(404).json({ message: "Gym not found" });
         return;
       }
-
+  
       let { name, city, description, prices, openingHours } = req.body;
-
-      if (typeof prices === "string") {
-        prices = JSON.parse(prices);
-      }
-
-      if (typeof openingHours === "string") {
-        openingHours = JSON.parse(openingHours);
-      }
-
-      // Handle image deletion logic
-      let updatedPictures = [...existingGym.pictures];
-      const pictures = Array.isArray(req.body.pictures)
-        ? req.body.pictures
-        : [];
-
-      const imagesToDelete = existingGym.pictures.filter(
-        (image) => !pictures.includes(image)
-      );
-
-      // Delete images no longer retained
-      imagesToDelete.forEach((image) => {
-        const imagePath = path.join(
-          __dirname,
-          "../uploads",
-          path.basename(image)
-        );
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-        }
-      });
-
-      // Handle new image uploads
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-      if (files && files["pictures[]"]) {
-        const newPictures = files["pictures[]"].map(
-          (file) =>
-            `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
-        );
-        updatedPictures = pictures.concat(newPictures);
-      } else {
-        updatedPictures = pictures;
-      }
-
-      // Update gym details
-      const updateData: Partial<Record<string, any>> = {
-        name,
-        city,
-        description,
-        pictures: updatedPictures,
-      };
-      if (prices && Array.isArray(prices) && prices.length === 3) {
-        updateData.prices = prices;
-      }
-
+  
+      if (typeof prices === "string") prices = JSON.parse(prices);
+      if (typeof openingHours === "string") openingHours = JSON.parse(openingHours);
+  
+      const updateData: Partial<Record<string, any>> = {};
+      if (name) updateData.name = name;
+      if (city) updateData.city = city;
+      if (description) updateData.description = description;
+      if (prices && Array.isArray(prices) && prices.length === 3) updateData.prices = prices;
       if (
-        openingHours &&
-        openingHours.sundayToThursday &&
-        openingHours.friday &&
-        openingHours.saturday
+        openingHours?.sundayToThursday &&
+        openingHours?.friday &&
+        openingHours?.saturday
       ) {
         updateData.openingHours = openingHours;
       }
-
-      const updatedGym = await Gym.findByIdAndUpdate(gymId, updateData, {
-        new: true,
-      });
-
-      res
-        .status(200)
-        .json({ message: "Gym updated successfully", gym: updatedGym });
+  
+      // Handle images only if pictures or files are sent
+      let pictures: string[] = existingGym.pictures; 
+      if ("pictures" in req.body && Array.isArray(req.body.pictures)) {
+        const retained = req.body.pictures as string[];
+        const toDelete = pictures.filter((img) => !retained.includes(img));
+  
+        toDelete.forEach((image) => {
+          const imagePath = path.join(__dirname, "../uploads", path.basename(image));
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
+        });
+  
+        pictures = retained;
+      }
+  
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      if (files?.["pictures[]"]) {
+        const uploaded = files["pictures[]"].map(
+          (file) => `${req.protocol}://${req.get("host")}/src/uploads/${file.filename}`
+        );
+        pictures = [...pictures, ...uploaded];
+      }
+  
+      if (pictures.length) {
+        updateData.pictures = pictures;
+      }
+  
+      const updatedGym = await Gym.findByIdAndUpdate(gymId, updateData, { new: true });
+  
+      res.status(200).json({ message: "Gym updated successfully", gym: updatedGym });
     } catch (err) {
+      console.error("Error updating gym:", err);
       res.status(500).json({ message: "Internal server error", error: err });
     }
   }
-
+  
   // get all gyms or get gyms by owner
   static async getGyms(req: Request, res: Response): Promise<void> {
     const errors = validationResult(req);
@@ -378,18 +353,18 @@ class GymController {
   static async getPurchasedUsersByGymId(req: Request, res: Response): Promise<void> {
     try {
       const { gymId } = req.params;
-  
+
       if (!mongoose.Types.ObjectId.isValid(gymId)) {
         res.status(400).json({ message: "Invalid gym ID format" });
         return;
       }
-  
+
       const purchases = await Purchase.find({ gym: gymId })
         .populate<{ user: { _id: string; firstName: string; lastName: string; email: string; avatarUrl: string } }>("user", "_id firstName lastName email avatarUrl")
         .lean();
-  
+
       const uniqueUsersMap = new Map();
-  
+
       purchases.forEach((purchase) => {
         const user = purchase.user;
         if (!uniqueUsersMap.has(user._id.toString())) {
@@ -404,9 +379,9 @@ class GymController {
           });
         }
       });
-  
+
       res.status(200).json({ users: Array.from(uniqueUsersMap.values()) });
-  
+
     } catch (err) {
       res.status(500).json({ message: "Internal server error", error: err });
     }
