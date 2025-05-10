@@ -3,7 +3,6 @@ import Purchase, { PurchasePlan, IPurchase } from "../models/purchase-model";
 import { getFromCookie } from "./auth-controller";
 import { addDays } from "date-fns";
 import CreditCard from "../models/creditcard-model";
-import User from "../models/user-model";
 import Gym from "../models/gym-model";
 
 // Generates a unique 6-digit code, checking for collisions in the Purchase collection.
@@ -205,6 +204,29 @@ class PurchaseController {
       }));
 
       res.status(200).json({ purchases: formatted });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error", error });
+    }
+  }
+
+  static async getGymOwnerPurchases(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = await getFromCookie(req, res, "id");
+      if (!userId) {
+        res.status(400).json({ error: "User ID is required." });
+        return;
+      }
+
+      const myGyms = await Gym.find({ owner: userId });
+      const myGymIds = myGyms.map((gym) => gym._id.toString());
+
+      const allPurchases = await Purchase.find()
+      const filteredPurchases = allPurchases.filter((purchase) =>
+        myGymIds.includes(purchase.gym.toString())
+      );
+
+      res.status(200).json({ filteredPurchases });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal server error", error });
