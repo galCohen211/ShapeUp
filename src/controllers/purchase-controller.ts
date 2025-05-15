@@ -233,6 +233,50 @@ class PurchaseController {
       res.status(500).json({ message: "Internal server error", error });
     }
   }
+
+  static async getGymPurchaseInsights(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = await getFromCookie(req, res, "id");
+      if (!userId) {
+        res.status(400).json({ error: "User ID is required." });
+        return;
+      }
+
+      const { gymId } = req.params;
+      const gym = await Gym.findOne({ _id: gymId, owner: userId });
+      if (!gym) {
+        res.status(400).json({ error: "Gym not found or does not belong to user." });
+        return;
+      }
+      const city = gym.city;
+
+      const gymsInCity = await Gym.find({ city });
+      const gymIdsInCity = gymsInCity.map(g => g._id);
+      const gymsInCityCount = gymIdsInCity.length
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      // count of purchases for all gyms in the city in the last 7 days
+      const purchasesCountInCityLastWeek = await Purchase.countDocuments({
+        gym: { $in: gymIdsInCity },
+        purchaseDate: { $gte: sevenDaysAgo }
+      });
+      const averagePurchasesCountInCity = purchasesCountInCityLastWeek / gymsInCityCount;
+
+      // count of purchases for this gym in the last 7 days
+      const purchasesCountInLastWeek = await Purchase.countDocuments({
+        gym: gymId,
+        purchaseDate: { $gte: sevenDaysAgo }
+      });
+
+      res.status(200).json({ purchasesCountInLastWeek, averagePurchasesCountInCity });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error", error });
+    }
+  }
 }
 
 export default PurchaseController;
