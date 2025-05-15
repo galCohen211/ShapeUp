@@ -191,11 +191,12 @@ class PurchaseController {
 
       const purchases = await Purchase.find({ user: userId })
         .populate("gym", "name _id")
-        .select("startDate endDate personalCode gym");
+        .select("startDate endDate personalCode gym purchaseDate");
 
       const formatted = purchases.map(purchase => ({
         startDate: purchase.startDate,
         endDate: purchase.endDate,
+        purchaseDate: purchase.purchaseDate,
         personalCode: purchase.personalCode,
         gym: {
           _id: (purchase.gym as any)?._id,
