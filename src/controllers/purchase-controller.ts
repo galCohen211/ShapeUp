@@ -233,6 +233,43 @@ class PurchaseController {
       res.status(500).json({ message: "Internal server error", error });
     }
   }
+
+  static async getGymPurchases(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = await getFromCookie(req, res, "id");
+      if (!userId) {
+        res.status(400).json({ error: "User ID is required." });
+        return;
+      }
+
+      const { gymId } = req.params;
+      const gym = await Gym.findOne({ _id: gymId, owner: userId });
+      if (!gym) {
+        res.status(400).json({ error: "Gym not found or does not belong to user." });
+        return;
+      }
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      console.log("Seven days ago:", sevenDaysAgo);
+
+      // Count purchases for this gym in the last 7 days
+      const purchasesCountInLastWeek = await Purchase.countDocuments({
+        gym: gymId,
+        purchaseDate: { $gte: sevenDaysAgo }
+      });
+
+      res.status(200).json({ purchasesCountInLastWeek });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error", error });
+    }
+  }
 }
 
+
 export default PurchaseController;
+
+// 1. get purchase count in last 7 days for a specific gym (one gym) V
+// 2. get the city of the specific gym
+// 3. get purchase count for in last 7 days for all gyms in the city of the specific gym
