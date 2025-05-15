@@ -46,6 +46,8 @@ router.put(
     GymController.updateGymById
 );
 
+router.get("/rating-stats/:gymId", GymController.getGymRatingStats);
+
 router.get(
     "/",
     [
