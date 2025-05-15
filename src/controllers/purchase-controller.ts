@@ -262,7 +262,7 @@ class PurchaseController {
         gym: { $in: gymIdsInCity },
         purchaseDate: { $gte: sevenDaysAgo }
       });
-      const averagePurchasesInCity = purchasesCountInCityLastWeek / gymsInCityCount;
+      const averagePurchasesCountInCity = purchasesCountInCityLastWeek / gymsInCityCount;
 
       // count of purchases for this gym in the last 7 days
       const purchasesCountInLastWeek = await Purchase.countDocuments({
@@ -270,7 +270,7 @@ class PurchaseController {
         purchaseDate: { $gte: sevenDaysAgo }
       });
 
-      res.status(200).json({ purchasesCountInLastWeek, averagePurchasesInCity });
+      res.status(200).json({ purchasesCountInLastWeek, averagePurchasesCountInCity });
 
     } catch (error) {
       console.error(error);
@@ -278,6 +278,5 @@ class PurchaseController {
     }
   }
 }
-
 
 export default PurchaseController;
