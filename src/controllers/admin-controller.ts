@@ -141,7 +141,7 @@ class AdminController {
         {
           $group: {
             _id: {
-              $dateToString: { format: "%Y-%m-%d", date: "$startDate" }
+              $dateToString: { format: "%Y-%m-%d", date: "$purchaseDate" }
             },
             revenue: { $sum: "$price" }
           }
