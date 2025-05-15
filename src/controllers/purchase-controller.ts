@@ -234,7 +234,7 @@ class PurchaseController {
     }
   }
 
-  static async getGymPurchases(req: Request, res: Response): Promise<void> {
+  static async getGymPurchaseInsights(req: Request, res: Response): Promise<void> {
     try {
       const userId = await getFromCookie(req, res, "id");
       if (!userId) {
@@ -248,17 +248,29 @@ class PurchaseController {
         res.status(400).json({ error: "Gym not found or does not belong to user." });
         return;
       }
+      const city = gym.city;
+
+      const gymsInCity = await Gym.find({ city });
+      const gymIdsInCity = gymsInCity.map(g => g._id);
+      const gymsInCityCount = gymIdsInCity.length
+
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      console.log("Seven days ago:", sevenDaysAgo);
 
-      // Count purchases for this gym in the last 7 days
+      // count of purchases for all gyms in the city in the last 7 days
+      const purchasesCountInCityLastWeek = await Purchase.countDocuments({
+        gym: { $in: gymIdsInCity },
+        purchaseDate: { $gte: sevenDaysAgo }
+      });
+      const averagePurchasesInCity = purchasesCountInCityLastWeek / gymsInCityCount;
+
+      // count of purchases for this gym in the last 7 days
       const purchasesCountInLastWeek = await Purchase.countDocuments({
         gym: gymId,
         purchaseDate: { $gte: sevenDaysAgo }
       });
 
-      res.status(200).json({ purchasesCountInLastWeek });
+      res.status(200).json({ purchasesCountInLastWeek, averagePurchasesInCity });
 
     } catch (error) {
       console.error(error);
@@ -269,7 +281,3 @@ class PurchaseController {
 
 
 export default PurchaseController;
-
-// 1. get purchase count in last 7 days for a specific gym (one gym) V
-// 2. get the city of the specific gym
-// 3. get purchase count for in last 7 days for all gyms in the city of the specific gym

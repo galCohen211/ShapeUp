@@ -40,8 +40,8 @@ router.get(
 );
 
 router.get(
-  "/getGymPurchases/:gymId",
-  // verifyToken([IUserType.GYM_OWNER]),
+  "/getGymPurchaseInsights/:gymId",
+  verifyToken([IUserType.GYM_OWNER]),
   [
     param("gymId")
       .notEmpty()
@@ -49,7 +49,7 @@ router.get(
       .isMongoId()
       .withMessage("Gym ID must be a valid MongoDB ObjectId."),
   ],
-  purchaseController.getGymPurchases
+  purchaseController.getGymPurchaseInsights
 );
 
 export default router;
