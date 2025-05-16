@@ -138,7 +138,6 @@ class PurchaseController {
           date = addDays(date, 1);
         }
 
-        console.log("Gym trainer counts updated:", gym.trainerCounts);
         gym.markModified("trainerCounts");
         await gym.save();
       }
@@ -225,6 +224,33 @@ class PurchaseController {
       const allPurchases = await Purchase.find()
       const filteredPurchases = allPurchases.filter((purchase) =>
         myGymIds.includes(purchase.gym.toString())
+      );
+
+      res.status(200).json({ filteredPurchases });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error", error });
+    }
+  }
+
+  static async getGymPurchases(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = await getFromCookie(req, res, "id");
+      if (!userId) {
+        res.status(400).json({ error: "User ID is required." });
+        return;
+      }
+
+      const { gymId } = req.params;
+      const gym = await Gym.findOne({ _id: gymId, owner: userId });
+      if (!gym) {
+        res.status(400).json({ error: "Gym not found or does not belong to user." });
+        return;
+      }
+
+      const allPurchases = await Purchase.find()
+      const filteredPurchases = allPurchases.filter((purchase) =>
+        gymId.includes(purchase.gym.toString())
       );
 
       res.status(200).json({ filteredPurchases });
