@@ -138,7 +138,6 @@ class PurchaseController {
           date = addDays(date, 1);
         }
 
-        console.log("Gym trainer counts updated:", gym.trainerCounts);
         gym.markModified("trainerCounts");
         await gym.save();
       }
