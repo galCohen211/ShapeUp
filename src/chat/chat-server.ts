@@ -23,6 +23,8 @@ export function initChat(server: SocketIOServer): void {
 
     socket.on("communicate", async (userId1: ObjectId, userId2: ObjectId, gymName: string, text: string) => {
       try {
+        const senderSocket = usersSocket[userId1.toString()];
+        const receiverSocket = usersSocket[userId2.toString()];
         await createChatBetweenUsers([userId1, userId2], gymName);
         const gym = await Gym.findOne({ name: gymName });
         const gymId = gym?._id;
@@ -32,12 +34,14 @@ export function initChat(server: SocketIOServer): void {
           sender: userId1,
           text: text,
           timestamp: new Date(),
-          gymId, 
+          gymId,
         };
 
         await AddMessageToChat(userId1, userId2, gymName, newMessage as IMessage);
 
-        server.emit("message", newMessage);
+        if (receiverSocket) {
+          receiverSocket.emit("message", newMessage);
+        }
 
       } catch (err) {
         console.error("Error sending message", err);
