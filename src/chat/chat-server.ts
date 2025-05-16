@@ -23,29 +23,28 @@ export function initChat(server: SocketIOServer): void {
 
     socket.on("communicate", async (userId1: ObjectId, userId2: ObjectId, gymName: string, text: string) => {
       try {
-        const receiverSocket = usersSocket[userId2.toString()];
         await createChatBetweenUsers([userId1, userId2], gymName);
         const gym = await Gym.findOne({ name: gymName });
         const gymId = gym?._id;
 
-
         const newMessage = {
-          sender: userId1,
-          text: text,
-          timestamp: new Date(),
-          gymId,
+            sender: userId1,
+            text: text,
+            timestamp: new Date(),
+            gymId,
         };
 
         await AddMessageToChat(userId1, userId2, gymName, newMessage as IMessage);
 
+        const receiverSocket = usersSocket[userId2.toString()];
         if (receiverSocket) {
           receiverSocket.emit("message", newMessage);
         }
 
-      } catch (err) {
+    } catch (err) {
         console.error("Error sending message", err);
-      }
-    });
+    }
+});
 
     socket.on("get_users_chat", async (userId1: ObjectId, userId2: ObjectId, gymName: string, callback) => {
       try {
