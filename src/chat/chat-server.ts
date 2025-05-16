@@ -23,7 +23,6 @@ export function initChat(server: SocketIOServer): void {
 
     socket.on("communicate", async (userId1: ObjectId, userId2: ObjectId, gymName: string, text: string) => {
       try {
-        const senderSocket = usersSocket[userId1.toString()];
         const receiverSocket = usersSocket[userId2.toString()];
         await createChatBetweenUsers([userId1, userId2], gymName);
         const gym = await Gym.findOne({ name: gymName });
