@@ -13,7 +13,8 @@ const ReviewSchema: Schema<IReview> = new mongoose.Schema({
   content: { type: String, required: true },
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   gym: { type: Schema.Types.ObjectId, ref: "Gym", required: true },
-});
+},
+{ timestamps: true });
 
 const Review: Model<IReview> = mongoose.model<IReview>(
   "Review",
