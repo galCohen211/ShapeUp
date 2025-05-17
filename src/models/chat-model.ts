@@ -4,6 +4,7 @@ export interface IMessage {
   sender: ObjectId;
   text: string;
   timestamp: Date;
+  readBy?: ObjectId[];
 }
 
 export const messageSchema = new Schema<IMessage>({
@@ -19,7 +20,12 @@ export const messageSchema = new Schema<IMessage>({
   timestamp: {
     type: Date,
     default: Date.now
-  }
+  },
+  readBy: [{
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    default: []
+  }]
 }, {versionKey: false});
 
 
