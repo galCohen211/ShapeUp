@@ -23,7 +23,7 @@ class GymController {
         return;
       }
 
-      let { name, city, description } = req.body;
+      let { name, city, street, streetNumber, description } = req.body;
       const ownerQueryString = req.query.owner as string;
 
       if (!req.files || !(req.files as Express.Multer.File[]).length) {
@@ -63,6 +63,8 @@ class GymController {
         name,
         pictures,
         city,
+        street,
+        streetNumber,
         description,
         owner: ownerIdObject,
         openingHours: defaultOpeningHours,
@@ -131,7 +133,7 @@ class GymController {
         return;
       }
   
-      let { name, city, description, prices, openingHours } = req.body;
+      let { name, city, street, streetNumber, description, prices, openingHours } = req.body;
   
       if (typeof prices === "string") prices = JSON.parse(prices);
       if (typeof openingHours === "string") openingHours = JSON.parse(openingHours);
@@ -140,6 +142,8 @@ class GymController {
       if (name) updateData.name = name;
       if (city) updateData.city = city;
       if (description) updateData.description = description;
+      if (street) updateData.street = street;         
+      if (streetNumber) updateData.streetNumber = streetNumber; 
       if (prices && Array.isArray(prices) && prices.length === 3) updateData.prices = prices;
       if (
         openingHours?.sundayToThursday &&
