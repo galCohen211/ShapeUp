@@ -14,6 +14,8 @@ router.post(
     [
         body("name").notEmpty().withMessage("Name is required."),
         body("city").notEmpty().withMessage("city is required."),
+        body("street").notEmpty().withMessage("Street is required."),
+        body("streetNumber").notEmpty().withMessage("Street number is required."),
         body("description").notEmpty().withMessage("Description is required."),
         query("owner")
             .notEmpty()
@@ -35,6 +37,8 @@ router.put(
             .withMessage("Gym ID must be a valid MongoDB ObjectId."),
         body("name").optional(),
         body("city").optional(),
+        body("street").optional(),
+        body("streetNumber").optional(),
         body("description").optional(),
         body("openingHours")
             .optional(),
