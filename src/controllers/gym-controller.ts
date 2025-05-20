@@ -275,73 +275,90 @@ class GymController {
     }
   }
 
-  static async getGymRatingStats(req: Request, res: Response): Promise<void> {
-    try {
-      const { gymId } = req.params;
-
-      if (!mongoose.Types.ObjectId.isValid(gymId)) {
-        res.status(400).json({ message: "Invalid gym ID." });
-        return;
-      }
-
-      const gym = await Gym.findById(gymId);
-      if (!gym) {
-        res.status(404).json({ message: "Gym not found." });
-        return;
-      }
-
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      const [gymAvg] = await Review.aggregate([
-        {
-          $match: {
-            gym: new mongoose.Types.ObjectId(gymId),
-            createdAt: { $gte: sevenDaysAgo },
-          },
+  static async fetchGymRatingStats(gymId: string) {
+    if (!mongoose.Types.ObjectId.isValid(gymId)) {
+      return {
+        success: false,
+        message: "Invalid gym ID.",
+        data: null,
+      };
+    }
+  
+    const gym = await Gym.findById(gymId);
+    if (!gym) {
+      return {
+        success: false,
+        message: "Gym not found.",
+        data: null,
+      };
+    }
+  
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  
+    const [gymAvg] = await Review.aggregate([
+      {
+        $match: {
+          gym: new mongoose.Types.ObjectId(gymId),
+          createdAt: { $gte: sevenDaysAgo },
         },
-        {
-          $group: {
-            _id: null,
-            avgRating: { $avg: "$rating" },
-          },
+      },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: "$rating" },
         },
-      ]);
-
-      const gymsInCity = await Gym.find(
-        { city: gym.city, _id: { $ne: gym._id } },
-        { _id: 1 }
-      );
-
-      const gymIds = gymsInCity.map((g) => g._id);
-
-      const [cityAvg] = await Review.aggregate([
-        {
-          $match: {
-            gym: { $in: gymIds },
-            createdAt: { $gte: sevenDaysAgo },
-          },
+      },
+    ]);
+  
+    const gymsInCity = await Gym.find(
+      { city: gym.city, _id: { $ne: gym._id } },
+      { _id: 1 }
+    );
+  
+    const gymIds = gymsInCity.map((g) => g._id);
+  
+    const [cityAvg] = await Review.aggregate([
+      {
+        $match: {
+          gym: { $in: gymIds },
+          createdAt: { $gte: sevenDaysAgo },
         },
-        {
-          $group: {
-            _id: null,
-            avgRating: { $avg: "$rating" },
-          },
+      },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: "$rating" },
         },
-      ]);
-
-      res.status(200).json({
+      },
+    ]);
+  
+    return {
+      success: true,
+      message: "Gym rating stats fetched successfully.",
+      data: {
         gymId,
         gymName: gym.name,
         city: gym.city,
         averageRatingThisGym: gymAvg?.avgRating ?? null,
         averageRatingCityGyms: cityAvg?.avgRating ?? null,
-      });
-    } catch (err) {
-      console.error("Error in getGymRatingStats:", err);
-      res.status(500).json({ message: "Internal server error" });
+      },
+    };
+  }  
+  
+
+  static async getGymRatingStats(req: Request, res: Response): Promise<void> {
+    const { gymId } = req.params;
+    const result = await GymController.fetchGymRatingStats(gymId);
+  
+    if (!result.success) {
+      res.status(400).json({ message: result.message });
+      return;
     }
+  
+    res.status(200).json(result.data);
   }
+  
 
 
   static async deleteGymById(req: Request, res: Response): Promise<void> {
