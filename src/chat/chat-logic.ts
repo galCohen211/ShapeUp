@@ -16,7 +16,6 @@ export async function createChatBetweenUsers(userIds: ObjectId[], gymName: strin
     };
 
     await chatModel.create(usersChat);
-    console.log(`Chat was created for user ids ${userIds[0]} and ${userIds[1]}`);
   }
 }
 
