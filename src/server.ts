@@ -56,7 +56,7 @@ server.listen(process.env.HTTP_SERVER_PORT, () => {
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:4000", "http://localhost:8081"], // Allow both origins
+    origin: ["http://localhost:3000", "http://localhost:4000", "http://localhost:8081", "http://shapeup.cs.colman.ac.il"], // Allow multiple origins
     credentials: true, // Allow sending cookies
   })
 );
