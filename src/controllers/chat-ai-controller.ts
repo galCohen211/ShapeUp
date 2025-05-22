@@ -7,7 +7,7 @@ import fetch from "node-fetch";
 
 export const askAI = async (question: string): Promise<string | null> => {
     const prompt = `<|system|>You are a helpful assistant.<|user|>${question}<|assistant|>`;
-  
+    let API_KEY = process.env.AI_API_KEY || "01234567890123456789012345678901";
     const response = await fetch("https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta", {
       method: "POST",
       headers: {
@@ -34,7 +34,7 @@ export const askAI = async (question: string): Promise<string | null> => {
       const output = generated.replace(prompt, "").trim();
       return output;
     } catch (err) {
-      console.error("JSON parse error:", raw);
+      console.error("JSON parse error:", err, raw);
       return null;
     }
   };
