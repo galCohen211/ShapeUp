@@ -89,33 +89,37 @@ if (require.main === module) {
 
 
 cron.schedule("0 0 * * 0", async () => {
-  console.log("[CRON] Starting weekly gym stats AI analysis");
-  let question = "I will send you details about each gym. please remember them for future use. ";
-  const gyms = await Gym.find({}, { _id: 1, name: 1, openingHours: 1 });
-  for (const gym of gyms) {
-    const result = await GymController.fetchGymRatingStats(gym._id.toString());
+  try
+  {
+    console.log("[CRON] Starting weekly gym stats AI analysis");
+    let question = "I will send you details about each gym. please remember them for future use. ";
+    const gyms = await Gym.find({}, { _id: 1, name: 1, openingHours: 1 });
+    for (const gym of gyms) {
+      const result = await GymController.fetchGymRatingStats(gym._id.toString());
 
-    if (!result.success || !result.data) {
-      continue;
+      if (!result.success || !result.data) {
+        continue;
+      }
+      
+      const { averageRatingThisGym, averageRatingCityGyms } = result.data;
+      question += `\n ${gym._id.toString()}: average ratings this gym: ${averageRatingThisGym}, average ratings for city gyms: ${averageRatingCityGyms}, `
+      const insights = await fetchGymPurchaseInsights(gym._id.toString());
+      
+      if (!insights) continue;
+
+      question += `purchases in last week: ${insights.purchasesCountInLastWeek}, Average purchases in same city: ${insights.averagePurchasesCountInCity}, `;
+      
+      if (
+        gym.openingHours &&
+        gym.openingHours.sundayToThursday &&
+        gym.openingHours.friday &&
+        gym.openingHours.saturday
+      ) {
+        question += `Opening Hours: - Sunday to Thursday: ${gym.openingHours.sundayToThursday.from} to ${gym.openingHours.sundayToThursday.to} - Friday: ${gym.openingHours.friday.from} to ${gym.openingHours.friday.to} - Saturday: ${gym.openingHours.saturday.from} to ${gym.openingHours.saturday.to}`;  
     }
-    
-    const { averageRatingThisGym, averageRatingCityGyms } = result.data;
-    question += `\n ${gym._id.toString()}: average ratings this gym: ${averageRatingThisGym}, average ratings for city gyms: ${averageRatingCityGyms}, `
-    const insights = await fetchGymPurchaseInsights(gym._id.toString());
-    
-    if (!insights) continue;
-
-    question += `purchases in last week: ${insights.purchasesCountInLastWeek}, Average purchases in same city: ${insights.averagePurchasesCountInCity}, `;
-    
-    if (
-      gym.openingHours &&
-      gym.openingHours.sundayToThursday &&
-      gym.openingHours.friday &&
-      gym.openingHours.saturday
-    ) {
-      question += `Opening Hours: - Sunday to Thursday: ${gym.openingHours.sundayToThursday.from} to ${gym.openingHours.sundayToThursday.to} - Friday: ${gym.openingHours.friday.from} to ${gym.openingHours.friday.to} - Saturday: ${gym.openingHours.saturday.from} to ${gym.openingHours.saturday.to}`;  
-  }
-  await askAI(question);
-  console.log("[CRON] Weekly analysis completed");
-  }
-});
+    await askAI(question);
+    console.log("[CRON] Weekly analysis completed");
+    }
+  } catch (error) {
+      console.error("[CRON] Error during weekly gym stats AI analysis:", error);
+}});

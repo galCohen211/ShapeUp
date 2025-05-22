@@ -352,7 +352,7 @@ class GymController {
     const result = await GymController.fetchGymRatingStats(gymId);
   
     if (!result.success) {
-      res.status(400).json({ message: result.message });
+      res.status(404).json({ message: result.message });
       return;
     }
   
