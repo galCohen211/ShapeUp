@@ -5,6 +5,44 @@ import { addDays } from "date-fns";
 import CreditCard from "../models/creditcard-model";
 import Gym from "../models/gym-model";
 
+export const fetchGymPurchaseInsights = async (gymId: string): Promise<null | {
+  purchasesCountInLastWeek: number;
+  averagePurchasesCountInCity: number;
+}> => {
+  try {
+    const gym = await Gym.findById(gymId);
+    if (!gym) return null;
+
+    const city = gym.city;
+    const gymsInCity = await Gym.find({ city });
+    const gymIdsInCity = gymsInCity.map(g => g._id);
+    const gymsInCityCount = gymIdsInCity.length;
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const purchasesCountInCityLastWeek = await Purchase.countDocuments({
+      gym: { $in: gymIdsInCity },
+      purchaseDate: { $gte: sevenDaysAgo }
+    });
+
+    const averagePurchasesCountInCity = purchasesCountInCityLastWeek / gymsInCityCount;
+
+    const purchasesCountInLastWeek = await Purchase.countDocuments({
+      gym: gymId,
+      purchaseDate: { $gte: sevenDaysAgo }
+    });
+
+    return {
+      purchasesCountInLastWeek,
+      averagePurchasesCountInCity
+    };
+  } catch (err) {
+    console.error("Error in fetchGymPurchaseInsights:", err);
+    return null;
+  }
+};
+
 // Generates a unique 6-digit code, checking for collisions in the Purchase collection.
 async function generateUniquePersonalCode(): Promise<string> {
   const maxAttempts = 10;
@@ -267,42 +305,27 @@ class PurchaseController {
         res.status(400).json({ error: "User ID is required." });
         return;
       }
-
+  
       const { gymId } = req.params;
       const gym = await Gym.findOne({ _id: gymId, owner: userId });
       if (!gym) {
         res.status(400).json({ error: "Gym not found or does not belong to user." });
         return;
       }
-      const city = gym.city;
-
-      const gymsInCity = await Gym.find({ city });
-      const gymIdsInCity = gymsInCity.map(g => g._id);
-      const gymsInCityCount = gymIdsInCity.length
-
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      // count of purchases for all gyms in the city in the last 7 days
-      const purchasesCountInCityLastWeek = await Purchase.countDocuments({
-        gym: { $in: gymIdsInCity },
-        purchaseDate: { $gte: sevenDaysAgo }
-      });
-      const averagePurchasesCountInCity = purchasesCountInCityLastWeek / gymsInCityCount;
-
-      // count of purchases for this gym in the last 7 days
-      const purchasesCountInLastWeek = await Purchase.countDocuments({
-        gym: gymId,
-        purchaseDate: { $gte: sevenDaysAgo }
-      });
-
-      res.status(200).json({ purchasesCountInLastWeek, averagePurchasesCountInCity });
-
+  
+      const insights = await fetchGymPurchaseInsights(gymId);
+  
+      if (!insights) {
+        res.status(500).json({ error: "Failed to generate insights." });
+        return;
+      }
+  
+      res.status(200).json(insights);
     } catch (error) {
-      console.error(error);
+      console.error("Error in getGymPurchaseInsights:", error);
       res.status(500).json({ message: "Internal server error", error });
     }
   }
-}
+}  
 
 export default PurchaseController;

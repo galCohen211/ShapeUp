@@ -8,7 +8,7 @@ import yaml from 'yamljs';
 import { Server } from 'socket.io';
 import * as http from "http";
 import path from 'path';
-
+import cron from 'node-cron';
 import { connectDb } from "./mongodb";
 import { initChat } from "./chat/chat-server";
 import "./controllers/auth-controller";
@@ -19,6 +19,11 @@ import chatAIRouter from "./routes/chat-ai-route";
 import adminRouter from "./routes/admin-route";
 import creditcardRouter from "./routes/creditcard-route";
 import purchaseRouter from "./routes/purchase-route";
+import GymController from "./controllers/gym-controller";
+import { fetchGymPurchaseInsights } from "./controllers/purchase-controller";
+import Gym from "./models/gym-model";
+import { askAI } from "./controllers/chat-ai-controller";
+
 
 const app: any = express();
 const swaggerDocument = yaml.load('./swagger.yaml');
@@ -81,3 +86,40 @@ if (require.main === module) {
     await startServer(PORT);
   })();
 }
+
+
+cron.schedule("0 0 * * 0", async () => {
+  try
+  {
+    console.log("[CRON] Starting weekly gym stats AI analysis");
+    let question = "I will send you details about each gym. please remember them for future use. ";
+    const gyms = await Gym.find({}, { _id: 1, name: 1, openingHours: 1 });
+    for (const gym of gyms) {
+      const result = await GymController.fetchGymRatingStats(gym._id.toString());
+
+      if (!result.success || !result.data) {
+        continue;
+      }
+      
+      const { averageRatingThisGym, averageRatingCityGyms } = result.data;
+      question += `\n ${gym._id.toString()}: average ratings this gym: ${averageRatingThisGym}, average ratings for city gyms: ${averageRatingCityGyms}, `
+      const insights = await fetchGymPurchaseInsights(gym._id.toString());
+      
+      if (!insights) continue;
+
+      question += `purchases in last week: ${insights.purchasesCountInLastWeek}, Average purchases in same city: ${insights.averagePurchasesCountInCity}, `;
+      
+      if (
+        gym.openingHours &&
+        gym.openingHours.sundayToThursday &&
+        gym.openingHours.friday &&
+        gym.openingHours.saturday
+      ) {
+        question += `Opening Hours: - Sunday to Thursday: ${gym.openingHours.sundayToThursday.from} to ${gym.openingHours.sundayToThursday.to} - Friday: ${gym.openingHours.friday.from} to ${gym.openingHours.friday.to} - Saturday: ${gym.openingHours.saturday.from} to ${gym.openingHours.saturday.to}`;  
+    }
+    await askAI(question);
+    console.log("[CRON] Weekly analysis completed");
+    }
+  } catch (error) {
+      console.error("[CRON] Error during weekly gym stats AI analysis:", error);
+}});
