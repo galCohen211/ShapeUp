@@ -100,7 +100,7 @@ cron.schedule("0 0 * * 0", async () => {
     }
     
     const { averageRatingThisGym, averageRatingCityGyms } = result.data;
-    question += `\n ${gym._id.toString()}: average ratings this gym: ${averageRatingThisGym}, average ratings this gym: ${averageRatingCityGyms}, `
+    question += `\n ${gym._id.toString()}: average ratings this gym: ${averageRatingThisGym}, average ratings for city gyms: ${averageRatingCityGyms}, `
     const insights = await fetchGymPurchaseInsights(gym._id.toString());
     
     if (!insights) continue;
