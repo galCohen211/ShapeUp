@@ -465,6 +465,7 @@ class GymController {
             lastName: user.lastName,
             email: user.email,
             avatarUrl: user.avatarUrl,
+            validFrom: purchase.startDate,
             validUntil: purchase.endDate,
             code: purchase.personalCode
           });
